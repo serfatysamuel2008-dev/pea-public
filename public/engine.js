@@ -120,15 +120,111 @@ const MARKET = [
 ];
 MARKET.forEach(a => { a.tone = {MO:'blue',US:'orange',EU:'green'}[a.id] || TONES[hash(a.id) % TONES.length]; a.eligible = a.type !== 'oblig' && !a.cto; if (a.id === 'SMC') a.pme = true; });
 const mk = id => MARKET.find(a => a.id === id);
+/* ---------- daily market model ----------
+   Every price follows a deterministic daily path, so the server and the browser
+   always agree. On ANCHOR day the prices equal the catalogue values above; the
+   past is shaped to match each line's day / 1-year / 5-year performance, and
+   from then on prices move a little every day. */
+const DAY = 86400000;
+const ANCHOR = Date.UTC(2026, 9, 24);
+const BACK = 2300;
+const dayIndex = t => Math.floor(((t == null ? Date.now() : t) - ANCHOR) / DAY);
+const dateOf = d => new Date(ANCHOR + d*DAY + 12*3600000);
+const VOL = {etf:.16, action:.27, oblig:.05, euro:0, immo:.05, bond:.05};
+const DRIFT = {etf:.065, action:.07, oblig:.03, euro:.026, immo:.03, bond:.03};
+function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function gaussGen(seed){ const r = rng(seed); return () => { let u = 0; while (!u) u = r(); return Math.sqrt(-2*Math.log(u)) * Math.cos(2*Math.PI*r()); }; }
+const PATHS = new Map();
+function baseOf(spec){
+  if (!spec.b) spec.b = {price:spec.price, day:spec.day, p1a:spec.p1a, p5a:spec.p5a};
+  return spec.b;
+}
+function pathOf(spec){
+  const key = spec.key || spec.id;
+  let P = PATHS.get(key); if (P) return P;
+  const b = baseOf(spec), vol = VOL[spec.type] != null ? VOL[spec.type] : .16;
+  const sd = vol / Math.sqrt(365), mu = Math.log(1 + (DRIFT[spec.type] != null ? DRIFT[spec.type] : .05)) / 365;
+  const at = d => d + BACK, L0 = Math.log(b.price);
+  const g = gaussGen(hash(key + ':past'));
+  const z = new Float64Array(BACK + 1); for (let i = 1; i <= BACK; i++) z[i] = g() * sd;
+  const lp = new Float64Array(BACK + 1);
+  const fix = [[-BACK, null], [-1826, L0 - Math.log(1 + b.p5a/100)], [-365, L0 - Math.log(1 + b.p1a/100)], [-1, L0 - Math.log(1 + b.day/100)], [0, L0]];
+  lp[at(0)] = L0;
+  for (let k = fix.length - 1; k > 0; k--){
+    const [d1, L1] = fix[k], [d0, Lf] = fix[k-1], n = d1 - d0;
+    let sum = 0; for (let d = d0 + 1; d <= d1; d++) sum += z[at(d)];
+    const La = Lf == null ? L1 - (sum + mu*n) : Lf, adj = (L1 - La - sum) / n;
+    lp[at(d0)] = La;
+    let cur = La; for (let d = d0 + 1; d < d1; d++){ cur += z[at(d)] + adj; lp[at(d)] = cur; }
+  }
+  P = {lp, fut:[L0], gf: gaussGen(hash(key + ':future')), sd, mu};
+  PATHS.set(key, P);
+  return P;
+}
+function logAt(spec, d){
+  const P = pathOf(spec);
+  if (d <= 0) return P.lp[Math.max(0, d + BACK)];
+  while (P.fut.length <= d) P.fut.push(P.fut[P.fut.length - 1] + P.mu + P.sd * P.gf());
+  return P.fut[d];
+}
+const priceAt = (spec, d) => r2(Math.exp(logAt(spec, d)));
+/* Updates a catalogue line (or an index) to day d: price, day change, 1-year and 5-year performance. */
+function refreshSpec(spec, d){
+  baseOf(spec);
+  const p = priceAt(spec, d), y = priceAt(spec, d - 1);
+  spec.price = p;
+  spec.day = Math.round((p/y - 1)*10000)/100;
+  spec.p1a = Math.round((p/priceAt(spec, d - 365) - 1)*1000)/10;
+  spec.p5a = Math.round((p/priceAt(spec, d - 1826) - 1)*1000)/10;
+  return spec;
+}
+let marketDay = null;
+function refreshMarket(d){
+  if (marketDay === d) return;
+  MARKET.forEach(a => refreshSpec(a, d));
+  marketDay = d;
+}
+
+/* Contract supports are held in units; their unit value (1 on ANCHOR day) moves every day. */
+const SUPPORT_SPECS = {
+  FE:{key:'S:FE', type:'euro', price:1, day:0.007, p1a:2.6, p5a:12},
+  IM:{key:'S:IM', type:'immo', price:1, day:-0.02, p1a:-3.2, p5a:4},
+  OB:{key:'S:OB', type:'bond', price:1, day:0.05, p1a:1.1, p5a:-4}
+};
+function navAt(id, d){
+  if (SUPPORT_SPECS[id]) return Math.exp(logAt(SUPPORT_SPECS[id], d));
+  const m = mk(id);
+  return m ? Math.exp(logAt(m, d) - Math.log(baseOf(m).price)) : 1;
+}
+function sampleDays(from, to, max){
+  const n = Math.max(1, to - from), step = Math.max(1, Math.ceil(n / (max || 90))), out = [];
+  for (let d = from; d < to; d += step) out.push(d);
+  out.push(to);
+  return out;
+}
+const specSeries = (spec, from, to, max) => sampleDays(from, to, max).map(d => ({t: dateOf(d).getTime(), v: priceAt(spec, d)}));
+const navSeries = (id, units, from, to, max) => sampleDays(from, to, max).map(d => ({t: dateOf(d).getTime(), v: units * navAt(id, d)}));
+/* Value of an account's current holdings on each day of [from, to]. */
+function accountSeries(acc, from, to, max){
+  return sampleDays(from, to, max).map(d => {
+    let v = acc.cash || 0;
+    acc.positions.forEach(p => {
+      if (p.units != null) v += p.units * navAt(p.id, d);
+      else { const m = mk(p.id); v += p.parts * (m ? priceAt(m, d) : p.price); }
+    });
+    return {t: dateOf(d).getTime(), v: r2(v)};
+  });
+}
+
 const elig = (a, k) => k === 'ct' ? true : k === 'pme' ? !!a.pme : a.eligible;
 
 /* ---------- default state ---------- */
 function defaults(firstName){
   const now = Date.now(), D = 86400000, H = 3600000;
   const ps = (id, ab, name, sub, tone, parts, price, cost, day) => ({id, ab, name, sub, tone, parts, price, cost, day});
-  const sp = (id, ab, name, sub, tone, value, cost, day) => ({id, ab, name, sub, tone, value, cost, day});
+  const sp = (id, ab, name, sub, tone, value, cost, day) => ({id, ab, name, sub, tone, value, cost, day, units: value / navAt(id, 0)});
   const dep = (days, amount, detail) => ({t: now - D*days, kind:'deposit', label:'Versement', detail: detail || 'Depuis ton compte courant', amount});
-  return {firstName: firstName || 'Léa', active:'pea', favs:['MO','AIR','ASML'], accounts:{
+  return {v:3, firstName: firstName || 'Léa', active:'pea', favs:['MO','AIR','ASML'], accounts:{
     pea:{cash:1250, deposits:21500,
       positions:[ps('MO','MO','ETF Monde','MSCI World','blue',48,320.63,13020.51,0.8), ps('US','US','ETF S&P 500','Actions US','orange',160,37.25,4909.39,0.4), ps('EU','EU','ETF Europe','Stoxx 600','green',26,86.93,2301.61,-0.3)],
       history:[{t: now - D*12, kind:'auto', label:'Versement programmé', detail:'ETF Monde', amount:50}, dep(40, 1000), {t: now - D*75, kind:'buy', label:'Achat · 4 parts', detail:'ETF S&P 500', amount:-148.6}],
@@ -206,6 +302,85 @@ function fiscal(k){
   const goal = pr.retire ? new Date(pr.retire, open.getMonth(), open.getDate()) : new Date(open.getFullYear() + (pr.years || 5), open.getMonth(), open.getDate());
   const p = Math.min(1, Math.max(0, (now - open) / (goal - open)));
   return {now, open, goal, p, done: now >= goal, elapsedTxt: ym(monthsBetween(open, now)).replace(' et ', ' '), leftTxt: ym(monthsBetween(now, goal)), leftYears: goal.getFullYear() - now.getFullYear()};
+}
+
+
+/* ---------- daily refresh, monthly plans ---------- */
+const PLAN_MIN = 10, PLAN_MAX = 10000;
+function fifthsBetween(after, until){
+  const out = [], a = new Date(after);
+  let y = a.getFullYear(), m = a.getMonth();
+  for (let i = 0; i < 240; i++){
+    const t = new Date(y, m, 5, 9, 0).getTime();
+    if (t > until) break;
+    if (t > after) out.push(t);
+    if (++m > 11){ m = 0; y++; }
+  }
+  return out;
+}
+const roundupsFor = (k, t) => r2(4 + (hash(k + ':' + new Date(t).getFullYear() + '-' + new Date(t).getMonth()) % 1200) / 100);
+function runPlan(G, k, t){
+  const S = G.accounts[k], pr = PR[k], plan = S.plan, d = dayIndex(t);
+  const extra = plan.roundups ? roundupsFor(k, t) : 0;
+  let x = r2(plan.amount + extra);
+  if (pr.kind === 'shares'){
+    x = Math.min(x, depositRoom(G, k));
+    if (x <= 0) return;
+    const m = mk(plan.asset);
+    S.cash = r2(S.cash + x); S.deposits = r2(S.deposits + x);
+    let detail = 'Depuis ton compte courant';
+    if (m){
+      // Monthly payments add up in plan.pending until they cover a whole share.
+      const price = priceAt(m, d), pot = r2((plan.pending || 0) + x), n = Math.floor(pot / price + 1e-9);
+      if (n > 0){
+        let a = pos(S, m.id);
+        if (!a){ a = stubPos(m.id); S.positions.push(a); }
+        a.parts += n; a.cost = r2(a.cost + n*price); S.cash = r2(S.cash - n*price);
+        plan.pending = r2(pot - n*price);
+        detail = `${n} ${n > 1 ? 'parts' : 'part'} ${de(m.name)} achetée${n > 1 ? 's' : ''}`;
+      } else { plan.pending = pot; detail = `Mis de côté : ${eur(pot)} sur ${eur(price)} pour une part`; }
+    }
+    S.history.push({t, kind:'auto', label: extra ? 'Versement programmé + arrondis' : 'Versement programmé', detail, amount:x});
+  } else {
+    splitAlloc(S, x).forEach(s => { s.p.units += s.v / navAt(s.id, d); s.p.cost = r2(s.p.cost + s.v); });
+    S.deposits = r2(S.deposits + x);
+    if (k === 'per' && new Date(t).getFullYear() === new Date().getFullYear()) S.year = r2(S.year + x);
+    S.history.push({t, kind:'auto', label: extra ? 'Versement programmé + arrondis' : 'Versement programmé', detail:'Réparti ' + allocShort(S, k), amount:x});
+  }
+  S.notifs.push({id:t, title:`${money(x)} ${pr.kind === 'shares' ? 'investis' : 'versés'} automatiquement`, body:`Ton versement du 5 sur ${lower(pr.name)} est passé.`, t, read:false});
+  if (S.notifs.length > 30) S.notifs.splice(0, S.notifs.length - 30);
+}
+/* Brings a state up to date: migration, yearly counters, plans due since the last visit, today's prices.
+   Returns true when something worth saving changed. */
+function refresh(G, now){
+  now = now == null ? Date.now() : now;
+  const d = dayIndex(now), year = new Date(now).getFullYear();
+  refreshMarket(d);
+  let changed = false;
+  if (G.v !== 3){
+    ORDER.forEach(k => G.accounts[k].positions.forEach(p => { if (p.value != null && p.units == null) p.units = p.value / navAt(p.id, d); }));
+    G.v = 3; changed = true;
+  }
+  ORDER.forEach(k => {
+    const S = G.accounts[k];
+    if (k === 'per' && S.yearOf !== year){ if (S.yearOf != null) S.year = 0; S.yearOf = year; changed = true; }
+    if (k === 'ct' && S.realizedYear !== year){ if (S.realizedYear != null) S.realized = 0; S.realizedYear = year; changed = true; }
+    if (S.plan){
+      const due = fifthsBetween(S.plan.lastRun || S.plan.since, now);
+      due.forEach(t => runPlan(G, k, t));
+      if (due.length){ S.plan.lastRun = due[due.length - 1]; changed = true; }
+    }
+    S.positions.forEach(p => {
+      if (p.units != null){
+        const v = navAt(p.id, d), y = navAt(p.id, d - 1);
+        p.value = r2(p.units * v); p.day = Math.round((v/y - 1)*10000)/100;
+      } else {
+        const m = mk(p.id);
+        if (m){ p.price = m.price; p.day = m.day; }
+      }
+    });
+  });
+  return changed;
 }
 
 /* ---------- quotes (aperçu d'une opération) ---------- */
@@ -288,7 +463,7 @@ function order(G, k, op){
       return {line1: money(x) + ' versés sur ' + ton, line2: 'Tes liquidités : ' + eur(S.cash) + '.', toast: '+' + money(x) + ' sur ' + ton};
     case 'verse': {
       const sp = splitAlloc(S, x);
-      sp.forEach(s => { s.p.value = r2(s.p.value + s.v); s.p.cost = r2(s.p.cost + s.v); });
+      sp.forEach(s => { const nav = navAt(s.id, dayIndex()); s.p.units += s.v / nav; s.p.value = r2(s.p.units * nav); s.p.cost = r2(s.p.cost + s.v); });
       S.deposits = r2(S.deposits + x);
       let line2;
       if (k === 'per'){ S.year = r2(S.year + x); line2 = `Jusqu’à ${eur0(x*S.tmi/100)} d’impôt en moins sur tes revenus ${new Date().getFullYear()} (tranche à ${S.tmi} %).`; }
@@ -299,15 +474,16 @@ function order(G, k, op){
     }
     case 'withdraw': {
       const ratio = x / totOf(S);
-      S.positions.forEach(p => { p.value = r2(p.value*(1 - ratio)); p.cost = r2(p.cost*(1 - ratio)); });
+      S.positions.forEach(p => { p.units *= (1 - ratio); p.value = r2(p.value*(1 - ratio)); p.cost = r2(p.cost*(1 - ratio)); });
       S.deposits = r2(S.deposits*(1 - ratio));
       S.history.push({t:now, kind:'withdraw', label:'Retrait', detail:'Vers ton compte courant', amount:-x});
       return {line1: money(x) + ' retirés de ' + ton, line2: 'L’argent arrive sur ton compte courant. Ton contrat reste ouvert.', toast: money(x) + ' retirés de ' + ton};
     }
     case 'arb': {
       const {from, to} = q;
-      from.cost = r2(from.cost*(1 - x/val(from))); from.value = r2(from.value - x);
-      to.value = r2(to.value + x); to.cost = r2(to.cost + x);
+      const d = dayIndex();
+      from.cost = r2(from.cost*(1 - x/val(from))); from.units -= x / navAt(from.id, d); from.value = r2(from.value - x);
+      to.units += x / navAt(to.id, d); to.value = r2(to.value + x); to.cost = r2(to.cost + x);
       S.history.push({t:now, kind:'arb', label:'Arbitrage', detail:`${from.name} → ${to.name}`, amount:x});
       return {line1: money(x) + ' arbitrés', line2: `De ${from.name} vers ${/^ETF/.test(to.name) ? to.name : lower(to.name)}. Pas d’impôt : l’argent reste dans ton contrat.`, toast: money(x) + ' arbitrés vers ' + to.name};
     }
@@ -324,7 +500,7 @@ function order(G, k, op){
       a.cost = r2(a.cost - basis); a.parts -= q.n; S.cash = r2(S.cash + q.cost);
       S.history.push({t:now, kind:'sell', label:'Vente · ' + q.n + (q.n>1?' parts':' part'), detail:a.name, amount:q.cost});
       return {line1: `${q.n} ${q.n>1?'parts':'part'} ${de(a.name)} ${q.n>1?'vendues':'vendue'} pour ${eur(q.cost)}`,
-        line2: S.realized != null ? `${pnl >= 0 ? 'Plus-value' : 'Moins-value'} de ${eur(Math.abs(pnl))}. Tes liquidités : ${eur(S.cash)}.` : `Tes liquidités : ${eur(S.cash)}.`,
+        line2: (S.realized != null ? `${pnl >= 0 ? 'Plus-value' : 'Moins-value'} de ${eur(Math.abs(pnl))}. ` : '') + `Tes liquidités passent à ${eur(S.cash)}. ${pr.vaut} toujours ${eur(totOf(S))} : tes parts sont devenues des liquidités.`,
         toast: `${eur(q.cost)} ajoutés à tes liquidités`};
     }
   }
@@ -333,11 +509,15 @@ function order(G, k, op){
 function apply(G, op){
   if (!op || typeof op !== 'object') fail('Opération invalide.');
   const k = accountOf(G, op), S = G.accounts[k], pr = PR[k];
+  refresh(G);
   switch (op.type){
     case 'order': return order(G, k, op);
     case 'switch': G.active = k; return null;
     case 'draft': {
-      if (op.amount != null){ if (!AMOUNTS.includes(op.amount)) fail('Montant mensuel invalide.'); S.draft.amount = op.amount; }
+      if (op.amount != null){
+        if (typeof op.amount !== 'number' || !isFinite(op.amount) || op.amount < PLAN_MIN || op.amount > PLAN_MAX) fail(`Choisis un montant entre ${PLAN_MIN} et ${F0.format(PLAN_MAX)} € par mois.`);
+        S.draft.amount = Math.round(op.amount);
+      }
       if (op.roundups != null) S.draft.roundups = !!op.roundups;
       if (op.asset != null){
         const m = mk(op.asset);
@@ -371,7 +551,8 @@ function apply(G, op){
   fail('Opération inconnue.');
 }
 
-return {F0, F1, F2, eur, eur0, sgn, pct, tri, r2, money, lower, de,
+return {DAY, ANCHOR, BACK, dayIndex, dateOf, priceAt, navAt, refreshSpec, refreshMarket, specSeries, navSeries, accountSeries, refresh, PLAN_MIN, PLAN_MAX, hash, rng,
+  F0, F1, F2, eur, eur0, sgn, pct, tri, r2, money, lower, de,
   PR, ORDER, PROFILES, SHORT, PEA_CAP, COMMON_CAP, AMOUNTS, TMIS, MARKET, mk, elig,
   defaults, val, held, totOf, pos, common, depositRoom, allocShort, splitAlloc, splitTxt,
   monthsBetween, ym, fiscal, quote, apply, OpError};

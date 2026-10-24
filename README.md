@@ -36,6 +36,9 @@ npm test
 - **Comptes utilisateurs** : inscription, connexion, déconnexion. Mots de passe hachés (scrypt), sessions dans un cookie `HttpOnly` / `SameSite=Lax`, connexion limitée après 8 échecs.
 - **Le serveur fait foi** : chaque opération (achat, vente, versement, retrait, arbitrage…) est recalculée et vérifiée côté serveur avant d'être enregistrée. Le navigateur ne peut pas modifier un solde lui-même. Chaque opération est journalisée.
 - **Mes comptes** : en touchant « Salut … · Mon PEA » sur l'Accueil, on passe d'un produit à l'autre. Chaque produit a ses 4 onglets (Supports, Avantages, Fiscalité, Transmission, Retraite…) et ses opérations.
+- **Les cours bougent chaque jour** : chaque placement suit une évolution quotidienne calculée à l'identique sur le serveur et dans le navigateur. Les graphiques (1S, 1M, 1A, 5A, Tout), les performances et la valeur des comptes se mettent à jour tous les jours.
+- **L'argent fructifie** : les supports des contrats (fonds euros à 2,6 %/an, ETF, immobilier, obligations) sont détenus en parts dont la valeur évolue. Un versement reste et suit cette valeur.
+- **Versements programmés réels** : le montant choisi (libre, de 10 à 10 000 € par mois) est versé le 5 de chaque mois, arrondis compris. Sur un compte boursier, les mois s'additionnent jusqu'à pouvoir acheter une part.
 - **Explorer** : catalogue de 68 ETF, actions et obligations avec graphiques, recherche, filtres et favoris.
 - **Mode démo** : si l'app est ouverte sans serveur (fichier local, hébergement statique), elle fonctionne quand même, avec les données gardées dans le navigateur.
 

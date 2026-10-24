@@ -287,6 +287,17 @@ div.asset-card{cursor:default}
 .acc-user{display:flex;flex-direction:column;gap:10px;margin:18px 0 4px;font-size:13px;color:var(--muted)}
 .acc-user b{color:var(--ink)}
 
+.chips5{grid-template-columns:repeat(5,1fr);gap:6px}
+.chips5 button{font-size:13px;padding:0 2px}
+.custom-amt{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.custom-amt label{font-size:12px;font-weight:600;color:var(--muted)}
+.custom-amt div{display:flex;align-items:center;gap:8px}
+.custom-amt input{flex:1;min-width:0;height:44px;border-radius:12px;border:1.5px solid var(--line);padding:0 12px;font:inherit;font-size:16px;font-weight:700;color:var(--ink);background:var(--card)}
+.custom-amt input:focus{outline:none;border-color:var(--navy)}
+.custom-amt span{font-weight:700}
+.custom-amt .primary{width:auto;height:44px;padding:0 18px}
+.custom-amt .auth-err{min-height:0}
+
 /* toast */
 .toast{position:absolute;left:12px;right:12px;top:calc(12px + env(safe-area-inset-top,0px));z-index:40;background:#0d1730;color:#fff;border-radius:14px;padding:12px 14px;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:center;transform:translateY(-140%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
 .toast.show{transform:none}
@@ -417,23 +428,14 @@ const fiscal = () => Engine.fiscal(G.active);
 const my = d => String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
 
 /* ---------- series for the chart ---------- */
-function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
-const RANGES = {'1S':{days:7,start:.992,vol:.004,seed:3}, '1M':{days:30,start:.978,vol:.01,seed:7}, '1A':{days:365,start:.87,vol:.03,seed:11}, '5A':{days:0,start:0,vol:.05,seed:19}, 'Tout':{days:0,start:0,vol:.05,seed:19}};
-function series(key, end, seedExtra){
-  const R = RANGES[key], N = 60, now = Date.now();
-  const since = Math.round((now - P().open) / 86400000);
-  const days = key === '5A' ? Math.min(1826, since) : R.days || since;
-  const start = R.start ? end * R.start : key === '5A' && since > 1826 ? end * .62 : Math.min(5000, end * .3);
-  const rand = rng(R.seed + (key === '5A' ? 5 : 0) + (seedExtra || 0) + ORDER.indexOf(G.active)*101);
-  const w = [0]; for (let i = 1; i < N; i++) w.push(w[i-1] + (rand() - .5));
-  const pts = [];
-  for (let i = 0; i < N; i++){
-    const t = i/(N-1);
-    const noise = w[i] - (w[0] + (w[N-1]-w[0])*t);
-    pts.push({t: now - (1-t)*days*86400000, v: Math.max(0, start + (end-start)*t + noise*end*R.vol)});
-  }
-  pts[N-1].v = end;
-  return pts;
+const RANGES = {'1S':1, '1M':1, '1A':1, '5A':1, 'Tout':1};
+const SPAN = {'1S':7, '1M':30, '1A':365, '5A':1826};
+let curDay = Engine.dayIndex();
+/* Value of the account's current holdings over the chosen period, from the daily price model. */
+function series(key){
+  const d = Engine.dayIndex(), open = Math.max(Engine.dayIndex(P().open.getTime()), -Engine.BACK + 1);
+  const from = key === 'Tout' ? open : Math.max(open, d - SPAN[key]);
+  return Engine.accountSeries(S, from, d, 90);
 }
 function pathFor(pts, W, H, pad){
   const vs = pts.map(p => p.v), mn = Math.min(...vs), mx = Math.max(...vs), span = (mx - mn) || 1;
@@ -531,6 +533,13 @@ function posRow(p){
     <span class="mid-col"><b>${esc(p.name)}</b><span>${esc(p.sub)} · ${share} %</span></span>
     <span class="right num"><b>${eur(val(p))}</b><span class="${perf>=0?'up':'down'}">${tri(perf)} ${pct(perf)}</span></span></button>`;
 }
+function cashRow(){
+  if (!isShares()) return '';
+  const share = total() ? Math.round(S.cash/total()*100) : 0;
+  return `<button class="row" data-act="buy" ${S.cash < 1 ? 'disabled' : ''}><span class="av t-grey">€</span>
+    <span class="mid-col"><b>Liquidités</b><span>Disponibles pour investir · ${share} %</span></span>
+    <span class="right num"><b>${eur(S.cash)}</b><span class="muted" style="font-size:12px">${S.cash >= 1 ? 'Placer' : '—'}</span></span></button>`;
+}
 function heroOps(){
   if (isShares()) return `<button class="btn-w" data-act="buy">+ Acheter</button><button class="btn-o" data-act="sell">− Vendre</button>`;
   const [act, lbl] = P().op2, ic = {withdraw:'−', arb:I.swap, simulate:I.bars}[act];
@@ -557,7 +566,7 @@ function renderHome(){
     <button class="card tap" data-act="${a.act}"><span class="tag">${I.spark} ${a.tag}</span><h3>${esc(a.h)}</h3><p class="sub">${esc(a.p)}</p></button>
     <div class="grid2">${tiles()}</div>
     <h2 class="sec">${isShares() ? 'Mes placements' : 'Mes supports'}</h2>
-    <div class="card list">${S.positions.filter(held).map(posRow).join('') || '<p class="empty-note">Aucun placement pour l’instant.</p>'}</div>
+    <div class="card list">${S.positions.filter(held).map(posRow).join('') || '<p class="empty-note">Aucun placement pour l’instant.</p>'}${cashRow()}</div>
     ${exploreCta()}
   </div>`;
   drawChart();
@@ -565,7 +574,7 @@ function renderHome(){
 }
 function drawChart(){
   const svg = $('#chart'); if (!svg) return;
-  const pts = series(range, total());
+  const pts = series(range);
   const {line, area} = pathFor(pts, 340, 110, 8);
   svg.innerHTML = `<defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".32"/><stop offset="1" stop-color="#fff" stop-opacity=".06"/></linearGradient></defs>
     <path d="${area}" fill="url(#ga)"/><path d="${line}" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
@@ -705,7 +714,7 @@ function renderPerks(){
 /* ---------- AUTO ---------- */
 const AMOUNTS = [25,50,100,200];
 const fv = (m, years, rate) => { const r = rate/12, n = years*12; return m*((Math.pow(1+r,n)-1)/r); };
-let autoShown = null;
+let autoShown = null, otherOpen = false;
 function renderAuto(){
   const d = S.draft, sh = isShares();
   const same = S.plan && S.plan.amount === d.amount && S.plan.asset === d.asset && S.plan.roundups === d.roundups;
@@ -724,11 +733,12 @@ function renderAuto(){
     <div class="navy-card"><div class="k">Dans 10 ans, tu auras versé</div><div class="v num" id="autoTot">${eur0(autoShown ?? d.amount*120)}</div>
       <div class="s num">Exemple à 5 %/an : environ <b id="autoFv">${eur0(fv(d.amount,10,.05))}</b></div><div class="xs">Simulation indicative, non garantie.</div></div>
     <div class="card"><p class="strong" style="margin:0">Combien chaque mois ?</p>
-      <div class="chips">${AMOUNTS.map(v => `<button data-act="amt" data-v="${v}" class="${v===d.amount?'on':''}" aria-pressed="${v===d.amount}">${v} €</button>`).join('')}</div>
+      <div class="chips chips5">${AMOUNTS.map(v => `<button data-act="amt" data-v="${v}" class="${v===d.amount?'on':''}" aria-pressed="${v===d.amount}">${v} €</button>`).join('')}<button data-act="amt-other" class="${AMOUNTS.includes(d.amount)?'':'on'}" aria-pressed="${!AMOUNTS.includes(d.amount)}">${AMOUNTS.includes(d.amount) ? 'Autre' : F0.format(d.amount) + ' €'}</button></div>
+      ${otherOpen ? `<form class="custom-amt" id="amtForm" novalidate><label for="autoAmt">Montant par mois</label><div><input id="autoAmt" type="number" inputmode="numeric" min="${Engine.PLAN_MIN}" max="${Engine.PLAN_MAX}" step="1" value="${AMOUNTS.includes(d.amount) ? '' : d.amount}" placeholder="Ex. 350"><span>€</span><button class="primary" type="submit">OK</button></div><p class="auth-err" id="amtErr"></p></form>` : ''}
       ${line}</div>
     <div class="card toggle-row"><div><p class="strong" style="margin:0">Les arrondis</p><p class="sub">Un café à 2,60 € ? 0,40 € part sur ${sh ? P().ton : 'ton épargne'}.</p></div>
       <button class="switch" role="switch" aria-checked="${d.roundups}" aria-label="Activer les arrondis" data-act="roundups"></button></div>
-    ${S.plan ? `<div class="card toggle-row"><span class="av t-green">✓</span><div><b>Plan actif : ${eur0(S.plan.amount)} par mois</b><p class="sub">${esc(planName)} · prochain versement le ${dShort(next)}${S.plan.roundups?' · arrondis activés':''}</p></div></div>` : ''}
+    ${S.plan ? `<div class="card toggle-row"><span class="av t-green">✓</span><div><b>Plan actif : ${eur0(S.plan.amount)} par mois</b><p class="sub">${esc(planName)} · prochain versement le ${dShort(next)}${S.plan.roundups?' · arrondis activés':''}${S.plan.pending ? ' · ' + eur(S.plan.pending) + ' mis de côté pour la prochaine part' : ''}</p></div></div>` : ''}
     <button class="primary" data-act="launch" ${same?'disabled':''}>${same ? 'Ton plan est en place' : (S.plan ? 'Passer à ' + d.amount + ' € par mois' : verb + d.amount + ' € par mois')}</button>
     ${S.plan ? '<button class="danger-link" data-act="stop-plan" style="align-self:center">Arrêter le plan</button>' : ''}
   </div>`;
@@ -931,7 +941,7 @@ function accountsPanel(){
     </div>`);
 }
 function supportDetail(id){
-  const p = pos(id), perf = p.cost ? (val(p)/p.cost - 1)*100 : 0, pts = series('1A', val(p), hash(id) % 97);
+  const p = pos(id), perf = p.cost ? (val(p)/p.cost - 1)*100 : 0, pts = p.units != null ? Engine.navSeries(id, p.units, Engine.dayIndex() - 365, Engine.dayIndex(), 90) : series('1A');
   const {line, area} = pathFor(pts, 300, 80, 6), share = Math.round(val(p)/total()*100);
   const cc = G.active === 'cc', m = mk(id);
   openPicker(`<div class="sheet-top">${avatar(p)}<span class="sheet-title">${esc(p.name)}<br><span style="font-size:12px;font-weight:500;color:var(--muted)">${esc(p.sub)}</span></span><button class="close" data-act="close-picker" aria-label="Fermer">${I.x}</button></div>
@@ -944,7 +954,7 @@ function supportDetail(id){
 }
 
 /* ---------- MARKET (catalogue, cours fictifs) ---------- */
-const hash = s => { let h = 7; for (const c of s) h = (h*31 + c.charCodeAt(0)) | 0; return Math.abs(h); };
+const hash = Engine.hash, rng = Engine.rng;
 const INDICES = [
   {id:'IX1',name:'CAC 40',price:7842.15,day:0.4,p1a:4,p5a:30,type:'action'},
   {id:'IX2',name:'Euro Stoxx 50',price:5412.80,day:0.3,p1a:9,p5a:42,type:'action'},
@@ -952,6 +962,7 @@ const INDICES = [
   {id:'IX4',name:'Nasdaq',price:24118.30,day:1.1,p1a:23,p5a:110,type:'action'},
   {id:'IX5',name:'MSCI World',price:4280.55,day:0.5,p1a:13,p5a:60,type:'action'}
 ];
+INDICES.forEach(ix => Engine.refreshSpec(ix, Engine.dayIndex()));
 const info = id => pos(id) || mk(id);
 const TYPE_LBL = {etf:'ETF', action:'Action', oblig:'Obligation'};
 const fmtPrice = (a, v) => a.type === 'oblig' ? F2.format(v ?? a.price) + ' %' : eur(v ?? a.price);
@@ -964,24 +975,24 @@ const AR = {'1J':{n:78,amp:.02,days:0}, '1S':{n:40,amp:.04,days:7}, '1M':{n:44,a
 const TYPE_VOL = {etf:.6, action:1, oblig:.15};
 const serCache = {};
 function assetSeries(a, k){
-  const ck = a.id + k;
-  if (serCache[ck] && serCache[ck].end === a.price) return serCache[ck].pts;
-  const R = AR[k], rand = rng(hash(ck)), vol = TYPE_VOL[a.type];
-  const drift = (rand() - .45) * vol;
-  const chg = {'1J':a.day, '1S':a.day + drift*3, '1M':a.p1a/12 + drift*6, '1A':a.p1a, '5A':a.p5a}[k];
-  const end = a.price, start = end / (1 + chg/100);
-  const now = new Date();
-  const t0 = k === '1J' ? new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0).getTime() : now.getTime() - R.days*86400000;
-  const t1 = k === '1J' ? t0 + 8.5*3600000 : now.getTime();
-  const w = [0]; for (let i = 1; i < R.n; i++) w.push(w[i-1] + (rand() - .5));
-  const sc = R.amp * vol * end / Math.sqrt(R.n) * 2;
-  const pts = [];
-  for (let i = 0; i < R.n; i++){
-    const t = i/(R.n-1), noise = w[i] - (w[0] + (w[R.n-1]-w[0])*t);
-    pts.push({t: t0 + (t1-t0)*t, v: Math.max(end*.05, start + (end-start)*t + noise*sc)});
+  const d = Engine.dayIndex(), ck = a.id + k + d;
+  if (serCache[ck]) return serCache[ck];
+  let pts;
+  if (k !== '1J') pts = Engine.specSeries(a, d - SPAN[k], d, 90);
+  else {
+    // Intraday: from yesterday's close to today's price, with a little noise.
+    const R = AR['1J'], rand = rng(hash(ck)), end = a.price, start = end / (1 + a.day/100);
+    const now = new Date(), t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0).getTime(), t1 = t0 + 8.5*3600000;
+    const w = [0]; for (let i = 1; i < R.n; i++) w.push(w[i-1] + (rand() - .5));
+    const sc = R.amp * TYPE_VOL[a.type] * end / Math.sqrt(R.n) * 2;
+    pts = [];
+    for (let i = 0; i < R.n; i++){
+      const t = i/(R.n-1), noise = w[i] - (w[0] + (w[R.n-1]-w[0])*t);
+      pts.push({t: t0 + (t1-t0)*t, v: Math.max(end*.05, start + (end-start)*t + noise*sc)});
+    }
+    pts[R.n-1].v = end;
   }
-  pts[R.n-1].v = end;
-  serCache[ck] = {end, pts};
+  serCache[ck] = pts;
   return pts;
 }
 function spark(a, w, h){
@@ -1153,9 +1164,10 @@ document.addEventListener('click', e => {
       break;
     }
     case 'amt': {
-      const from = S.draft.amount*120; op({type:'draft', amount:+b.dataset.v}, true); autoShown = from; renderAuto(); autoShown = null;
+      const from = S.draft.amount*120; otherOpen = false; op({type:'draft', amount:+b.dataset.v}, true); autoShown = from; renderAuto(); autoShown = null;
       countUp($('#autoTot'), from, S.draft.amount*120, 700, eur0); break;
     }
+    case 'amt-other': otherOpen = !otherOpen; renderAuto(); if (otherOpen) setTimeout(() => { const i = $('#autoAmt'); if (i) i.focus(); }, 50); break;
     case 'roundups': op({type:'draft', roundups:!S.draft.roundups}, true); renderAuto(); break;
     case 'launch': op({type:'plan', action:'start'}).then(r => { renderAuto(); if (r.done) toast(r.done.toast); }); break;
     case 'stop-plan': op({type:'plan', action:'stop'}).then(r => { renderAuto(); if (r.done) toast(r.done.toast); }); break;
@@ -1165,6 +1177,15 @@ document.addEventListener('click', e => {
     case 'logout': api('/api/logout', {}).then(() => { USER = null; G = null; closePicker(); showAuth(); }); break;
     case 'auth-tab': setAuthTab(b.dataset.t); break;
   }
+});
+document.addEventListener('submit', e => {
+  if (e.target.id !== 'amtForm') return;
+  e.preventDefault();
+  const v = Math.round(parseFloat(String($('#autoAmt').value).replace(',', '.')));
+  if (!(v >= Engine.PLAN_MIN && v <= Engine.PLAN_MAX)){ $('#amtErr').textContent = `Choisis un montant entre ${Engine.PLAN_MIN} et ${F0.format(Engine.PLAN_MAX)} €.`; return; }
+  const from = S.draft.amount*120; otherOpen = false;
+  op({type:'draft', amount:v}, true); autoShown = from; renderAuto(); autoShown = null;
+  countUp($('#autoTot'), from, v*120, 700, eur0);
 });
 document.addEventListener('pointermove', chartMove);
 document.addEventListener('pointerout', e => { const svg = e.target.closest && e.target.closest('svg[data-scrub]'); if (svg && !(e.relatedTarget && svg.contains(e.relatedTarget))) chartLeave(svg); });
@@ -1221,9 +1242,19 @@ async function boot(){
     MODE = 'server';
     if (r.ok){ USER = r.data.user; G = r.data.state; sync(); start(); } else showAuth();
   } else {
-    MODE = 'demo'; G = loadLocal(); sync(); start();
+    MODE = 'demo'; G = loadLocal(); if (Engine.refresh(G)) saveLocal(); sync(); start();
   }
 }
+/* A new day brings new prices and maybe a monthly payment: refresh without a reload. */
+setInterval(async () => {
+  const d = Engine.dayIndex();
+  if (d === curDay || !G) return;
+  curDay = d;
+  INDICES.forEach(ix => Engine.refreshSpec(ix, d));
+  if (MODE === 'demo'){ Engine.refresh(G); saveLocal(); sync(); render(); }
+  else await refresh();
+  if (assetOpen()) renderAsset();
+}, 60000);
 boot();
 })();
 </script>

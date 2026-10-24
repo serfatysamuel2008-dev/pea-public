@@ -124,3 +124,13 @@ test('sert l’app et bloque la sortie du dossier public', async () => {
   assert.notEqual((await fetch(base + '/..%2fserver.js')).status, 200);
   assert.notEqual((await fetch(base + '/%2e%2e/package.json')).status, 200);
 });
+
+test('montant mensuel libre, validé par le serveur', async () => {
+  const c = client();
+  await c('/api/login', { email: 'lea@example.com', password: 'motdepasse1' });
+  assert.equal((await c('/api/op', { type: 'draft', account: 'av', amount: 350 })).status, 200);
+  assert.equal((await c('/api/op', { type: 'draft', account: 'av', amount: 5 })).status, 400);
+  assert.equal((await c('/api/op', { type: 'draft', account: 'av', amount: 50000 })).status, 400);
+  const me = await c('/api/me');
+  assert.equal(me.data.state.accounts.av.draft.amount, 350);
+});

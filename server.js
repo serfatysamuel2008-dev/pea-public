@@ -121,9 +121,14 @@ function noteFail(key){
 }
 
 /* ---------- state ---------- */
+/* Loads a user's state brought up to today: prices of the day, monthly payments due since
+   the last visit, yearly counters. Anything that changed for good is saved straight away. */
 function loadState(userId){
   const row = q.getState.get(userId);
-  return row ? JSON.parse(row.data) : null;
+  if (!row) return null;
+  const state = JSON.parse(row.data);
+  if (Engine.refresh(state)) q.updateState.run(JSON.stringify(state), Date.now(), userId);
+  return state;
 }
 const publicUser = u => ({ email: u.email, firstName: u.first_name });
 
@@ -190,6 +195,7 @@ async function handleApi(req, res, pathname){
     const { lastInsertRowid } = q.insertUser.run(email, firstName, hashPassword(password), now);
     const userId = Number(lastInsertRowid);
     const state = Engine.defaults(firstName);
+    Engine.refresh(state);
     q.insertState.run(userId, JSON.stringify(state), now);
     createSession(res, userId);
     return send(res, 201, { user: { email, firstName }, state });
