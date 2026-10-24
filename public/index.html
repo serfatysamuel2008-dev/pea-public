@@ -157,7 +157,7 @@ h2.sec{font-size:17px;font-weight:800;margin:10px 0 0;letter-spacing:-.01em}
 .seg button.on{background:#fff;color:var(--navy);box-shadow:0 1px 4px rgba(15,26,51,.1)}
 .sheet-title{flex:1;font-weight:800;font-size:16px}
 .asset-card{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:16px;padding:10px 12px;margin-top:14px;width:100%;text-align:left}
-.asset-card b{display:block;font-size:14px}
+.asset-card b{display:block;font-size:14px;color:var(--ink)}
 .asset-card span{display:block;font-size:12px;color:var(--muted)}
 .asset-card .chev{margin-left:auto;color:var(--faint)}
 .asset-card span span{display:inline}
@@ -324,6 +324,13 @@ img.logo{object-fit:contain;background:#fff}
 .points{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:13px}
 .points li{display:flex;gap:10px;align-items:flex-start;line-height:1.4}
 .points li span{flex:none;width:22px;height:22px;border-radius:50%;background:var(--green-soft);color:var(--green);display:grid;place-items:center}
+
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.primary.danger{background:var(--red)}
+.bank-card{display:flex;align-items:center;gap:12px}
+.bank-card .mid-col{flex:1;min-width:0}
+.bank-card b{display:block;font-size:14px}
+.bank-card span span{display:block;font-size:12px;color:var(--muted)}
 
 /* toast */
 .toast{position:absolute;left:12px;right:12px;top:calc(12px + env(safe-area-inset-top,0px));z-index:40;background:#0d1730;color:#fff;border-radius:14px;padding:12px 14px;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:center;transform:translateY(-140%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
@@ -503,6 +510,7 @@ const $ = s => document.querySelector(s);
 
 /* ---------- icons ---------- */
 const I = {
+  bank:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-5 9 5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg>',
   tick:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>',
   bell:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15zM10 21h4"/></svg>',
   x:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
@@ -647,7 +655,7 @@ function contractCard(){
 }
 let confirmReset = false;
 function histRow(h){
-  const icon = {deposit:'+', auto:'+', sell:'↘', buy:'↗', arb:'⇆', withdraw:'−'}[h.kind] || '•';
+  const icon = {deposit:'+', auto:'+', sell:'↘', buy:'↗', arb:'⇆', withdraw:'−', cashout:'−', open:'✓'}[h.kind] || '•';
   const neutral = h.kind === 'arb';
   return `<div class="row"><span class="av ${neutral ? 't-grey' : h.amount >= 0 ? 't-green' : 't-blue'}">${icon}</span>
     <span class="mid-col"><b>${esc(h.label)}</b><span>${esc(h.detail)}</span><span>${dShort(new Date(h.t))}</span></span>
@@ -667,7 +675,8 @@ function renderWallet(){
     <div class="card list">${S.positions.filter(held).map(posRow).join('') || '<p class="empty-note">Aucun placement pour l’instant.</p>'}</div>
     ${isShares() ? exploreCta() + `<h2 class="sec">Liquidités</h2>
     <div class="card"><div class="row" style="padding:0"><span class="av t-grey">€</span><span class="mid-col"><b class="num">${eur(S.cash)}</b><span>Disponibles pour acheter des parts</span></span></div>
-      <div class="grid2" style="margin-top:14px"><button class="ghost" data-act="deposit">Verser</button><button class="ghost" data-act="buy" ${S.cash<1?'disabled':''}>Placer</button></div></div>` : contractCard()}
+      <div class="grid3" style="margin-top:14px"><button class="ghost" data-act="deposit">Verser</button><button class="ghost" data-act="buy" ${S.cash<1?'disabled':''}>Placer</button><button class="ghost" data-act="cashout">Retirer</button></div>
+      <p class="sub" style="margin-top:10px">${Engine.cashoutOpen(G, G.active) ? 'Tu peux retirer tes liquidités vers ton compte courant quand tu veux.' : `Avant 5 ans, un retrait ferme ${P().ton}.`}</p></div>` : contractCard()}
     <h2 class="sec">Historique</h2>
     <div class="card list">${hist.length ? hist.map(histRow).join('') : '<p class="empty-note">Aucune opération.</p>'}</div>
     ${confirmReset ? `<div class="confirm">Remettre la démo à zéro ? Les opérations et réglages de tous tes comptes seront effacés.<div><button style="background:var(--red);color:#fff" data-act="reset-yes">Réinitialiser</button><button style="background:#fff" data-act="reset-no">Annuler</button></div></div>`
@@ -846,16 +855,19 @@ function quote(){ return Engine.quote(G, G.active, {mode:O.mode, asset:O.asset, 
 function renderOrder(){
   const body = $('#sheetBody');
   if (O.mode === 'open' && !O.done) return renderOpen();
+  if (O.mode === 'close' && !O.done) return renderClose();
   if (O.done){
     body.innerHTML = `<div class="sheet-top"><span class="spacer"></span></div>
       <div class="done"><div class="tick">${I.check}</div><h2>C’est fait !</h2><p class="b num">${O.done.line1}</p><p class="m num">${O.done.line2}</p></div>
-      <button class="primary" data-act="back-home">${O.done.enter ? 'Découvrir ' + esc(P().ton) : 'Retour à ' + esc(lower(P().name))}</button>`;
+      <button class="primary" data-act="back-home">${O.done.hub ? 'Retour à l’accueil' : O.done.enter ? 'Découvrir ' + esc(P().ton) : 'Retour à ' + esc(lower(P().name))}</button>`;
     return;
   }
   const q = quote(), sh = isShares(), close = `<button class="close" data-act="close" aria-label="Fermer">${I.x}</button>`;
   const tabs = sh ? [['buy','Acheter'],['sell','Vendre']] : [['verse','Verser'], P().op2];
   let top;
+  const bank = Engine.bankOf(G), bankCard = `<div class="asset-card"><span class="av t-grey">${I.bank}</span><span style="min-width:0"><b>${esc(bank.name)} de ${esc(G.firstName)}</b><span>${esc(bank.bank)} · ${Engine.maskIban(bank.iban)}</span></span></div>`;
   if (O.mode === 'deposit') top = `<div class="sheet-top">${close}<span class="sheet-title">Verser sur ${esc(lower(P().name))}</span></div>`;
+  else if (O.mode === 'cashout') top = `<div class="sheet-top">${close}<span class="sheet-title">Retirer mes liquidités</span></div>${bankCard}`;
   else {
     top = `<div class="sheet-top">${close}<div class="seg" role="tablist">${tabs.map(([m,l]) => `<button role="tab" data-act="mode" data-m="${m}" class="${O.mode===m?'on':''}">${l}</button>`).join('')}</div></div>`;
     if (sh){
@@ -872,6 +884,8 @@ function renderOrder(){
   let info;
   const row = (l, v) => `<div class="l"><span>${l}</span><b class="num">${v}</b></div>`;
   switch (O.mode){
+    case 'cashout': info = row('Liquidités disponibles', eur(S.cash)) + row('Arrivée', '1 à 2 jours ouvrés')
+      + `<p>${G.active === 'ct' ? 'Les liquidités ne sont pas imposées : tes plus-values l’ont déjà été au moment de la vente.' : 'Après 5 ans, pas d’impôt sur le revenu : seuls les prélèvements sociaux s’appliquent sur la part de gains.'} Pour retirer davantage, vends d’abord des placements.</p>`; break;
     case 'deposit': info = row('Depuis', 'Ton compte courant') + row('Plafond restant', q.room === Infinity ? 'Aucun plafond' : eur(q.room)) + `<p>L’argent arrive en liquidités sur ${P().ton}. Tu choisis ensuite où le placer.</p>`; break;
     case 'buy': info = row('Disponible', eur(S.cash)) + row('Type d’ordre', 'Au prix du marché') + `<p>${G.active === 'pea' ? 'Sur un PEA' : 'Sur ce compte'}, on achète des parts entières. ${q.n > 0 && q.rest > 0 ? 'Les ' + eur(q.rest) + ' restants restent dispo.' : 'Le reste reste dispo.'}</p>`; break;
     case 'sell': info = row('Tu détiens', `${q.a.parts} parts · ${eur(val(q.a))}`) + row('Type d’ordre', 'Au prix du marché')
@@ -895,8 +909,9 @@ function renderOrder(){
     }
     case 'arb': info = row('Disponible sur ce support', eur(val(q.from))) + row('Impôt', 'Aucun') + '<p>Un arbitrage ne sort pas de ton contrat : pas d’impôt, et ton ancienneté fiscale est conservée.</p>'; break;
   }
-  const label = {buy:'Combien veux-tu investir ?', sell:'Combien veux-tu récupérer ?', deposit:'Combien veux-tu verser ?', verse:'Combien veux-tu verser ?', simulate:'Combien veux-tu verser ?', withdraw:'Combien veux-tu retirer ?', arb:'Combien veux-tu arbitrer ?'}[O.mode];
-  const presets = O.mode === 'buy' ? `<button class="tag" data-act="max">Tout investir · ${eur0(S.cash)}</button>`
+  const label = {cashout:'Combien veux-tu retirer ?', buy:'Combien veux-tu investir ?', sell:'Combien veux-tu récupérer ?', deposit:'Combien veux-tu verser ?', verse:'Combien veux-tu verser ?', simulate:'Combien veux-tu verser ?', withdraw:'Combien veux-tu retirer ?', arb:'Combien veux-tu arbitrer ?'}[O.mode];
+  const presets = O.mode === 'cashout' ? `<button class="tag" data-act="max">Tout retirer · ${eur(S.cash)}</button>`
+    : O.mode === 'buy' ? `<button class="tag" data-act="max">Tout investir · ${eur0(S.cash)}</button>`
     : O.mode === 'sell' ? `<button class="tag" data-act="max">Tout vendre · ${q.a.parts} parts</button>`
     : O.mode === 'arb' ? `<button class="tag" data-act="max">Tout le support · ${eur0(val(q.from))}</button>`
     : (O.mode === 'simulate' ? [1000,3000,5000] : [100,500,1000]).map(v => `<button class="tag" data-act="preset" data-v="${v}">${F0.format(v)} €</button>`).join('');
@@ -923,6 +938,15 @@ function key(k){
 }
 let busy = false;
 async function confirmOrder(){
+  if (O.mode === 'close'){
+    if (busy) return;
+    if (!closeArmed){ closeArmed = true; renderOrder(); return; }
+    busy = true;
+    const r = await op({type:'closeAccount', account:O.acc});
+    busy = false;
+    if (r.error){ if (r.error !== 'auth') renderOrder(); return; }
+    O.done = r.done; renderOrder(); return;
+  }
   if (O.mode === 'open'){
     if (busy) return;
     busy = true;
@@ -1000,11 +1024,32 @@ function renderHub(){
   <div class="content pad stack">
     <h2 class="sec">Mes comptes</h2>
     <div class="card list">${owned.map(row).join('') || '<p class="empty-note">Tu n’as pas encore de compte. Ouvre ton premier ci-dessous.</p>'}</div>
+    <div class="card bank-card"><span class="av t-grey">${I.bank}</span><span class="mid-col"><b>${esc(Engine.bankOf(G).name)} de ${esc(G.firstName)}</b><span>${esc(Engine.bankOf(G).bank)} · ${Engine.maskIban(Engine.bankOf(G).iban)}</span><span>Sert à tes versements et à tes retraits.</span></span></div>
     ${others.length ? `<h2 class="sec">À ouvrir</h2><div class="card list">${others.map(toOpen).join('')}</div>` : ''}
     ${exploreCta()}
     ${MODE === 'server' && USER ? `<div class="acc-user"><span>Connexion : <b>${esc(USER.email)}</b></span><button class="ghost" data-act="logout">Se déconnecter</button></div>`
       : '<p class="m-note">Mode démo : tes données restent dans ce navigateur. Cours et montants fictifs.</p>'}
   </div>`;
+}
+let closeArmed = false;
+function openCloseSheet(){
+  O.mode = 'close'; O.acc = G.active; O.input = ''; O.done = null; closeArmed = false;
+  renderOrder(); $('#sheet').classList.add('open'); caption('order');
+}
+function renderClose(){
+  const k = O.acc, pr = PR[k], c = Engine.closingOf(G, k), f = fiscal(), bank = Engine.bankOf(G);
+  const row = (l, v) => `<div class="l"><span>${l}</span><b class="num">${v}</b></div>`;
+  $('#sheetBody').innerHTML = `
+    <div class="sheet-top"><button class="close" data-act="close" aria-label="Fermer">${I.x}</button><span class="sheet-title">Retirer mes liquidités</span></div>
+    <div class="notice" style="margin-top:14px"><b>Avant 5 ans, un retrait ferme ${esc(pr.ton)}.</b><br>
+      Tes placements sont vendus au prix du marché et tout l’argent est viré sur ton compte courant. ${pr.ton.charAt(0).toUpperCase() + pr.ton.slice(1)} perd son ancienneté (plus que ${esc(f.leftTxt)} avant les 5 ans) et tes gains sont imposés.</div>
+    <div class="info">${row('Placements vendus', eur(c.sold))}${row('Liquidités', eur(c.cash))}${row('Gains imposables', eur(c.gains))}
+      <div class="l" style="border-top:1px solid var(--line);margin-top:6px;padding-top:8px"><span><b>Total viré</b></span><b class="num">${eur(c.total)}</b></div></div>
+    <div class="asset-card"><span class="av t-grey">${I.bank}</span><span style="min-width:0"><b>${esc(bank.name)} de ${esc(G.firstName)}</b><span>${esc(bank.bank)} · ${Engine.maskIban(bank.iban)}</span></span></div>
+    <p class="sub" style="margin-top:12px">Pour garder ${esc(pr.ton)}, tu peux plutôt attendre tes 5 ans, ou placer tes liquidités.</p>
+    <span class="spacer"></span>
+    <button class="primary ${closeArmed ? 'danger' : ''}" data-act="confirm">${closeArmed ? 'Confirmer la clôture' : 'Clôturer et virer ' + eur(c.total)}</button>
+    <button class="ghost" data-act="close" style="margin-top:8px">Garder ${esc(pr.ton)}</button>`;
 }
 function openAccountSheet(k){
   closePicker();
@@ -1207,6 +1252,7 @@ document.addEventListener('click', e => {
     case 'buy': openOrder('buy'); break;
     case 'sell': openOrder('sell'); break;
     case 'deposit': openOrder('deposit'); break;
+    case 'cashout': if (Engine.cashoutOpen(G, G.active)) openOrder('cashout'); else openCloseSheet(); break;
     case 'verse': closePicker(); openOrder('verse'); break;
     case 'withdraw': openOrder('withdraw'); break;
     case 'arb': openOrder('arb'); break;
@@ -1234,13 +1280,14 @@ document.addEventListener('click', e => {
     case 'mode': setMode(b.dataset.m); break;
     case 'key': key(b.dataset.k); break;
     case 'max': {
-      const x = O.mode === 'buy' ? Math.floor(S.cash*100)/100 : O.mode === 'arb' ? val(pos(O.asset)) : val(pos(O.asset));
+      const x = O.mode === 'buy' || O.mode === 'cashout' ? Math.floor(S.cash*100)/100 : O.mode === 'arb' ? val(pos(O.asset)) : val(pos(O.asset));
       O.input = F2.format(x).replace(/[\s  ]/g,'').replace(/,00$/,''); renderOrder(); break;
     }
     case 'preset': O.input = b.dataset.v; renderOrder(); break;
     case 'confirm': confirmOrder(); break;
     case 'back-home': {
       const t = O.done && O.done.toast, before = O.done && O.done.before;
+      if (O.done && O.done.hub){ sync(); setNav(); closeAsset(); closeSheet(); go('hub'); if (t) setTimeout(() => toast(t), 250); break; }
       if (O.done && O.done.enter){ sync(); range = '1A'; firstPaint = true; setNav(); }
       closeAsset(); closeSheet(); go('home');
       if (before && isShares()){

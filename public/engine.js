@@ -219,6 +219,11 @@ function accountSeries(acc, from, to, max){
 const elig = (a, k) => k === 'ct' ? true : k === 'pme' ? !!a.pme : a.eligible;
 
 /* ---------- default state ---------- */
+/* The customer's external current account (imaginary): source of deposits, destination of withdrawals. */
+const BANK = {name:'Compte courant', bank:'Banque externe', iban:'FR76 3000 6000 0112 3456 7890 189'};
+const bankOf = G => G.bank || BANK;
+const maskIban = iban => iban.slice(0, 4) + ' •••• ' + iban.replace(/\s/g, '').slice(-4);
+
 /* An account the customer doesn't hold yet: same shape, empty. */
 function emptyAccount(k){
   const pr = PR[k];
@@ -235,7 +240,7 @@ function defaults(firstName){
   const ps = (id, ab, name, sub, tone, parts, price, cost, day) => ({id, ab, name, sub, tone, parts, price, cost, day});
   const sp = (id, ab, name, sub, tone, value, cost, day) => ({id, ab, name, sub, tone, value, cost, day, units: value / navAt(id, 0)});
   const dep = (days, amount, detail) => ({t: now - D*days, kind:'deposit', label:'Versement', detail: detail || 'Depuis ton compte courant', amount});
-  const G = {v:4, firstName: firstName || 'Léa', active:'pea', favs:['MO','AIR','ASML'], accounts:{
+  const G = {v:4, bank:Object.assign({}, BANK), firstName: firstName || 'Léa', active:'pea', favs:['MO','AIR','ASML'], accounts:{
     pea:{cash:1250, deposits:21500,
       positions:[ps('MO','MO','ETF Monde','MSCI World','blue',48,320.63,13020.51,0.8), ps('US','US','ETF S&P 500','Actions US','orange',160,37.25,4909.39,0.4), ps('EU','EU','ETF Europe','Stoxx 600','green',26,86.93,2301.61,-0.3)],
       history:[{t: now - D*12, kind:'auto', label:'Versement programmé', detail:'ETF Monde', amount:50}, dep(40, 1000), {t: now - D*75, kind:'buy', label:'Achat · 4 parts', detail:'ETF S&P 500', amount:-148.6}],
@@ -365,6 +370,7 @@ function refresh(G, now){
   let changed = false;
   if (!G.v || G.v < 3) ORDER.forEach(k => G.accounts[k].positions.forEach(p => { if (p.value != null && p.units == null) p.units = p.value / navAt(p.id, d); }));
   if (!G.v || G.v < 4) ORDER.forEach(k => { if (G.accounts[k].opened == null) G.accounts[k].opened = true; });
+  if (!G.bank){ G.bank = Object.assign({}, BANK); changed = true; }
   if (G.v !== 4){ G.v = 4; changed = true; }
   ORDER.forEach(k => {
     const S = G.accounts[k];
@@ -389,10 +395,18 @@ function refresh(G, now){
 }
 
 /* ---------- quotes (aperçu d'une opération) ---------- */
-const MODES = {shares:['buy','sell','deposit'], contract:['verse','withdraw','arb','simulate']};
+const MODES = {shares:['buy','sell','deposit','cashout'], contract:['verse','withdraw','arb','simulate']};
+/* On a PEA or PEA-PME, any withdrawal before 5 years closes the plan. */
+const cashoutOpen = (G, k) => k === 'ct' || fiscal(k, G.accounts[k]).done;
 function quote(G, k, o){
   const S = G.accounts[k], x = o.x;
   switch (o.mode){
+    case 'cashout': {
+      if (!cashoutOpen(G, k)) return {x, ok:false, warn:true, pill:'Avant 5 ans, un retrait ferme le plan', btn:'Retrait impossible sans clôture'};
+      const over = x > S.cash;
+      return {x, ok: x > 0 && !over, warn: over, pill: over ? 'Plus que tes liquidités' : x > 0 ? 'Vers ' + bankOf(G).name.toLowerCase() : 'Retrait de liquidités',
+        btn: x <= 0 ? 'Saisis un montant' : over ? 'Montant trop élevé' : 'Retirer ' + money(x)};
+    }
     case 'deposit': {
       const room = depositRoom(G, k), over = x > room;
       return {x, ok: x > 0 && !over, warn: over, room, pill: over ? 'Au-delà du plafond' : x > 0 ? 'Versement depuis ton compte' : 'Saisis un montant',
@@ -437,6 +451,12 @@ function quote(G, k, o){
   return {x, ok:false, pill:'', btn:'Opération inconnue'};
 }
 
+/* What closing a stock account would transfer: placements sold at today's price, plus cash. */
+function closingOf(G, k){
+  const S = G.accounts[k], sold = r2(S.positions.reduce((a,p) => a + val(p), 0)), cost = r2(S.positions.reduce((a,p) => a + p.cost, 0));
+  return {sold, cash: S.cash, total: r2(sold + S.cash), gains: r2(Math.max(0, sold - cost))};
+}
+
 /* ---------- apply (le serveur fait foi) ---------- */
 class OpError extends Error {}
 const fail = msg => { throw new OpError(msg); };
@@ -462,6 +482,14 @@ function order(G, k, op){
   const q = quote(G, k, o);
   if (!q.ok) fail(q.btn === 'Saisis un montant' ? 'Montant insuffisant.' : q.pill || q.btn);
   switch (mode){
+    case 'cashout': {
+      const before = totOf(S);
+      S.cash = r2(S.cash - x);
+      S.deposits = r2(S.deposits * (1 - x / before));
+      const b = bankOf(G);
+      S.history.push({t:now, kind:'cashout', label:'Virement vers ton compte courant', detail:`${b.name} · ${maskIban(b.iban)}`, amount:-x});
+      return {line1: money(x) + ' virés vers ton compte courant', line2: `Ils arrivent sous 1 à 2 jours ouvrés sur ${maskIban(b.iban)}. Tes liquidités : ${eur(S.cash)}.`, toast: money(x) + ' virés vers ton compte courant'};
+    }
     case 'deposit':
       S.cash = r2(S.cash + x); S.deposits = r2(S.deposits + x);
       S.history.push({t:now, kind:'deposit', label:'Versement', detail:'Depuis ton compte courant', amount:x});
@@ -519,6 +547,16 @@ function apply(G, op){
   switch (op.type){
     case 'order': return order(G, k, op);
     case 'switch': G.active = k; return null;
+    case 'closeAccount': {
+      if (pr.kind !== 'shares') fail('Ce compte ne se clôture pas ici.');
+      const c = closingOf(G, k), b = bankOf(G);
+      G.accounts[k] = emptyAccount(k);
+      if (G.active === k) G.active = ORDER.find(o => G.accounts[o].opened) || 'pea';
+      const Ton = pr.ton.charAt(0).toUpperCase() + pr.ton.slice(1);
+      return {line1: `${money(c.total)} virés vers ton compte courant`,
+        line2: `${Ton} est clôturé. L’argent arrive sous 1 à 2 jours ouvrés sur ${maskIban(b.iban)}. Tu pourras en rouvrir un depuis l’accueil.`,
+        toast: `${Ton} est clôturé`, hub:true};
+    }
     case 'openAccount': {
       if (S.opened) fail('Ce compte est déjà ouvert.');
       const first = op.amount == null || op.amount === 0 ? 0 : cleanAmount(op.amount);
@@ -569,7 +607,7 @@ function apply(G, op){
   fail('Opération inconnue.');
 }
 
-return {openOf, emptyAccount, DAY, ANCHOR, BACK, dayIndex, dateOf, priceAt, navAt, refreshSpec, refreshMarket, specSeries, navSeries, accountSeries, refresh, PLAN_MIN, PLAN_MAX, hash, rng,
+return {BANK, bankOf, maskIban, cashoutOpen, closingOf, openOf, emptyAccount, DAY, ANCHOR, BACK, dayIndex, dateOf, priceAt, navAt, refreshSpec, refreshMarket, specSeries, navSeries, accountSeries, refresh, PLAN_MIN, PLAN_MAX, hash, rng,
   F0, F1, F2, eur, eur0, sgn, pct, tri, r2, money, lower, de,
   PR, ORDER, PROFILES, SHORT, PEA_CAP, COMMON_CAP, AMOUNTS, TMIS, MARKET, mk, elig,
   defaults, val, held, totOf, pos, common, depositRoom, allocShort, splitAlloc, splitTxt,

@@ -58,3 +58,19 @@ test('les versements programmés passent le 5 de chaque mois, arrondis compris',
   E.refresh(G, noon(96));
   assert.equal(G.accounts.av.history.filter(h => h.kind === 'auto' && h.t > noon(0)).length, 3, 'pas de double passage');
 });
+
+test('retrait de liquidités : libre sur le compte-titres, clôture obligatoire sur le PEA avant 5 ans', () => {
+  const G = E.defaults('L'); E.refresh(G, noon(0));
+  const ct = G.accounts.ct, cash = ct.cash;
+  const done = E.apply(G, { type: 'order', account: 'ct', mode: 'cashout', amount: 300 });
+  assert.equal(ct.cash, cash - 300);
+  assert.match(done.line1, /virés vers ton compte courant/);
+  assert.throws(() => E.apply(G, { type: 'order', account: 'ct', mode: 'cashout', amount: 99999 }));
+  assert.throws(() => E.apply(G, { type: 'order', account: 'pea', mode: 'cashout', amount: 100 }), /5 ans/);
+  const total = E.totOf(G.accounts.pea);
+  const close = E.apply(G, { type: 'closeAccount', account: 'pea' });
+  assert.match(close.line1.replace(/[  ]/g, ' '), new RegExp(String(total).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ')));
+  assert.equal(G.accounts.pea.opened, false);
+  assert.equal(E.totOf(G.accounts.pea), 0);
+  assert.throws(() => E.apply(G, { type: 'closeAccount', account: 'av' }));
+});

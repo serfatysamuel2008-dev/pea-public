@@ -40,6 +40,7 @@ npm test
 - **Les cours bougent chaque jour** : chaque placement suit une évolution quotidienne calculée à l'identique sur le serveur et dans le navigateur. Les graphiques (1S, 1M, 1A, 5A, Tout), les performances et la valeur des comptes se mettent à jour tous les jours.
 - **L'argent fructifie** : les supports des contrats (fonds euros à 2,6 %/an, ETF, immobilier, obligations) sont détenus en parts dont la valeur évolue. Un versement reste et suit cette valeur.
 - **Versements programmés réels** : le montant choisi (libre, de 10 à 10 000 € par mois) est versé le 5 de chaque mois, arrondis compris. Sur un compte boursier, les mois s'additionnent jusqu'à pouvoir acheter une part.
+- **Retirer ses liquidités** vers un compte courant externe (fictif) : libre sur le compte-titres, et sur PEA / PEA-PME après 5 ans. Avant 5 ans, l'app propose la clôture du plan (placements vendus, tout est viré), avec confirmation en deux temps.
 - **Explorer** : catalogue de 68 ETF, actions et obligations avec graphiques, recherche, filtres et favoris.
 - **Mode démo** : si l'app est ouverte sans serveur (fichier local, hébergement statique), elle fonctionne quand même, avec les données gardées dans le navigateur.
 
