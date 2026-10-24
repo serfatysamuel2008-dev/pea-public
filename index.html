@@ -251,6 +251,27 @@ h2.sec{font-size:17px;font-weight:800;margin:10px 0 0;letter-spacing:-.01em}
 .a-foot{display:grid;grid-template-columns:1fr 1fr;gap:10px;border-top:1px solid var(--line);padding-top:10px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
 .nav .fab.on span{box-shadow:0 0 0 4px var(--chip),0 8px 18px -6px rgba(11,58,140,.6)}
 
+/* accounts */
+.brand{text-align:left;color:inherit;border-radius:12px;min-width:0}
+.brand-t{display:block;min-width:0}
+.brand-t b{display:flex;align-items:center;gap:4px;white-space:nowrap}
+.brand-chev{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.16)}
+.topbar{gap:10px}
+.acc-scroll{max-height:68vh;overflow-y:auto;margin:0 -4px;padding:0 4px}
+.acc-h{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 4px}
+.acc-list{padding:0}
+.row.acc.on .mid-col b::after{content:" ✓";color:var(--green)}
+.alloc{display:flex;flex-direction:column;gap:10px}
+.alloc>div{display:grid;grid-template-columns:1fr auto;gap:4px 8px;font-size:13px}
+.alloc>div span{color:var(--muted)}
+.alloc .bar{grid-column:1/-1}
+.tmi{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:4px 0 8px}
+.tmi button{height:34px;border-radius:10px;background:var(--card);border:1.5px solid var(--line);font-weight:700;font-size:13px}
+.tmi button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.presets{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+div.asset-card{cursor:default}
+.t-grey{background:var(--soft);color:var(--muted)}
+
 /* toast */
 .toast{position:absolute;left:12px;right:12px;top:calc(12px + env(safe-area-inset-top,0px));z-index:40;background:#0d1730;color:#fff;border-radius:14px;padding:12px 14px;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:center;transform:translateY(-140%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
 .toast.show{transform:none}
@@ -273,9 +294,9 @@ h2.sec{font-size:17px;font-weight:800;margin:10px 0 0;letter-spacing:-.01em}
 
     <nav class="nav" aria-label="Navigation principale">
       <button data-act="go" data-v="home" class="on"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg>Accueil</button>
-      <button data-act="go" data-v="wallet"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5V12h8.5"/></svg>Portefeuille</button>
+      <button data-act="go" data-v="wallet"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5V12h8.5"/></svg><span id="navWallet">Portefeuille</span></button>
       <button data-act="go" data-v="explore" class="fab" aria-label="Explorer le marché"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span></button>
-      <button data-act="go" data-v="perks"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6z"/></svg>Avantages</button>
+      <button data-act="go" data-v="perks"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6z"/></svg><span id="navPerks">Avantages</span></button>
       <button data-act="go" data-v="auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>Auto</button>
     </nav>
 
@@ -305,47 +326,97 @@ const dNum = d => String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth(
 const de = n => /^ETF/.test(n) || (!/^[A-Z]{2}/.test(n) && /^[AEIOUYHÉÈaeiouyhéè]/.test(n)) ? 'd’' + n : 'de ' + n;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
+/* ---------- products ---------- */
+const PR = {
+  pea:{kind:'shares', name:'Mon PEA', ab:'PEA', tone:'blue', group:'Bourse', label:'Actions européennes, 0 impôt après 5 ans', vaut:'Ton PEA vaut', ton:'ton PEA', nav:['Portefeuille','Avantages'], open:new Date(2023,2,12), years:5},
+  pme:{kind:'shares', name:'Mon PEA-PME', ab:'PME', tone:'teal', group:'Bourse', label:'PME et ETI européennes', vaut:'Ton PEA-PME vaut', ton:'ton PEA-PME', nav:['Portefeuille','Avantages'], open:new Date(2024,2,12), years:5},
+  ct:{kind:'shares', name:'Mon compte-titres', ab:'CT', tone:'orange', group:'Bourse', label:'Toutes les bourses, sans plafond', vaut:'Ton compte-titres vaut', ton:'ton compte-titres', nav:['Portefeuille','Fiscalité'], open:new Date(2022,4,2)},
+  av:{kind:'contract', name:'Mon assurance vie', ab:'AV', tone:'green', group:'Épargne long terme', label:'Épargne disponible et transmission', vaut:'Ton assurance vie vaut', ton:'ton assurance vie', nav:['Supports','Avantages'], open:new Date(2021,2,12), years:8, op2:['withdraw','Retirer'], sub:'Répartition selon ton profil'},
+  cc:{kind:'contract', name:'Mon contrat de capitalisation', ab:'CC', tone:'purple', group:'Épargne long terme', label:'Gestion libre, donation possible', vaut:'Ton contrat vaut', ton:'ton contrat', nav:['Supports','Transmission'], open:new Date(2021,2,12), years:8, op2:['arb','Arbitrer'], sub:'Gestion libre · ta répartition'},
+  per:{kind:'contract', name:'Mon PER', ab:'PER', tone:'rose', group:'Épargne long terme', label:'Retraite, versements déductibles', vaut:'Ton PER vaut', ton:'ton PER', nav:['Supports','Retraite'], open:new Date(2024,0,12), retire:2064, op2:['simulate','Simuler'], sub:'Versement déductible'}
+};
+const ORDER = ['pea','pme','ct','av','cc','per'];
+const PROFILES = {
+  prudent:{label:'Prudent', adj:'prudent', alloc:{FE:80, MO:15, IM:5}, why:'limiter les variations'},
+  equilibre:{label:'Équilibré', adj:'équilibré', alloc:{FE:60, MO:30, IM:10}, why:'viser plus de rendement'},
+  dynamique:{label:'Dynamique', adj:'dynamique', alloc:{FE:30, MO:55, IM:15}, why:'viser plus de rendement sur la durée'}
+};
+const SHORT = {MO:'ETF', FE:'euros', IM:'immo', OB:'oblig.'};
+const SUPPORT_TXT = {
+  FE:'Capital garanti par l’assureur. Le rendement est crédité chaque année et reste acquis.',
+  MO:'Unité de compte investie dans un ETF Monde : plus de potentiel sur la durée, mais le capital n’est pas garanti.',
+  IM:'Unité de compte en immobilier (SCPI, SCI) : des loyers réguliers, mais le capital n’est pas garanti.',
+  OB:'Unité de compte en obligations : moins de variations que les actions, capital non garanti.'
+};
+
 /* ---------- state ---------- */
-const KEY = 'monpea:v1';
-const CAP = 150000;
-const OPEN = new Date(2023, 2, 12);
+const KEY = 'monpea:v2';
+const PEA_CAP = 150000, COMMON_CAP = 225000;
 
 function defaults(){
-  return {
-    firstName: 'Léa',
-    cash: 1250,
-    deposits: 21500,
-    positions: [
-      {id:'MO', name:'ETF Monde',   sub:'MSCI World',  tone:'blue',   parts:48,  price:320.63, cost:13020.51, day:0.8},
-      {id:'US', name:'ETF S&P 500', sub:'Actions US',  tone:'orange', parts:160, price:37.25,  cost:4909.39,  day:0.4},
-      {id:'EU', name:'ETF Europe',  sub:'Stoxx 600',   tone:'green',  parts:26,  price:86.93,  cost:2301.61,  day:-0.3}
-    ],
-    history: [
-      {t: Date.now() - 86400000*12, kind:'auto', label:'Versement programmé', detail:'ETF Monde', amount:50},
-      {t: Date.now() - 86400000*40, kind:'deposit', label:'Versement', detail:'Depuis ton compte courant', amount:1000},
-      {t: Date.now() - 86400000*75, kind:'buy', label:'Achat · 4 parts', detail:'ETF S&P 500', amount:-148.6}
-    ],
-    plan: null,
-    draft: {amount:50, asset:'MO', roundups:false},
-    notifs: [
-      {id:1, title:'Tu as 1 250 € qui dorment', body:'Place-les sur ton ETF Monde en 2 clics.', t: Date.now() - 3600000*5, read:false},
-      {id:2, title:'Plus que 1 an et 4 mois', body:'Ensuite, zéro impôt sur le revenu sur tes gains.', t: Date.now() - 86400000*3, read:false}
-    ]
-  };
+  const now = Date.now(), D = 86400000, H = 3600000;
+  const ps = (id, ab, name, sub, tone, parts, price, cost, day) => ({id, ab, name, sub, tone, parts, price, cost, day});
+  const sp = (id, ab, name, sub, tone, value, cost, day) => ({id, ab, name, sub, tone, value, cost, day});
+  const dep = (days, amount, detail) => ({t: now - D*days, kind:'deposit', label:'Versement', detail: detail || 'Depuis ton compte courant', amount});
+  return {active:'pea', favs:['MO','AIR','ASML'], accounts:{
+    pea:{cash:1250, deposits:21500,
+      positions:[ps('MO','MO','ETF Monde','MSCI World','blue',48,320.63,13020.51,0.8), ps('US','US','ETF S&P 500','Actions US','orange',160,37.25,4909.39,0.4), ps('EU','EU','ETF Europe','Stoxx 600','green',26,86.93,2301.61,-0.3)],
+      history:[{t: now - D*12, kind:'auto', label:'Versement programmé', detail:'ETF Monde', amount:50}, dep(40, 1000), {t: now - D*75, kind:'buy', label:'Achat · 4 parts', detail:'ETF S&P 500', amount:-148.6}],
+      plan:null, draft:{amount:50, asset:'MO', roundups:false},
+      notifs:[{id:1, title:'Tu as 1 250 € qui dorment', body:'Place-les sur ton ETF Monde en 2 clics.', t: now - H*5, read:false}, {id:2, title:'Plus que 1 an et 4 mois', body:'Ensuite, zéro impôt sur le revenu sur tes gains.', t: now - D*3, read:false}]},
+    pme:{cash:640, deposits:8500,
+      positions:[ps('PME','EU','ETF PME Europe','Petites capi.','blue',91,58.40,4613.19,0.6), ps('FPF','FR','Fonds PME France','Fonds actions','orange',18,160.67,2563.88,0.3), ps('SCF','SC','ETF Small Caps France','Actions','green',6,132.29,813.26,-0.5)],
+      history:[{t: now - D*20, kind:'buy', label:'Achat · 5 parts', detail:'ETF PME Europe', amount:-292}, dep(61, 1000)],
+      plan:null, draft:{amount:50, asset:'PME', roundups:false},
+      notifs:[{id:1, title:'Plafond commun : 30 000 € versés', body:'PEA et PEA-PME partagent un plafond de 225 000 €.', t: now - D*2, read:false}]},
+    ct:{cash:850, deposits:10200, realized:1240, losses:340,
+      positions:[ps('NQU','NQ','ETF Nasdaq 100','Actions US','blue',54,102.35,4183.88,1.2), ps('EMU','EM','ETF Émergents','Monde','orange',48,76.91,3374.47,0.4), ps('OBL','OB','ETF Obligations','Obligations','green',74,30.23,2250.52,-0.1)],
+      history:[{t: now - D*9, kind:'sell', label:'Vente · 10 parts', detail:'ETF Nasdaq 100', amount:1012.4}, dep(33, 500)],
+      plan:null, draft:{amount:50, asset:'NQU', roundups:false},
+      notifs:[{id:1, title:'340 € de pertes à valoriser', body:'Elles réduisent l’impôt sur tes gains pendant 10 ans.', t: now - H*20, read:false}]},
+    av:{deposits:16500, profile:'equilibre', alloc:{FE:60, MO:30, IM:10},
+      positions:[sp('FE','€','Fonds euros','Sécurisé','blue',11052.45,10417.02,0.01), sp('MO','MO','ETF Monde','Unité de compte','orange',5526.23,4428.07,0.8), sp('IM','IM','Immobilier','Unité de compte','green',1842.07,1902.97,-0.1)],
+      history:[{t: now - D*15, kind:'auto', label:'Versement programmé', detail:'Réparti 60 / 40', amount:100}, dep(120, 2000)],
+      plan:null, draft:{amount:50, roundups:false},
+      notifs:[{id:1, title:'Ta clause bénéficiaire est à jour', body:'2 personnes désignées. Tu peux la modifier quand tu veux.', t: now - D*6, read:false}]},
+    cc:{deposits:28000, alloc:{MO:50, FE:30, IM:20},
+      positions:[sp('MO','MO','ETF Monde','Unité de compte','orange',16205.45,12730.11,0.8), sp('FE','€','Fonds euros','Sécurisé','blue',9723.27,9155.62,0.01), sp('IM','IM','Immobilier','Unité de compte','green',6482.18,6759.31,-0.1)],
+      history:[{t: now - D*44, kind:'arb', label:'Arbitrage', detail:'Fonds euros → ETF Monde', amount:1500}, dep(90, 3000, 'Réparti 50 / 30 / 20')],
+      plan:null, draft:{amount:50, roundups:false},
+      notifs:[{id:1, title:'Tes 8 ans arrivent en mars 2029', body:'Ensuite, abattement annuel sur les gains que tu retires.', t: now - D*4, read:false}]},
+    per:{deposits:7000, year:3000, tmi:30, alloc:{MO:60, FE:25, OB:15},
+      positions:[sp('MO','MO','ETF Monde','Unité de compte','orange',4716.18,3946.59,0.8), sp('FE','€','Fonds euros','Sécurisé','blue',1965.08,1919.02,0.01), sp('OB','OB','Obligations','Unité de compte','green',1179.04,1166.21,0.1)],
+      history:[{t: now - D*25, kind:'deposit', label:'Versement déductible', detail:'Réparti 60 / 25 / 15', amount:1000}],
+      plan:null, draft:{amount:50, roundups:false},
+      notifs:[{id:1, title:'Verse avant le 31 décembre', body:'Tes versements 2026 se déduisent de ton revenu imposable 2026.', t: now - H*8, read:false}]}
+  }};
 }
-let S;
-try { S = JSON.parse(localStorage.getItem(KEY)) || defaults(); } catch(e){ S = defaults(); }
-if (!S.positions || !S.draft) S = defaults();
-if (!S.favs) S.favs = ['MO','AIR','ASML'];
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+let G;
+try { G = JSON.parse(localStorage.getItem(KEY)); } catch(e){ G = null; }
+if (!G || !G.accounts || !ORDER.every(k => G.accounts[k]) || !PR[G.active]) G = defaults();
+let S = G.accounts[G.active];
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(G)); } catch(e){} }
 
+const P = () => PR[G.active];
+const isShares = () => P().kind === 'shares';
+const lower = s => s.charAt(0).toLowerCase() + s.slice(1);
 const pos = id => S.positions.find(p => p.id === id);
-const val = p => r2(p.parts * p.price);
+const val = p => r2(p.value != null ? p.value : p.parts * p.price);
+const held = p => val(p) > 0;
+const totOf = a => r2(a.positions.reduce((s,p) => s + val(p), 0) + (a.cash || 0));
 const invested = () => S.positions.reduce((a,p) => a + val(p), 0);
-const total = () => r2(invested() + S.cash);
+const total = () => totOf(S);
 const gain = () => r2(total() - S.deposits);
+const common = () => r2(G.accounts.pea.deposits + G.accounts.pme.deposits);
+const money = x => Number.isInteger(x) ? eur0(x) : eur(x);
+const allocShort = () => G.active === 'av' ? S.alloc.FE + ' / ' + (100 - S.alloc.FE) : Object.values(S.alloc).join(' / ');
+function depositRoom(){
+  if (G.active === 'pea') return Math.min(PEA_CAP - S.deposits, COMMON_CAP - common());
+  if (G.active === 'pme') return COMMON_CAP - common();
+  return Infinity;
+}
 
-/* ---------- dates / fiscal counter ---------- */
+/* ---------- dates / counters ---------- */
 function monthsBetween(a, b){
   let m = (b.getFullYear() - a.getFullYear())*12 + (b.getMonth() - a.getMonth());
   if (b.getDate() < a.getDate()) m--;
@@ -358,22 +429,21 @@ function ym(m){
   return ys && ms ? ys + ' et ' + ms : (ys || ms || 'moins d’un mois');
 }
 function fiscal(){
-  const now = new Date();
-  const goal = new Date(OPEN); goal.setFullYear(OPEN.getFullYear() + 5);
-  const p = Math.min(1, Math.max(0, (now - OPEN) / (goal - OPEN)));
-  const elapsed = monthsBetween(OPEN, now);
-  const left = monthsBetween(now, goal);
-  return {now, goal, p, done: now >= goal, elapsedTxt: ym(elapsed).replace(' et ', ' '), leftTxt: ym(left)};
+  const pr = P(), now = new Date(), open = pr.open;
+  const goal = pr.retire ? new Date(pr.retire, open.getMonth(), open.getDate()) : new Date(open.getFullYear() + (pr.years || 5), open.getMonth(), open.getDate());
+  const p = Math.min(1, Math.max(0, (now - open) / (goal - open)));
+  return {now, open, goal, p, done: now >= goal, elapsedTxt: ym(monthsBetween(open, now)).replace(' et ', ' '), leftTxt: ym(monthsBetween(now, goal)), leftYears: goal.getFullYear() - now.getFullYear()};
 }
+const my = d => String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
 
 /* ---------- series for the chart ---------- */
 function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 const RANGES = {'1S':{days:7,start:.992,vol:.004,seed:3}, '1M':{days:30,start:.978,vol:.01,seed:7}, '1A':{days:365,start:.87,vol:.03,seed:11}, '5A':{days:0,start:0,vol:.05,seed:19}, 'Tout':{days:0,start:0,vol:.05,seed:19}};
 function series(key, end, seedExtra){
   const R = RANGES[key], N = 60, now = Date.now();
-  const days = R.days || Math.round((now - OPEN) / 86400000);
-  const start = R.start ? end * R.start : 5000;
-  const rand = rng(R.seed + (seedExtra||0));
+  const days = R.days || Math.round((now - P().open) / 86400000);
+  const start = R.start ? end * R.start : Math.min(5000, end * .3);
+  const rand = rng(R.seed + (seedExtra || 0) + ORDER.indexOf(G.active)*101);
   const w = [0]; for (let i = 1; i < N; i++) w.push(w[i-1] + (rand() - .5));
   const pts = [];
   for (let i = 0; i < N; i++){
@@ -401,7 +471,14 @@ const CAPTIONS = {
   order:['Acheter en 3 gestes','Tu tapes un montant, l’app calcule les parts'],
   explore:['Tout le marché, en clair','ETF, actions et obligations, avec leurs graphiques']
 };
-function caption(k){ const c = CAPTIONS[k]; $('#capT').textContent = c[0]; $('#capS').textContent = c[1]; }
+const CONTRACT_CAPS = {wallet:['Tes supports','Ta répartition et ton historique'], auto:['Verse en automatique','Chaque mois, et avec les arrondis de ta carte'], order:['Verser en 3 gestes','Tu tapes un montant, l’app le répartit']};
+const CAPS = {
+  ct:{perks:['Ta fiscalité, en clair','Combien d’impôt sur tes gains cette année']},
+  av:Object.assign({perks:['Ton compteur 8 ans, en clair','Combien de temps avant l’abattement sur tes gains']}, CONTRACT_CAPS),
+  cc:Object.assign({perks:['Transmission et fiscalité','Donation, succession et compteur 8 ans']}, CONTRACT_CAPS),
+  per:Object.assign({perks:['Ta retraite, en clair','Ton horizon et ton avantage fiscal']}, CONTRACT_CAPS, {order:['Verser en 3 gestes','L’app calcule ton économie d’impôt']})
+};
+function caption(k){ const c = (CAPS[G.active] && CAPS[G.active][k]) || CAPTIONS[k]; $('#capT').textContent = c[0]; $('#capS').textContent = c[1]; }
 const $ = s => document.querySelector(s);
 
 /* ---------- icons ---------- */
@@ -414,15 +491,29 @@ const I = {
   check:'<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>',
   spark:'✦',
   search:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>',
-  compass:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>'
+  compass:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>',
+  swap:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg>',
+  bars:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 20h14M7 16v-4M12 16V7M17 16v-6"/></svg>',
+  down:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>'
 };
 
 /* ---------- HOME ---------- */
 function advice(){
-  const mo = pos('MO');
-  if (S.cash >= mo.price) return {act:'advice-buy', tag:'Conseil malin', h:`Tu as ${eur0(S.cash)} qui dorment sur ton PEA.`, p:'Les liquidités ne rapportent rien ici. Place-les sur ton ETF Monde en 2 clics.'};
-  if (!S.plan) return {act:'go-auto', tag:'Conseil malin', h:'Investis un peu chaque mois, sans y penser.', p:'Dès 25 € par mois sur ton ETF Monde. Tu peux arrêter quand tu veux.'};
-  return {act:'go-perks', tag:'Bon à savoir', h:`Ton plan de ${eur0(S.plan.amount)} par mois tourne.`, p:'Chaque versement compte dans ton plafond de 150 000 €. Regarde où tu en es.'};
+  switch (G.active){
+    case 'pea': {
+      const mo = pos('MO');
+      if (mo && S.cash >= mo.price) return {act:'advice-buy', tag:'Conseil malin', h:`Tu as ${eur0(S.cash)} qui dorment sur ton PEA.`, p:'Les liquidités ne rapportent rien ici. Place-les sur ton ETF Monde en 2 clics.'};
+      if (!S.plan) return {act:'go-auto', tag:'Conseil malin', h:'Investis un peu chaque mois, sans y penser.', p:'Dès 25 € par mois sur ton ETF Monde. Tu peux arrêter quand tu veux.'};
+      return {act:'go-perks', tag:'Bon à savoir', h:`Ton plan de ${eur0(S.plan.amount)} par mois tourne.`, p:'Chaque versement compte dans ton plafond de 150 000 €. Regarde où tu en es.'};
+    }
+    case 'pme': return {act:'go-perks', tag:'Bon à savoir', h:'Ton argent finance des PME et ETI.', p:'Plus de potentiel qu’un ETF Monde, mais plus de variations. Garde un horizon long.'};
+    case 'ct': return S.losses > 0
+      ? {act:'go-perks', tag:'Conseil malin', h:`Tu as ${eur0(S.losses)} de pertes à valoriser.`, p:'Tes moins-values réduisent l’impôt sur tes gains, cette année ou les 10 suivantes.'}
+      : {act:'go-perks', tag:'Bon à savoir', h:'Tes gains sont imposés quand tu vends.', p:'Flat tax de 31,4 % sur les plus-values et les dividendes.'};
+    case 'av': { const pf = PROFILES[S.profile]; return {act:'go-wallet', tag:'Conseil malin', h:`Ton profil est ${pf.adj}.`, p:`${S.alloc.FE} % sécurisé sur le fonds euros, ${100 - S.alloc.FE} % en unités de compte pour ${pf.why}.`}; }
+    case 'cc': return {act:'arb', tag:'Gestion libre', h:'C’est toi qui choisis tes supports.', p:'Fonds euros, ETF, immobilier : tu répartis comme tu veux et tu arbitres quand tu veux.'};
+    case 'per': return {act:'verse', tag:'Conseil malin', h:'Verse avant le 31 décembre.', p:'Tes versements 2026 se déduisent de ton revenu imposable 2026, dans la limite de ton plafond.'};
+  }
 }
 function ringSVG(p, size){
   const r = size/2 - 5, c = 2*Math.PI*r;
@@ -431,39 +522,61 @@ function ringSVG(p, size){
     <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--navy)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(c*p).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 ${size/2} ${size/2})"/>
     <text x="50%" y="50%" dy=".35em" text-anchor="middle" font-size="12" font-weight="800" fill="var(--ink)">${Math.round(p*100)}%</text></svg>`;
 }
-function posRow(p, act){
+function tiles(){
+  const f = fiscal();
+  const card = inner => `<button class="card tap" data-act="go" data-v="perks">${inner}</button>`;
+  const ring = (lbl, txt) => card(`${ringSVG(f.p, 54)}<p class="small-lbl">${lbl}</p><p class="strong" style="margin:0">${txt}</p>`);
+  const big = (lbl, v, sub, strong, bar) => card(`<p class="small-lbl" style="margin-top:0">${lbl}</p><p class="mid num">${v}</p>${bar != null ? `<div class="bar"><i style="width:${Math.max(3, bar*100)}%"></i></div>` : ''}${sub ? `<p class="small-lbl">${sub}</p>` : ''}<p class="strong" style="margin:0">${strong}</p>`);
+  switch (G.active){
+    case 'pea': return ring('Compteur 5 ans', f.done ? 'Zéro impôt sur tes gains, c’est acquis' : 'Zéro impôt sur tes gains dans ' + f.leftTxt)
+      + big('Versements', eur0(S.deposits), 'sur 150 000 €', `Encore ${eur0(PEA_CAP - S.deposits)} possibles`, S.deposits/PEA_CAP);
+    case 'pme': return ring('Compteur 5 ans', f.done ? 'Zéro impôt sur tes gains, c’est acquis' : 'Zéro impôt sur le revenu sur tes gains dans ' + f.leftTxt)
+      + big('Plafond commun', eur0(common()), 'PEA + PEA-PME sur 225 000 €', `Encore ${eur0(COMMON_CAP - common())} possibles`, common()/COMMON_CAP);
+    case 'ct': return big('Gains réalisés 2026', eur0(S.realized), '', 'Imposés quand tu vends') + big('Moins-values', eur0(S.losses), 'reportables 10 ans', 'Elles réduisent ton impôt');
+    case 'av': return ring('Compteur 8 ans', f.done ? 'Fiscalité allégée sur tes gains, c’est acquis' : 'Fiscalité allégée sur tes gains dans ' + f.leftTxt)
+      + big('Bénéficiaires', '2 personnes', 'Clause bénéficiaire', 'À jour');
+    case 'cc': return ring('Compteur 8 ans', f.done ? 'Fiscalité allégée sur tes gains, c’est acquis' : 'Fiscalité allégée sur tes gains dans ' + f.leftTxt)
+      + big('Transmission', 'Donation', 'possible de ton vivant', 'Ancienneté fiscale conservée');
+    case 'per': return big('Impôt économisé', '≈ ' + eur0(S.year*S.tmi/100), `pour ${eur0(S.year)} versés en ${new Date().getFullYear()}`, `Exemple avec une tranche à ${S.tmi} %`)
+      + big('Ta retraite', 'dans ' + f.leftYears + ' ans', 'horizon long', 'Plus de potentiel sur la durée');
+  }
+}
+function posRow(p){
   const perf = p.cost ? (val(p)/p.cost - 1)*100 : 0;
-  const share = invested() ? Math.round(val(p)/total()*100) : 0;
-  return `<button class="row" data-act="${act||'asset'}" data-id="${p.id}">
+  const share = total() ? Math.round(val(p)/total()*100) : 0;
+  return `<button class="row" data-act="${isShares() ? 'asset' : 'support'}" data-id="${p.id}">
     ${avatar(p)}
     <span class="mid-col"><b>${esc(p.name)}</b><span>${esc(p.sub)} · ${share} %</span></span>
     <span class="right num"><b>${eur(val(p))}</b><span class="${perf>=0?'up':'down'}">${tri(perf)} ${pct(perf)}</span></span></button>`;
 }
+function heroOps(){
+  if (isShares()) return `<button class="btn-w" data-act="buy">+ Acheter</button><button class="btn-o" data-act="sell">− Vendre</button>`;
+  const [act, lbl] = P().op2, ic = {withdraw:'−', arb:I.swap, simulate:I.bars}[act];
+  return `<button class="btn-w" data-act="verse">+ Verser</button><button class="btn-o" data-act="${act}">${ic} ${lbl}</button>`;
+}
+const exploreCta = () => `<button class="card tap explore-cta" data-act="go" data-v="explore"><span class="av t-blue">${I.compass}</span><span class="mid-col"><b>Explorer le marché</b><span class="s">${MARKET.length} ETF, actions et obligations</span></span><span style="color:var(--faint)">${I.right}</span></button>`;
 function renderHome(){
-  const f = fiscal(), a = advice(), g = gain();
+  const a = advice(), g = gain();
   const unread = S.notifs.some(n => !n.read);
   $('#v-home').innerHTML = `
   <header class="hero"><div class="pad">
     <div class="topbar">
-      <div class="brand"><span class="logo">LOGO</span><div><small>Salut ${esc(S.firstName)}</small><b>Mon PEA</b></div></div>
+      <button class="brand" data-act="accounts" aria-label="Changer de compte : ${esc(P().name)}"><span class="logo">LOGO</span><span class="brand-t"><small>Salut Léa</small><b>${esc(P().name)} <span class="brand-chev">${I.down}</span></b></span></button>
       <button class="icon-btn" data-act="notifs" aria-label="Notifications">${I.bell}<span class="dot" ${unread?'':'hidden'}></span></button>
     </div>
-    <p class="lbl" id="valLbl">Ton PEA vaut</p>
+    <p class="lbl" id="valLbl">${P().vaut}</p>
     <p class="big num" id="totalVal">${eur(firstPaint ? 0 : total())}</p>
     <div class="gainrow"><span class="pill-gain num ${g<0?'neg':''}">${tri(g)} ${sgn(g)}${eur(Math.abs(g))}</span><span class="num">${pct(g/S.deposits*100)} depuis l’ouverture</span></div>
-    <svg class="chart" id="chart" data-scrub viewBox="0 0 340 110" preserveAspectRatio="none" role="img" aria-label="Évolution de la valeur du PEA"></svg>
+    <svg class="chart" id="chart" data-scrub viewBox="0 0 340 110" preserveAspectRatio="none" role="img" aria-label="Évolution de la valeur"></svg>
     <div class="ranges" role="tablist">${Object.keys(RANGES).map(k => `<button role="tab" data-act="range" data-r="${k}" class="${k===range?'on':''}" aria-selected="${k===range}">${k}</button>`).join('')}</div>
-    <div class="cta2"><button class="btn-w" data-act="buy">+ Acheter</button><button class="btn-o" data-act="sell">− Vendre</button></div>
+    <div class="cta2">${heroOps()}</div>
   </div></header>
   <div class="content pad stack">
     <button class="card tap" data-act="${a.act}"><span class="tag">${I.spark} ${a.tag}</span><h3>${esc(a.h)}</h3><p class="sub">${esc(a.p)}</p></button>
-    <div class="grid2">
-      <button class="card tap" data-act="go" data-v="perks">${ringSVG(f.p, 54)}<p class="small-lbl">Compteur 5 ans</p><p class="strong" style="margin:0">${f.done ? 'Zéro impôt sur tes gains, c’est acquis' : 'Zéro impôt sur tes gains dans ' + f.leftTxt}</p></button>
-      <button class="card tap" data-act="go" data-v="perks"><p class="small-lbl" style="margin-top:0">Versements</p><p class="mid num">${eur0(S.deposits)}</p><div class="bar"><i style="width:${Math.max(3,S.deposits/CAP*100)}%"></i></div><p class="small-lbl">sur 150 000 €</p><p class="strong" style="margin:0">Encore ${eur0(CAP - S.deposits)} possibles</p></button>
-    </div>
-    <h2 class="sec">Mes placements</h2>
-    <div class="card list">${S.positions.filter(p => p.parts > 0).map(p => posRow(p)).join('') || '<p class="empty-note">Aucun placement pour l’instant.</p>'}</div>
-    <button class="card tap explore-cta" data-act="go" data-v="explore"><span class="av t-blue">${I.compass}</span><span class="mid-col"><b>Explorer le marché</b><span class="s">${MARKET.length} ETF, actions et obligations</span></span><span style="color:var(--faint)">${I.right}</span></button>
+    <div class="grid2">${tiles()}</div>
+    <h2 class="sec">${isShares() ? 'Mes placements' : 'Mes supports'}</h2>
+    <div class="card list">${S.positions.filter(held).map(posRow).join('') || '<p class="empty-note">Aucun placement pour l’instant.</p>'}</div>
+    ${exploreCta()}
   </div>`;
   drawChart();
   if (firstPaint){ firstPaint = false; countUp($('#totalVal'), 0, total(), 1100, eur); }
@@ -477,71 +590,134 @@ function drawChart(){
     <line class="scrubL" x1="0" x2="0" y1="0" y2="110" stroke="#fff" stroke-opacity=".5" stroke-width="1" vector-effect="non-scaling-stroke" visibility="hidden"/>`;
   charts.chart = {pts, W:340,
     move: p => { $('#totalVal').textContent = eur(p.v); $('#valLbl').textContent = 'Le ' + dShort(new Date(p.t)); },
-    leave: () => { if (!$('#totalVal')) return; $('#totalVal').textContent = eur(total()); $('#valLbl').textContent = 'Ton PEA vaut'; }};
+    leave: () => { if (!$('#totalVal')) return; $('#totalVal').textContent = eur(total()); $('#valLbl').textContent = P().vaut; }};
 }
 
 /* ---------- WALLET ---------- */
-const TONE_COL = {blue:'#0b3a8c', orange:'#e08a3c', green:'#2f9e64', grey:'#b9c3d6'};
+const TONE_COL = {blue:'#0b3a8c', orange:'#e08a3c', green:'#2f9e64', purple:'#7c4fd0', teal:'#14928c', rose:'#c93a6e', grey:'#b9c3d6'};
 function donut(){
-  const parts = S.positions.filter(p => p.parts>0).map(p => ({label:p.name, v:val(p), c:TONE_COL[p.tone]}));
-  parts.push({label:'Liquidités', v:S.cash, c:TONE_COL.grey});
+  const parts = S.positions.filter(held).map(p => ({label:p.name, v:val(p), c:TONE_COL[p.tone] || TONE_COL.grey}));
+  if (isShares()) parts.push({label:'Liquidités', v:S.cash, c:TONE_COL.grey});
   const T = parts.reduce((a,p) => a+p.v, 0) || 1, r = 38, C = 2*Math.PI*r;
   let off = 0;
   const arcs = parts.map(p => { const len = p.v/T*C; const s = `<circle cx="50" cy="50" r="${r}" fill="none" stroke="${p.c}" stroke-width="14" stroke-dasharray="${len.toFixed(2)} ${C.toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 50 50)"/>`; off += len; return s; }).join('');
   return `<div class="donut-wrap"><svg width="104" height="104" viewBox="0 0 100 100" aria-hidden="true">${arcs}</svg>
     <div class="legend">${parts.map(p => `<div><i style="background:${p.c}"></i><span>${esc(p.label)}</span><b class="num">${Math.round(p.v/T*100)} %</b></div>`).join('')}</div></div>`;
 }
+function allocBars(){
+  return `<div class="alloc">${Object.entries(S.alloc).map(([id, pc]) => { const p = pos(id); return `<div><span>${esc(p ? p.name : id)}</span><b class="num">${pc} %</b><div class="bar"><i style="width:${pc}%;background:${TONE_COL[p ? p.tone : 'grey']}"></i></div></div>`; }).join('')}</div>`;
+}
+function contractCard(){
+  const av = G.active === 'av', [act, lbl] = P().op2;
+  return `<h2 class="sec">${av ? 'Mon profil' : 'Ma répartition'}</h2>
+  <div class="card">
+    ${av ? `<div class="chips" style="grid-template-columns:repeat(3,1fr);margin:0 0 14px">${Object.entries(PROFILES).map(([k,pf]) => `<button data-act="profile" data-p="${k}" class="${S.profile===k?'on':''}" aria-pressed="${S.profile===k}">${pf.label}</button>`).join('')}</div>` : ''}
+    ${allocBars()}
+    <p class="sub" style="margin-top:12px">Chaque versement est réparti comme ça. ${av ? 'Tu peux changer de profil à tout moment.' : G.active === 'per' ? 'Gestion pilotée : la part sécurisée augmente à l’approche de la retraite.' : 'Ta répartition libre, modifiable à tout moment.'}</p>
+    <div class="grid2" style="margin-top:12px"><button class="ghost" data-act="verse">Verser</button><button class="ghost" data-act="${act}">${lbl}</button></div></div>`;
+}
 let confirmReset = false;
+function histRow(h){
+  const icon = {deposit:'+', auto:'+', sell:'↘', buy:'↗', arb:'⇆', withdraw:'−'}[h.kind] || '•';
+  const neutral = h.kind === 'arb';
+  return `<div class="row"><span class="av ${neutral ? 't-grey' : h.amount >= 0 ? 't-green' : 't-blue'}">${icon}</span>
+    <span class="mid-col"><b>${esc(h.label)}</b><span>${esc(h.detail)} · ${dShort(new Date(h.t))}</span></span>
+    <span class="right num"><b class="${!neutral && h.amount >= 0 ? 'up' : ''}" style="font-size:14px">${neutral ? '' : sgn(h.amount)}${eur(Math.abs(h.amount))}</b></span></div>`;
+}
 function renderWallet(){
-  const inv = invested(), g = gain();
+  const g = gain();
   const hist = S.history.slice().sort((a,b) => b.t - a.t).slice(0, 12);
   $('#v-wallet').innerHTML = `
-  <h1 class="ptitle pad">Mon portefeuille</h1>
+  <h1 class="ptitle pad">${isShares() ? 'Mon portefeuille' : 'Mes supports'}</h1>
   <div class="pad stack">
-    <div class="navy-card"><div class="k">Valeur totale</div><div class="v num">${eur(total())}</div>
+    <div class="navy-card"><div class="k">${esc(P().name)} · valeur totale</div><div class="v num">${eur(total())}</div>
       <div class="s num">${tri(g)} ${sgn(g)}${eur(Math.abs(g))} (${pct(g/S.deposits*100)}) depuis l’ouverture</div>
-      <div class="xs num">Placé : ${eur(inv)} · Liquidités : ${eur(S.cash)}</div></div>
+      <div class="xs num">${isShares() ? `Placé : ${eur(invested())} · Liquidités : ${eur(S.cash)}` : `Versé : ${eur0(S.deposits)} · ouvert le ${dNum(P().open)}`}</div></div>
     <div class="card"><p class="strong" style="margin:0 0 12px">Répartition</p>${donut()}</div>
-    <h2 class="sec">Mes placements</h2>
-    <div class="card list">${S.positions.filter(p => p.parts > 0).map(p => posRow(p)).join('') || '<p class="empty-note">Aucun placement pour l’instant.</p>'}</div>
-    <button class="card tap explore-cta" data-act="go" data-v="explore"><span class="av t-blue">${I.compass}</span><span class="mid-col"><b>Explorer le marché</b><span class="s">${MARKET.length} ETF, actions et obligations</span></span><span style="color:var(--faint)">${I.right}</span></button>
-    <h2 class="sec">Liquidités</h2>
+    <h2 class="sec">${isShares() ? 'Mes placements' : 'Mes supports'}</h2>
+    <div class="card list">${S.positions.filter(held).map(posRow).join('') || '<p class="empty-note">Aucun placement pour l’instant.</p>'}</div>
+    ${isShares() ? exploreCta() + `<h2 class="sec">Liquidités</h2>
     <div class="card"><div class="row" style="padding:0"><span class="av t-grey">€</span><span class="mid-col"><b class="num">${eur(S.cash)}</b><span>Disponibles pour acheter des parts</span></span></div>
-      <div class="grid2" style="margin-top:14px"><button class="ghost" data-act="deposit">Verser</button><button class="ghost" data-act="buy" ${S.cash<1?'disabled':''}>Placer</button></div></div>
+      <div class="grid2" style="margin-top:14px"><button class="ghost" data-act="deposit">Verser</button><button class="ghost" data-act="buy" ${S.cash<1?'disabled':''}>Placer</button></div></div>` : contractCard()}
     <h2 class="sec">Historique</h2>
-    <div class="card list">${hist.length ? hist.map(h => `<div class="row"><span class="av ${h.amount>=0?'t-green':'t-blue'}">${h.kind==='deposit'||h.kind==='auto'?'+':h.kind==='sell'?'↘':'↗'}</span>
-      <span class="mid-col"><b>${esc(h.label)}</b><span>${esc(h.detail)} · ${dShort(new Date(h.t))}</span></span>
-      <span class="right num"><b class="${h.amount>=0?'up':''}" style="font-size:14px">${sgn(h.amount)}${eur(Math.abs(h.amount))}</b></span></div>`).join('') : '<p class="empty-note">Aucune opération.</p>'}</div>
-    ${confirmReset ? `<div class="confirm">Remettre la démo à zéro ? Tes achats, ventes et réglages seront effacés.<div><button style="background:var(--red);color:#fff" data-act="reset-yes">Réinitialiser</button><button style="background:#fff" data-act="reset-no">Annuler</button></div></div>`
+    <div class="card list">${hist.length ? hist.map(histRow).join('') : '<p class="empty-note">Aucune opération.</p>'}</div>
+    ${confirmReset ? `<div class="confirm">Remettre la démo à zéro ? Les opérations et réglages de tous tes comptes seront effacés.<div><button style="background:var(--red);color:#fff" data-act="reset-yes">Réinitialiser</button><button style="background:#fff" data-act="reset-no">Annuler</button></div></div>`
       : `<button class="danger-link" data-act="reset" style="align-self:center;margin:6px 0">Réinitialiser la démo</button>`}
   </div>`;
 }
 
 /* ---------- PERKS ---------- */
 function renderPerks(){
-  const f = fiscal();
-  const g = Math.max(0, gain()), saved = g*0.128;
+  const f = fiscal(), id = G.active;
+  const step = (n, tone, t, s) => `<div class="card step"><span class="n t-${tone}">${n}</span><div><b>${t}</b><span>${s}</span></div></div>`;
+  const tl3 = (a, b, c) => `<div class="tl"><div>${a[0]}<b>${a[1]}</b></div><div>${b[0]}<b>${b[1]}</b></div><div>${c[0]}<b>${c[1]}</b></div></div>`;
+  const verseBtn = `<button class="link-btn" data-act="${isShares() ? 'deposit' : 'verse'}">Verser de l’argent →</button>`;
+  const versed = txt => `<div class="card"><p class="strong" style="margin:0">Ce que tu as versé</p><p class="mid num" style="font-size:28px;margin:8px 0 6px">${eur0(S.deposits)}</p><p class="sub">${txt}</p>${verseBtn}</div>`;
+  const estim = (h, p) => `<div class="card"><span class="tag">${I.spark} Ton estimation</span><h3>${h}</h3><p class="sub">${p}</p></div>`;
+  const counter5 = () => ({k:'Compteur 5 ans', h: f.done ? 'C’est bon, tes 5 ans sont passés' : 'Plus que ' + f.leftTxt,
+    d: f.done ? 'Tes gains ne paient plus d’impôt sur le revenu.' : 'avant de ne plus payer d’impôt sur le revenu sur tes gains',
+    tl: tl3(['Ouvert', dNum(f.open)], ['Aujourd’hui', f.elapsedTxt], ['Objectif', dNum(f.goal)])});
+  const counter8 = () => ({k:'Compteur 8 ans', h: f.done ? 'C’est bon, tes 8 ans sont passés' : 'Plus que ' + f.leftTxt,
+    d: f.done ? 'Abattement annuel sur les gains que tu retires.' : 'avant l’abattement annuel sur les gains que tu retires',
+    tl: tl3(['Ouvert', my(f.open)], ['Aujourd’hui', f.elapsedTxt], ['Objectif', my(f.goal)])});
+  let hero, cards, bar = f.p;
+  if (id === 'pea'){
+    const g = Math.max(0, gain());
+    hero = Object.assign({t:'Mes avantages PEA'}, counter5());
+    cards = `<div class="card"><p class="strong" style="margin:0">Ce que tu as versé</p><p class="mid num" style="font-size:28px;margin:8px 0 10px">${eur0(S.deposits)}</p>
+      <div class="bar"><i style="width:${Math.max(3,S.deposits/PEA_CAP*100)}%"></i></div>
+      <p class="sub" style="margin-top:10px">Encore <b style="color:var(--ink)">${eur0(PEA_CAP - S.deposits)}</b> possibles sur 150 000 €</p>${verseBtn}</div>
+      ${step(1,'blue','Jusqu’à 150 000 € de versements','Tes gains et dividendes restent dans le PEA sans être taxés tant que tu ne retires rien.')}
+      ${step(2,'green','Après 5 ans, pas d’impôt sur le revenu','Seuls les prélèvements sociaux restent dus quand tu retires.')}
+      ${step(3,'orange','Avant 5 ans, attention au retrait','Retirer avant 5 ans ferme ton PEA (sauf cas particuliers).')}
+      ${estim(`Environ ${eur0(g*0.128)} d’impôt évités`, `Sur tes ${eur0(g)} de gains actuels, au taux de 12,8 % de l’impôt sur le revenu. Estimation indicative.`)}`;
+  } else if (id === 'pme'){
+    const c = common();
+    hero = Object.assign({t:'Mes avantages PEA-PME'}, counter5());
+    cards = `<div class="card"><p class="strong" style="margin:0">Plafond commun PEA + PEA-PME</p><p class="mid num" style="font-size:28px;margin:8px 0 10px">${eur0(c)}</p>
+      <div class="bar"><i style="width:${Math.max(3, c/COMMON_CAP*100)}%"></i></div>
+      <p class="sub" style="margin-top:10px">Encore ${eur0(COMMON_CAP - c)} possibles sur 225 000 €.</p>${verseBtn}</div>
+      ${step(2,'green','Réservé aux PME et ETI','Actions et fonds d’entreprises européennes de taille petite et moyenne.')}
+      ${step(3,'orange','Avant 5 ans, attention au retrait','Retirer avant 5 ans ferme ton plan (sauf cas particuliers).')}`;
+  } else if (id === 'ct'){
+    const net = Math.max(0, S.realized - S.losses), tax = net*0.314;
+    bar = S.realized ? net/S.realized : 0;
+    hero = {t:'Ma fiscalité', k:'Estimation ' + new Date().getFullYear(), h:`≈ ${eur0(tax)} d’impôt`, d:`sur ${eur0(net)} de gains nets, avec la flat tax à 31,4 %`,
+      tl: tl3(['Gains', eur0(S.realized)], ['Pertes', '−' + eur0(S.losses)], ['Net imposable', eur0(net)])};
+    cards = versed('Pas de plafond, pas de durée minimale, retraits libres.')
+      + step(2,'green','Moins-values reportables','Une perte peut réduire l’impôt sur tes gains pendant 10 ans.')
+      + step(3,'orange','Tu paies à la sortie','Sur tes gains quand tu vends, et sur les dividendes reçus.');
+  } else if (id === 'av'){
+    hero = Object.assign({t:'Mes avantages'}, counter8());
+    cards = versed('Pas de plafond de versements sur l’assurance vie.')
+      + step(2,'green','Ton argent reste disponible','Tu peux retirer à tout moment, ton contrat reste ouvert.')
+      + step(3,'orange','Transmission','Un cadre fiscal avantageux pour les bénéficiaires que tu choisis.')
+      + estim('4 600 € de gains sans impôt sur le revenu, chaque année', 'Après 8 ans, c’est l’abattement annuel sur les gains que tu retires (9 200 € pour un couple). Les prélèvements sociaux restent dus.');
+  } else if (id === 'cc'){
+    hero = Object.assign({t:'Transmission & fiscalité'}, counter8());
+    cards = versed('Pas de plafond de versements.')
+      + step(2,'green','Donation de ton vivant','Tu peux donner ton contrat sans perdre son ancienneté fiscale.')
+      + step(3,'orange','Pas de clause bénéficiaire','Au décès, le contrat continue et passe à tes héritiers via la succession.');
+  } else {
+    const yrs = f.goal.getFullYear() - f.now.getFullYear(), proj = total()*Math.pow(1.05, yrs);
+    hero = {t:'Ma retraite', k:'Horizon', h:`Plus que ${f.leftYears} ans`, d:'avant de récupérer ton épargne, en capital ou en rente',
+      tl: tl3(['Ouvert', my(f.open)], ['Aujourd’hui', String(f.now.getFullYear())], ['Retraite', String(f.goal.getFullYear())])};
+    cards = versed('Tes versements se déduisent de ton revenu imposable, dans la limite de ton plafond.')
+      + step(2,'green','Sortie anticipée possible','Pour l’achat de ta résidence principale, et certains accidents de la vie.')
+      + step(3,'orange','À la retraite, tu choisis','Capital, rente, ou un mélange des deux.')
+      + estim(`Environ ${eur0(proj)} en ${f.goal.getFullYear()}`, `Si tes ${eur0(total())} progressent de 5 % par an, sans nouveau versement. Simulation indicative, non garantie.`);
+  }
   $('#v-perks').innerHTML = `
   <header class="hero perk-hero"><div class="pad">
-    <h1>Mes avantages PEA</h1>
-    <div class="k">Compteur 5 ans</div>
-    <div class="h">${f.done ? 'C’est bon, tes 5 ans sont passés' : 'Plus que ' + f.leftTxt}</div>
-    <div class="d">${f.done ? 'Tes gains ne paient plus d’impôt sur le revenu.' : 'avant de ne plus payer d’impôt sur le revenu sur tes gains'}</div>
+    <h1>${hero.t}</h1>
+    <div class="k">${hero.k}</div>
+    <div class="h">${hero.h}</div>
+    <div class="d">${hero.d}</div>
     <div class="wbar"><i id="perkBar" style="width:0%"></i></div>
-    <div class="tl"><div>Ouvert<b>${dNum(OPEN)}</b></div><div>Aujourd’hui<b>${f.elapsedTxt}</b></div><div>Objectif<b>${dNum(f.goal)}</b></div></div>
+    ${hero.tl}
   </div></header>
-  <div class="content pad stack">
-    <div class="card"><p class="strong" style="margin:0">Ce que tu as versé</p><p class="mid num" style="font-size:28px;margin:8px 0 10px">${eur0(S.deposits)}</p>
-      <div class="bar"><i style="width:${Math.max(3,S.deposits/CAP*100)}%"></i></div>
-      <p class="sub" style="margin-top:10px">Encore <b style="color:var(--ink)">${eur0(CAP - S.deposits)}</b> possibles sur 150 000 €</p>
-      <button class="link-btn" data-act="deposit">Verser de l’argent →</button></div>
-    <div class="card step"><span class="n t-blue">1</span><div><b>Jusqu’à 150 000 € de versements</b><span>Tes gains et dividendes restent dans le PEA sans être taxés tant que tu ne retires rien.</span></div></div>
-    <div class="card step"><span class="n t-green">2</span><div><b>Après 5 ans, pas d’impôt sur le revenu</b><span>Seuls les prélèvements sociaux restent dus quand tu retires.</span></div></div>
-    <div class="card step"><span class="n t-orange">3</span><div><b>Avant 5 ans, attention au retrait</b><span>Retirer avant 5 ans ferme ton PEA (sauf cas particuliers).</span></div></div>
-    <div class="card"><span class="tag">${I.spark} Ton estimation</span><h3>Environ ${eur0(saved)} d’impôt évités</h3>
-      <p class="sub">Sur tes ${eur0(g)} de gains actuels, au taux de 12,8 % de l’impôt sur le revenu. Estimation indicative.</p></div>
-  </div>`;
-  requestAnimationFrame(() => requestAnimationFrame(() => { const b = $('#perkBar'); if (b) b.style.width = (f.p*100).toFixed(1) + '%'; }));
+  <div class="content pad stack">${cards}</div>`;
+  requestAnimationFrame(() => requestAnimationFrame(() => { const b = $('#perkBar'); if (b) b.style.width = (bar*100).toFixed(1) + '%'; }));
 }
 
 /* ---------- AUTO ---------- */
@@ -549,21 +725,29 @@ const AMOUNTS = [25,50,100,200];
 const fv = (m, years, rate) => { const r = rate/12, n = years*12; return m*((Math.pow(1+r,n)-1)/r); };
 let autoShown = null;
 function renderAuto(){
-  const d = S.draft, a = info(d.asset);
+  const d = S.draft, sh = isShares();
   const same = S.plan && S.plan.amount === d.amount && S.plan.asset === d.asset && S.plan.roundups === d.roundups;
-  const next = nextDebit();
+  const next = nextDebit(), verb = sh ? 'Lancer ' : 'Verser ';
+  let line;
+  if (sh){
+    const a = info(d.asset);
+    line = `<button class="asset-line" data-act="pick-auto">${avatar(a)}<span style="flex:1;min-width:0"><b>${esc(a.name)}</b><span>Le 5 du mois · depuis ton compte</span></span><span style="color:var(--faint)">${I.chev}</span></button>`;
+  } else {
+    line = `<div class="asset-line">${avatar({id:P().ab, tone:P().tone})}<span style="flex:1;min-width:0"><b>${esc(P().name)}</b><span>Le 5 du mois · ${G.active === 'per' ? 'déductible' : 'réparti ' + allocShort()}</span></span></div>`;
+  }
+  const planName = S.plan ? (sh ? info(S.plan.asset).name : P().name) : '';
   $('#v-auto').innerHTML = `
-  <h1 class="ptitle pad">Investir en automatique</h1>
+  <h1 class="ptitle pad">${sh ? 'Investir en automatique' : 'Versements programmés'}</h1>
   <div class="pad stack">
     <div class="navy-card"><div class="k">Dans 10 ans, tu auras versé</div><div class="v num" id="autoTot">${eur0(autoShown ?? d.amount*120)}</div>
       <div class="s num">Exemple à 5 %/an : environ <b id="autoFv">${eur0(fv(d.amount,10,.05))}</b></div><div class="xs">Simulation indicative, non garantie.</div></div>
     <div class="card"><p class="strong" style="margin:0">Combien chaque mois ?</p>
       <div class="chips">${AMOUNTS.map(v => `<button data-act="amt" data-v="${v}" class="${v===d.amount?'on':''}" aria-pressed="${v===d.amount}">${v} €</button>`).join('')}</div>
-      <button class="asset-line" data-act="pick-auto"><span class="av t-${a.tone}">${a.id}</span><span style="flex:1;min-width:0"><b>${esc(a.name)}</b><span>Le 5 du mois · depuis ton compte</span></span><span style="color:var(--faint)">${I.chev}</span></button></div>
-    <div class="card toggle-row"><div><p class="strong" style="margin:0">Les arrondis</p><p class="sub">Un café à 2,60 € ? 0,40 € part sur ton PEA.</p></div>
+      ${line}</div>
+    <div class="card toggle-row"><div><p class="strong" style="margin:0">Les arrondis</p><p class="sub">Un café à 2,60 € ? 0,40 € part sur ${sh ? P().ton : 'ton épargne'}.</p></div>
       <button class="switch" role="switch" aria-checked="${d.roundups}" aria-label="Activer les arrondis" data-act="roundups"></button></div>
-    ${S.plan ? `<div class="card toggle-row"><span class="av t-green">✓</span><div><b>Plan actif : ${eur0(S.plan.amount)} par mois</b><p class="sub">${esc(info(S.plan.asset).name)} · prochain versement le ${dShort(next)}${S.plan.roundups?' · arrondis activés':''}</p></div></div>` : ''}
-    <button class="primary" data-act="launch" ${same?'disabled':''}>${same ? 'Ton plan est en place' : (S.plan ? 'Passer à ' + d.amount + ' € par mois' : 'Lancer ' + d.amount + ' € par mois')}</button>
+    ${S.plan ? `<div class="card toggle-row"><span class="av t-green">✓</span><div><b>Plan actif : ${eur0(S.plan.amount)} par mois</b><p class="sub">${esc(planName)} · prochain versement le ${dShort(next)}${S.plan.roundups?' · arrondis activés':''}</p></div></div>` : ''}
+    <button class="primary" data-act="launch" ${same?'disabled':''}>${same ? 'Ton plan est en place' : (S.plan ? 'Passer à ' + d.amount + ' € par mois' : verb + d.amount + ' € par mois')}</button>
     ${S.plan ? '<button class="danger-link" data-act="stop-plan" style="align-self:center">Arrêter le plan</button>' : ''}
   </div>`;
 }
@@ -583,6 +767,7 @@ function countUp(el, from, to, ms, f, done){
 function render(){
   ({home:renderHome, wallet:renderWallet, perks:renderPerks, auto:renderAuto, explore:renderExplore})[view]();
 }
+function setNav(){ $('#navWallet').textContent = P().nav[0]; $('#navPerks').textContent = P().nav[1]; }
 function go(v){
   if (v !== 'wallet') confirmReset = false;
   view = v;
@@ -591,28 +776,77 @@ function go(v){
   $('#v-' + v).scrollTop = 0;
   caption(v); render();
 }
+function switchAccount(k, stay){
+  closePicker();
+  if (k === G.active) return;
+  G.active = k; S = G.accounts[k]; save();
+  range = '1A'; firstPaint = true; setNav();
+  if (!stay) go('home'); else render();
+}
 
 /* ---------- toast ---------- */
 let toastT;
 function toast(msg){ $('#toastTxt').textContent = msg; const t = $('#toast'); t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2800); }
 
-/* ---------- ORDER SHEET (buy / sell / deposit) ---------- */
-const O = {mode:'buy', asset:'MO', input:'', done:null};
+/* ---------- ORDER SHEET ---------- */
+const O = {mode:'buy', asset:'MO', to:null, input:'', done:null};
+function defaultArb(){
+  const list = S.positions.slice().sort((a,b) => val(b) - val(a));
+  O.asset = list[0].id; O.to = (list.find(p => p.id !== O.asset) || list[0]).id;
+}
 function openOrder(mode, asset, preset){
-  if (asset) ensurePos(asset);
-  O.mode = mode; O.asset = asset || O.asset || 'MO'; O.input = preset ? String(preset).replace('.', ',') : ''; O.done = null;
-  if (mode === 'sell' && pos(O.asset).parts === 0){ const p = S.positions.find(p => p.parts > 0); if (p) O.asset = p.id; }
+  if (asset && isShares()) ensurePos(asset);
+  O.mode = mode; O.input = preset ? String(preset).replace('.', ',') : ''; O.done = null;
+  if (isShares()){
+    O.asset = asset || (pos(O.asset) ? O.asset : S.draft.asset);
+    if (mode === 'sell' && !held(pos(O.asset))){ const p = S.positions.find(held); if (p) O.asset = p.id; }
+  } else if (mode === 'arb'){ defaultArb(); if (asset && pos(asset)){ O.asset = asset; if (O.to === asset) O.to = S.positions.find(p => p.id !== asset).id; } }
   renderOrder(); $('#sheet').classList.add('open'); caption('order');
+}
+function setMode(m){
+  O.mode = m; O.input = '';
+  if (m === 'arb') defaultArb();
+  if (m === 'sell' && !held(pos(O.asset))){ const p = S.positions.find(held); if (p) O.asset = p.id; }
+  renderOrder();
 }
 function closeSheet(){ $('#sheet').classList.remove('open'); closePicker(); caption(view); if (assetOpen()) renderAsset(); }
 function amount(){ const n = parseFloat(O.input.replace(',', '.')); return isNaN(n) ? 0 : n; }
+function splitAlloc(x){
+  const ids = Object.keys(S.alloc); let left = x;
+  return ids.map((id, i) => { const v = i === ids.length - 1 ? r2(left) : r2(x*S.alloc[id]/100); left -= v; return {p: pos(id), id, v}; });
+}
+function splitTxt(x){
+  const sp = splitAlloc(x);
+  if (G.active === 'av'){ const fe = sp.find(s => s.id === 'FE').v; return `${money(fe)} fonds euros · ${money(r2(x - fe))} UC`; }
+  return sp.map(s => `${money(s.v)} ${SHORT[s.id] || s.p.name}`).join(' · ');
+}
 function quote(){
-  const a = pos(O.asset), x = amount();
+  const x = amount();
   if (O.mode === 'deposit'){
-    const room = CAP - S.deposits;
-    return {a, x, ok: x > 0 && x <= room, pill: x > room ? 'Au-delà du plafond' : (x > 0 ? 'Versement depuis ton compte' : 'Saisis un montant'), warn: x > room,
-      btn: x <= 0 ? 'Saisis un montant' : x > room ? 'Plafond dépassé' : 'Verser ' + eur(x).replace(',00',''), room};
+    const room = depositRoom(), over = x > room;
+    return {x, ok: x > 0 && !over, warn: over, room, pill: over ? 'Au-delà du plafond' : x > 0 ? 'Versement depuis ton compte' : 'Saisis un montant',
+      btn: x <= 0 ? 'Saisis un montant' : over ? 'Plafond dépassé' : 'Verser ' + money(x)};
   }
+  if (O.mode === 'verse'){
+    const per = G.active === 'per';
+    return {x, ok: x > 0, pill: x <= 0 ? (per ? 'Économie d’impôt estimée' : 'Répartition automatique') : per ? `≈ ${eur0(x*S.tmi/100)} d’impôt en moins` : splitTxt(x),
+      btn: x <= 0 ? 'Saisis un montant' : 'Verser ' + money(x)};
+  }
+  if (O.mode === 'simulate'){
+    return {x, ok: x > 0, pill: x > 0 ? `≈ ${eur0(x*S.tmi/100)} d’impôt en moins` : 'Économie d’impôt estimée', btn: x > 0 ? 'Verser ce montant' : 'Saisis un montant'};
+  }
+  if (O.mode === 'withdraw'){
+    const over = x > total();
+    return {x, ok: x > 0 && !over, warn: over, pill: over ? 'Plus que ton épargne' : x > 0 ? 'Ton contrat reste ouvert' : 'Retrait partiel',
+      btn: x <= 0 ? 'Saisis un montant' : over ? 'Montant trop élevé' : 'Retirer ' + money(x)};
+  }
+  if (O.mode === 'arb'){
+    const from = pos(O.asset), to = pos(O.to), over = x > val(from), same = from === to;
+    return {x, from, to, ok: x > 0 && !over && !same, warn: over || same,
+      pill: same ? 'Choisis deux supports différents' : over ? 'Max ' + eur(val(from)) : `${from.name} → ${to.name}`,
+      btn: x <= 0 ? 'Saisis un montant' : over ? 'Montant trop élevé' : 'Arbitrer ' + money(x)};
+  }
+  const a = pos(O.asset);
   const n = Math.floor(x / a.price + 1e-9), cost = r2(n * a.price), rest = r2(x - cost);
   if (O.mode === 'buy'){
     const over = x > S.cash;
@@ -630,35 +864,63 @@ function renderOrder(){
   if (O.done){
     body.innerHTML = `<div class="sheet-top"><span class="spacer"></span></div>
       <div class="done"><div class="tick">${I.check}</div><h2>C’est fait !</h2><p class="b num">${O.done.line1}</p><p class="m num">${O.done.line2}</p></div>
-      <button class="primary" data-act="back-home">Retour à mon PEA</button>`;
+      <button class="primary" data-act="back-home">Retour à ${esc(lower(P().name))}</button>`;
     return;
   }
-  const q = quote(), a = q.a;
-  const top = O.mode === 'deposit'
-    ? `<div class="sheet-top"><button class="close" data-act="close" aria-label="Fermer">${I.x}</button><span class="sheet-title">Verser sur mon PEA</span></div>`
-    : `<div class="sheet-top"><button class="close" data-act="close" aria-label="Fermer">${I.x}</button>
-        <div class="seg" role="tablist"><button role="tab" data-act="mode" data-m="buy" class="${O.mode==='buy'?'on':''}">Acheter</button><button role="tab" data-act="mode" data-m="sell" class="${O.mode==='sell'?'on':''}">Vendre</button></div></div>
-       <button class="asset-card" data-act="pick-order"><span class="av t-${a.tone}">${a.id}</span><span style="min-width:0"><b>${esc(a.name)}</b><span class="num">${eur(a.price)} la part · <span class="${a.day>=0?'up':'down'}">${tri(a.day)} ${pct(a.day)}</span></span></span><span class="chev">${I.chev}</span></button>`;
-  let info;
-  if (O.mode === 'deposit'){
-    info = `<div class="l"><span>Depuis</span><b>Ton compte courant</b></div><div class="l"><span>Plafond restant</span><b class="num">${eur(q.room)}</b></div><p>L’argent arrive en liquidités sur ton PEA. Tu choisis ensuite où le placer.</p>`;
-  } else if (O.mode === 'buy'){
-    info = `<div class="l"><span>Disponible</span><b class="num">${eur(S.cash)}</b></div><div class="l"><span>Type d’ordre</span><b>Au prix du marché</b></div>
-      <p>Sur un PEA, on achète des parts entières. ${q.n > 0 && q.rest > 0 ? 'Les ' + eur(q.rest) + ' restants restent dispo.' : 'Le reste reste dispo.'}</p>`;
-  } else {
-    info = `<div class="l"><span>Tu détiens</span><b class="num">${a.parts} parts · ${eur(val(a))}</b></div><div class="l"><span>Type d’ordre</span><b>Au prix du marché</b></div>
-      <p>L’argent de la vente reste sur ton PEA, en liquidités. Le retirer avant 5 ans fermerait ton PEA.</p>`;
+  const q = quote(), sh = isShares(), close = `<button class="close" data-act="close" aria-label="Fermer">${I.x}</button>`;
+  const tabs = sh ? [['buy','Acheter'],['sell','Vendre']] : [['verse','Verser'], P().op2];
+  let top;
+  if (O.mode === 'deposit') top = `<div class="sheet-top">${close}<span class="sheet-title">Verser sur ${esc(lower(P().name))}</span></div>`;
+  else {
+    top = `<div class="sheet-top">${close}<div class="seg" role="tablist">${tabs.map(([m,l]) => `<button role="tab" data-act="mode" data-m="${m}" class="${O.mode===m?'on':''}">${l}</button>`).join('')}</div></div>`;
+    if (sh){
+      const a = q.a;
+      top += `<button class="asset-card" data-act="pick-order">${avatar(a)}<span style="min-width:0"><b>${esc(a.name)}</b><span class="num">${eur(a.price)} la part · <span class="${a.day>=0?'up':'down'}">${tri(a.day)} ${pct(a.day)}</span></span></span><span class="chev">${I.chev}</span></button>`;
+    } else if (O.mode === 'arb'){
+      top += `<button class="asset-card" data-act="pick-from">${avatar(q.from)}<span style="min-width:0"><span>De</span><b>${esc(q.from.name)}</b><span class="num">${eur(val(q.from))} disponibles</span></span><span class="chev">${I.chev}</span></button>
+        <button class="asset-card" data-act="pick-to" style="margin-top:8px">${avatar(q.to)}<span style="min-width:0"><span>Vers</span><b>${esc(q.to.name)}</b><span class="num">${esc(q.to.sub)}</span></span><span class="chev">${I.chev}</span></button>`;
+    } else {
+      const sub = O.mode === 'withdraw' ? 'Retrait partiel · vers ton compte courant' : O.mode === 'simulate' ? 'Simulation d’économie d’impôt' : P().sub;
+      top += `<div class="asset-card">${avatar({id:P().ab, tone:P().tone})}<span style="min-width:0"><b>${esc(P().name)}</b><span>${sub}</span></span></div>`;
+    }
   }
-  const label = O.mode === 'buy' ? 'Combien veux-tu investir ?' : O.mode === 'sell' ? 'Combien veux-tu récupérer ?' : 'Combien veux-tu verser ?';
-  const shown = O.input ? O.input : '0';
+  let info;
+  const row = (l, v) => `<div class="l"><span>${l}</span><b class="num">${v}</b></div>`;
+  switch (O.mode){
+    case 'deposit': info = row('Depuis', 'Ton compte courant') + row('Plafond restant', q.room === Infinity ? 'Aucun plafond' : eur(q.room)) + `<p>L’argent arrive en liquidités sur ${P().ton}. Tu choisis ensuite où le placer.</p>`; break;
+    case 'buy': info = row('Disponible', eur(S.cash)) + row('Type d’ordre', 'Au prix du marché') + `<p>${G.active === 'pea' ? 'Sur un PEA' : 'Sur ce compte'}, on achète des parts entières. ${q.n > 0 && q.rest > 0 ? 'Les ' + eur(q.rest) + ' restants restent dispo.' : 'Le reste reste dispo.'}</p>`; break;
+    case 'sell': info = row('Tu détiens', `${q.a.parts} parts · ${eur(val(q.a))}`) + row('Type d’ordre', 'Au prix du marché')
+      + `<p>${G.active === 'ct' ? 'L’argent de la vente reste sur ton compte-titres, en liquidités. Ta plus-value est imposée à 31,4 %.' : `L’argent de la vente reste sur ${P().ton}, en liquidités. Le retirer avant 5 ans fermerait ${P().ton}.`}</p>`; break;
+    case 'verse':
+      if (G.active === 'per') info = row('Depuis', 'Compte courant') + row('Ta tranche (TMI)', S.tmi + ' %') + `<p>Estimation pour une tranche à ${S.tmi} %. Ton plafond figure sur ton avis d’impôt.</p>`;
+      else if (G.active === 'av') info = row('Depuis', 'Compte courant') + row('Répartition', allocShort() + ' (ton profil)') + '<p>Tu peux changer ta répartition à tout moment.</p>';
+      else info = row('Depuis', 'Compte courant') + row('Ta répartition', allocShort()) + '<p>Ta répartition libre, modifiable à tout moment.</p>';
+      break;
+    case 'simulate': {
+      const f = fiscal(), yrs = f.goal.getFullYear() - f.now.getFullYear();
+      info = `<div class="l"><span>Ta tranche (TMI)</span></div><div class="tmi">${[0,11,30,41,45].map(t => `<button data-act="tmi" data-v="${t}" class="${S.tmi===t?'on':''}" aria-pressed="${S.tmi===t}">${t} %</button>`).join('')}</div>`
+        + row('Effort réel', eur0(Math.max(0, q.x - q.x*S.tmi/100))) + row(`En ${f.goal.getFullYear()}, à 5 %/an`, '≈ ' + eur0(q.x*Math.pow(1.05, yrs)))
+        + '<p>Simulation indicative. L’économie réelle dépend de ta tranche et de ton plafond de déduction.</p>';
+      break;
+    }
+    case 'withdraw': {
+      const f = fiscal();
+      info = row('Disponible', eur(total())) + row('Vers', 'Ton compte courant') + `<p>${f.done ? 'Tes 8 ans sont passés : abattement de 4 600 € par an sur les gains retirés.' : `Les gains retirés sont imposés. Plus que ${f.leftTxt} avant l’abattement des 8 ans.`} Le retrait est réparti sur tes supports.</p>`;
+      break;
+    }
+    case 'arb': info = row('Disponible sur ce support', eur(val(q.from))) + row('Impôt', 'Aucun') + '<p>Un arbitrage ne sort pas de ton contrat : pas d’impôt, et ton ancienneté fiscale est conservée.</p>'; break;
+  }
+  const label = {buy:'Combien veux-tu investir ?', sell:'Combien veux-tu récupérer ?', deposit:'Combien veux-tu verser ?', verse:'Combien veux-tu verser ?', simulate:'Combien veux-tu verser ?', withdraw:'Combien veux-tu retirer ?', arb:'Combien veux-tu arbitrer ?'}[O.mode];
+  const presets = O.mode === 'buy' ? `<button class="tag" data-act="max">Tout investir · ${eur0(S.cash)}</button>`
+    : O.mode === 'sell' ? `<button class="tag" data-act="max">Tout vendre · ${q.a.parts} parts</button>`
+    : O.mode === 'arb' ? `<button class="tag" data-act="max">Tout le support · ${eur0(val(q.from))}</button>`
+    : (O.mode === 'simulate' ? [1000,3000,5000] : [100,500,1000]).map(v => `<button class="tag" data-act="preset" data-v="${v}">${F0.format(v)} €</button>`).join('');
   body.innerHTML = `${top}
     <p class="q">${label}</p>
-    <p class="amt num ${O.input?'':'empty'}" aria-live="polite">${shown} €</p>
+    <p class="amt num ${O.input?'':'empty'}" aria-live="polite">${O.input || '0'} €</p>
     <span class="parts-pill ${q.warn?'warn':''}">${q.pill}</span>
     <div class="info">${info}</div>
-    ${O.mode !== 'deposit' ? `<div style="display:flex;gap:8px;justify-content:center;margin-top:10px">${O.mode==='buy'
-        ? `<button class="tag" data-act="max">Tout investir · ${eur0(S.cash)}</button>`
-        : `<button class="tag" data-act="max">Tout vendre · ${a.parts} parts</button>`}</div>` : `<div style="display:flex;gap:8px;justify-content:center;margin-top:10px">${[100,500,1000].map(v=>`<button class="tag" data-act="preset" data-v="${v}">${F0.format(v)} €</button>`).join('')}</div>`}
+    <div class="presets">${presets}</div>
     <div class="keypad">${['1','2','3','4','5','6','7','8','9',',','0','⌫'].map(k => `<button data-act="key" data-k="${k}" aria-label="${k==='⌫'?'Effacer':k}">${k==='⌫'?I.back:k}</button>`).join('')}</div>
     <span class="spacer"></span>
     <button class="primary" data-act="confirm" ${q.ok?'':'disabled'}>${q.btn}</button>`;
@@ -676,34 +938,80 @@ function key(k){
 }
 function confirmOrder(){
   const q = quote(); if (!q.ok) return;
-  const now = Date.now();
-  if (O.mode === 'deposit'){
-    S.cash = r2(S.cash + q.x); S.deposits = r2(S.deposits + q.x);
-    S.history.push({t:now, kind:'deposit', label:'Versement', detail:'Depuis ton compte courant', amount:q.x});
-    O.done = {line1: eur(q.x) + ' versés sur ton PEA', line2: 'Tes liquidités : ' + eur(S.cash) + '.', toast: eur0(q.x) + ' versés sur ton PEA'};
-  } else if (O.mode === 'buy'){
-    const a = q.a; a.parts += q.n; a.cost = r2(a.cost + q.cost); S.cash = r2(S.cash - q.cost);
-    S.history.push({t:now, kind:'buy', label:'Achat · ' + q.n + (q.n>1?' parts':' part'), detail:a.name, amount:-q.cost});
-    O.done = {line1: `${q.n} ${q.n>1?'parts':'part'} ${de(a.name)} ${q.n>1?'achetées':'achetée'} pour ${eur(q.cost)}`, line2: `Il te reste ${eur(S.cash)} de liquidités.`, toast: `+${q.n} ${q.n>1?'parts':'part'} ${de(a.name)} dans ton PEA`};
-  } else {
-    const a = q.a; a.cost = r2(a.cost * (a.parts - q.n) / a.parts); a.parts -= q.n; S.cash = r2(S.cash + q.cost);
-    S.history.push({t:now, kind:'sell', label:'Vente · ' + q.n + (q.n>1?' parts':' part'), detail:a.name, amount:q.cost});
-    O.done = {line1: `${q.n} ${q.n>1?'parts':'part'} ${de(a.name)} ${q.n>1?'vendues':'vendue'} pour ${eur(q.cost)}`, line2: `Tes liquidités : ${eur(S.cash)}.`, toast: `${eur(q.cost)} ajoutés à tes liquidités`};
+  const now = Date.now(), x = q.x, ton = P().ton;
+  switch (O.mode){
+    case 'simulate': O.mode = 'verse'; renderOrder(); return;
+    case 'deposit':
+      S.cash = r2(S.cash + x); S.deposits = r2(S.deposits + x);
+      S.history.push({t:now, kind:'deposit', label:'Versement', detail:'Depuis ton compte courant', amount:x});
+      O.done = {line1: money(x) + ' versés sur ' + ton, line2: 'Tes liquidités : ' + eur(S.cash) + '.', toast: '+' + money(x) + ' sur ' + ton};
+      break;
+    case 'verse': {
+      const sp = splitAlloc(x);
+      sp.forEach(s => { s.p.value = r2(s.p.value + s.v); s.p.cost = r2(s.p.cost + s.v); });
+      S.deposits = r2(S.deposits + x);
+      let line2;
+      if (G.active === 'per'){ S.year = r2(S.year + x); line2 = `Jusqu’à ${eur0(x*S.tmi/100)} d’impôt en moins sur tes revenus ${new Date().getFullYear()} (tranche à ${S.tmi} %).`; }
+      else if (G.active === 'av'){ const fe = sp.find(s => s.id === 'FE').v; line2 = `${money(fe)} sur le fonds euros, ${money(r2(x - fe))} en unités de compte.`; }
+      else line2 = sp.map(s => `${money(s.v)} ${/^ETF/.test(s.p.name) ? s.p.name : lower(s.p.name)}`).join(', ') + '.';
+      S.history.push({t:now, kind:'deposit', label: G.active === 'per' ? 'Versement déductible' : 'Versement', detail:'Réparti ' + allocShort(), amount:x});
+      O.done = {line1: money(x) + ' versés sur ' + ton, line2, toast: '+' + money(x) + ' sur ' + ton};
+      break;
+    }
+    case 'withdraw': {
+      const ratio = x / total();
+      S.positions.forEach(p => { p.value = r2(p.value*(1 - ratio)); p.cost = r2(p.cost*(1 - ratio)); });
+      S.deposits = r2(S.deposits*(1 - ratio));
+      S.history.push({t:now, kind:'withdraw', label:'Retrait', detail:'Vers ton compte courant', amount:-x});
+      O.done = {line1: money(x) + ' retirés de ' + ton, line2: 'L’argent arrive sur ton compte courant. Ton contrat reste ouvert.', toast: money(x) + ' retirés de ' + ton};
+      break;
+    }
+    case 'arb': {
+      const {from, to} = q;
+      from.cost = r2(from.cost*(1 - x/val(from))); from.value = r2(from.value - x);
+      to.value = r2(to.value + x); to.cost = r2(to.cost + x);
+      S.history.push({t:now, kind:'arb', label:'Arbitrage', detail:`${from.name} → ${to.name}`, amount:x});
+      O.done = {line1: money(x) + ' arbitrés', line2: `De ${from.name} vers ${lower(to.name).replace(/^etf/, 'ETF')}. Pas d’impôt : l’argent reste dans ton contrat.`, toast: money(x) + ' arbitrés vers ' + to.name};
+      break;
+    }
+    case 'buy': {
+      const a = q.a; a.parts += q.n; a.cost = r2(a.cost + q.cost); S.cash = r2(S.cash - q.cost);
+      S.history.push({t:now, kind:'buy', label:'Achat · ' + q.n + (q.n>1?' parts':' part'), detail:a.name, amount:-q.cost});
+      O.done = {line1: `${q.n} ${q.n>1?'parts':'part'} ${de(a.name)} ${q.n>1?'achetées':'achetée'} pour ${eur(q.cost)}`, line2: `Il te reste ${eur(S.cash)} de liquidités.`, toast: `+${q.n} ${q.n>1?'parts':'part'} ${de(a.name)} dans ${ton}`};
+      break;
+    }
+    case 'sell': {
+      const a = q.a, basis = r2(a.cost * q.n / a.parts), pnl = r2(q.cost - basis);
+      if (S.realized != null){ if (pnl >= 0) S.realized = r2(S.realized + pnl); else S.losses = r2(S.losses - pnl); }
+      a.cost = r2(a.cost - basis); a.parts -= q.n; S.cash = r2(S.cash + q.cost);
+      S.history.push({t:now, kind:'sell', label:'Vente · ' + q.n + (q.n>1?' parts':' part'), detail:a.name, amount:q.cost});
+      O.done = {line1: `${q.n} ${q.n>1?'parts':'part'} ${de(a.name)} ${q.n>1?'vendues':'vendue'} pour ${eur(q.cost)}`,
+        line2: S.realized != null ? `${pnl >= 0 ? 'Plus-value' : 'Moins-value'} de ${eur(Math.abs(pnl))}. Tes liquidités : ${eur(S.cash)}.` : `Tes liquidités : ${eur(S.cash)}.`,
+        toast: `${eur(q.cost)} ajoutés à tes liquidités`};
+      break;
+    }
   }
   save(); renderOrder(); render(); if (assetOpen()) renderAsset();
 }
 
-/* ---------- pickers (asset, notifications, detail) ---------- */
+/* ---------- pickers (asset, notifications, accounts, supports) ---------- */
 let pickTarget = null;
 function openPicker(html){ $('#pickerBody').innerHTML = html; $('#picker').classList.add('open'); }
 function closePicker(){ $('#picker').classList.remove('open'); }
 function assetPicker(target){
   pickTarget = target;
-  const cur = target === 'auto' ? S.draft.asset : O.asset;
-  const held = S.positions.filter(p => p.parts > 0).map(p => p.id);
-  const ids = target === 'auto' ? MARKET.filter(a => a.type === 'etf').map(a => a.id)
-    : O.mode === 'buy' ? [...new Set(held.concat(S.favs.filter(id => mk(id) && mk(id).eligible)))] : held;
-  openPicker(`<h4>Choisis ton placement</h4><div style="max-height:52vh;overflow-y:auto">${ids.map(id => { const p = info(id); return `<button class="row" data-act="pick" data-id="${p.id}">${avatar(p)}<span class="mid-col"><b>${esc(p.name)}</b><span class="num">${esc(p.sub)} · ${fmtPrice(p)}${O.mode==='sell'&&target==='order'?' · '+p.parts+' parts':''}</span></span>${p.id===cur?'<span class="up">✓</span>':''}</button>`; }).join('')}</div>
+  let ids, cur;
+  if (target === 'from' || target === 'to'){
+    cur = target === 'from' ? O.asset : O.to;
+    ids = S.positions.map(p => p.id);
+  } else {
+    cur = target === 'auto' ? S.draft.asset : O.asset;
+    const hs = S.positions.filter(held).map(p => p.id);
+    ids = target === 'auto' ? MARKET.filter(a => a.type === 'etf' && elig(a, G.active)).map(a => a.id)
+      : O.mode === 'buy' ? [...new Set(hs.concat(G.favs.filter(id => mk(id) && elig(mk(id), G.active))))] : hs;
+  }
+  const title = target === 'from' ? 'Depuis quel support ?' : target === 'to' ? 'Vers quel support ?' : 'Choisis ton placement';
+  openPicker(`<h4>${title}</h4><div style="max-height:52vh;overflow-y:auto">${ids.map(id => { const p = info(id); return `<button class="row" data-act="pick" data-id="${p.id}">${avatar(p)}<span class="mid-col"><b>${esc(p.name)}</b><span class="num">${esc(p.sub)} · ${p.value != null ? eur(val(p)) : fmtPrice(p)}${O.mode==='sell'&&target==='order'?' · '+p.parts+' parts':''}</span></span>${p.id===cur?'<span class="up">✓</span>':''}</button>`; }).join('')}</div>
     ${target === 'order' && O.mode === 'buy' ? `<button class="ghost" data-act="explore-from-order" style="margin-top:10px">Chercher dans tout le marché</button>` : ''}`);
 }
 function notifPanel(){
@@ -713,6 +1021,37 @@ function notifPanel(){
   S.notifs.forEach(n => n.read = true); save();
   const d = document.querySelector('#v-home .dot'); if (d) d.hidden = true;
 }
+function accountsPanel(){
+  const all = ORDER.reduce((s,k) => s + totOf(G.accounts[k]), 0);
+  const allDep = ORDER.reduce((s,k) => s + G.accounts[k].deposits, 0), allG = all - allDep;
+  const row = k => {
+    const a = G.accounts[k], pr = PR[k], t = totOf(a), g = t - a.deposits;
+    const name = pr.name.replace(/^Mon /, ''), nm = name.charAt(0).toUpperCase() + name.slice(1);
+    return `<button class="row acc ${k===G.active?'on':''}" data-act="switch" data-k="${k}" aria-current="${k===G.active}">${avatar({id:pr.ab, tone:pr.tone})}
+      <span class="mid-col"><b>${esc(nm)}</b><span>${esc(pr.label)}</span></span>
+      <span class="right num"><b>${eur(t)}</b><span class="${g>=0?'up':'down'}">${tri(g)} ${pct(g/a.deposits*100)}</span></span></button>`;
+  };
+  const groups = [...new Set(ORDER.map(k => PR[k].group))];
+  openPicker(`<div class="sheet-top"><span class="sheet-title">Mes comptes</span><button class="close" data-act="close-picker" aria-label="Fermer">${I.x}</button></div>
+    <div class="acc-scroll">
+      <div class="navy-card" style="margin-top:12px"><div class="k">Ton patrimoine · ${ORDER.length} comptes</div><div class="v num" style="font-size:26px">${eur(all)}</div>
+        <div class="s num">${tri(allG)} ${sgn(allG)}${eur(Math.abs(allG))} (${pct(allG/allDep*100)}) depuis l’ouverture</div></div>
+      ${groups.map(gr => `<p class="acc-h">${gr}</p><div class="list acc-list">${ORDER.filter(k => PR[k].group === gr).map(row).join('')}</div>`).join('')}
+    </div>`);
+}
+function supportDetail(id){
+  const p = pos(id), perf = p.cost ? (val(p)/p.cost - 1)*100 : 0, pts = series('1A', val(p), hash(id) % 97);
+  const {line, area} = pathFor(pts, 300, 80, 6), share = Math.round(val(p)/total()*100);
+  const cc = G.active === 'cc', m = mk(id);
+  openPicker(`<div class="sheet-top">${avatar(p)}<span class="sheet-title">${esc(p.name)}<br><span style="font-size:12px;font-weight:500;color:var(--muted)">${esc(p.sub)}</span></span><button class="close" data-act="close-picker" aria-label="Fermer">${I.x}</button></div>
+    <p class="mid num" style="margin:14px 0 0">${eur(val(p))} <span class="${perf>=0?'up':'down'}">${tri(perf)} ${pct(perf)}</span></p>
+    <svg viewBox="0 0 300 80" preserveAspectRatio="none" style="width:100%;height:80px;display:block;margin-top:8px" aria-label="Valeur sur 1 an" role="img"><path d="${area}" fill="var(--chip)"/><path d="${line}" fill="none" stroke="var(--navy)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
+    <div class="stats num"><div><span>Part du contrat</span><b>${share} %</b></div><div><span>Répartition des versements</span><b>${S.alloc[id] != null ? S.alloc[id] + ' %' : '—'}</b></div>
+      <div><span>Versé sur ce support</span><b>${eur(p.cost)}</b></div><div><span>Plus-value latente</span><b class="${perf>=0?'up':'down'}" style="font-size:15px">${sgn(val(p)-p.cost)}${eur(Math.abs(val(p)-p.cost))}</b></div></div>
+    <p class="sub" style="margin-top:12px">${SUPPORT_TXT[id] || ''}</p>
+    <div class="grid2" style="margin-top:14px">${cc ? `<button class="primary" data-act="arb-from" data-id="${id}">Arbitrer</button>` : `<button class="primary" data-act="verse">Verser</button>`}${m ? `<button class="ghost" data-act="asset" data-id="${id}">Voir la fiche</button>` : `<button class="ghost" data-act="close-picker">Fermer</button>`}</div>`);
+}
+
 /* ---------- MARKET (catalogue, cours fictifs) ---------- */
 const TONES = ['blue','orange','green','purple','teal','rose'];
 const hash = s => { let h = 7; for (const c of s) h = (h*31 + c.charCodeAt(0)) | 0; return Math.abs(h); };
@@ -735,6 +1074,12 @@ const MARKET = [
   E('SMC','ETF Petites capi. Europe','MSCI Europe Small Cap',162.30,-0.4,5.2,21,0.40,220,900),
   E('DIV','ETF Dividendes Europe','Stoxx Europe Select Dividend 30',21.05,0.2,8.8,26,0.30,180,30),
   E('NRJ','ETF Énergies propres','S&P Global Clean Energy',9.84,2.1,-6.3,-24,0.40,95,100),
+  Object.assign(E('PME','ETF PME Europe','Petites capi. européennes',58.40,0.6,15.2,30,0.45,320,800), {ab:'EU', pme:true}),
+  Object.assign(E('FPF','Fonds PME France','Fonds actions PME',160.67,0.3,12.8,25,1.20,180,60), {ab:'FR', pme:true}),
+  Object.assign(E('SCF','ETF Small Caps France','CAC Small',132.29,-0.5,-2.4,10,0.35,150,90), {ab:'SC', pme:true}),
+  Object.assign(E('NQU','ETF Nasdaq 100','Nasdaq-100 · réplication physique',102.35,1.2,32.1,140,0.20,2600,101), {ab:'NQ', cto:true}),
+  Object.assign(E('EMU','ETF Émergents','MSCI EM IMI · réplication physique',76.91,0.4,9.4,18,0.18,1900,3000), {ab:'EM', cto:true}),
+  Object.assign(E('OBL','ETF Obligations','Obligations mondiales',30.23,-0.1,-0.6,-6,0.10,2400,3000), {ab:'OB', cto:true}),
   A('MC','LVMH','Luxe','France',642.30,-0.9,-8.4,12,322,22.5,2.0,'Numéro un mondial du luxe : Louis Vuitton, Dior, Moët Hennessy, Sephora.'),
   A('RMS','Hermès','Luxe','France',2315.00,-0.5,4.3,160,244,49.0,0.8,'Maroquinerie, soie et prêt-à-porter haut de gamme, fabriqués en grande partie en France.'),
   A('OR','L’Oréal','Cosmétiques','France',372.10,0.2,-6.1,18,199,30.4,1.9,'Premier groupe de cosmétiques au monde : Lancôme, Garnier, La Roche-Posay.'),
@@ -783,7 +1128,7 @@ const MARKET = [
   B('MC29','LVMH 2029','LVMH',100.45,0.1,3.2,-2,3.5,'11/09/2029',3.32,'AA-'),
   B('AGG','ETF Obligations euro','Bloomberg Euro Aggregate',112.60,0.1,3.6,-8,null,'—',3.10,'A')
 ];
-MARKET.forEach(a => { a.tone = {MO:'blue',US:'orange',EU:'green'}[a.id] || TONES[hash(a.id) % TONES.length]; a.eligible = a.type !== 'oblig'; });
+MARKET.forEach(a => { a.tone = {MO:'blue',US:'orange',EU:'green'}[a.id] || TONES[hash(a.id) % TONES.length]; a.eligible = a.type !== 'oblig' && !a.cto; if (a.id === 'SMC') a.pme = true; });
 const INDICES = [
   {id:'IX1',name:'CAC 40',price:7842.15,day:0.4,p1a:4,p5a:30,type:'action'},
   {id:'IX2',name:'Euro Stoxx 50',price:5412.80,day:0.3,p1a:9,p5a:42,type:'action'},
@@ -795,11 +1140,13 @@ const mk = id => MARKET.find(a => a.id === id);
 const info = id => pos(id) || mk(id);
 function ensurePos(id){
   const m = mk(id);
-  if (!pos(id) && m) S.positions.push({id, name:m.name, sub:m.sub, tone:m.tone, parts:0, price:m.price, cost:0, day:m.day});
+  if (!pos(id) && m) S.positions.push({id, ab:m.ab || id, name:m.name, sub:m.sub, tone:m.tone, parts:0, price:m.price, cost:0, day:m.day});
 }
 const TYPE_LBL = {etf:'ETF', action:'Action', oblig:'Obligation'};
 const fmtPrice = (a, v) => a.type === 'oblig' ? F2.format(v ?? a.price) + ' %' : eur(v ?? a.price);
-const avatar = a => `<span class="av t-${a.tone}${a.id.length > 3 ? ' sm' : ''}">${a.id}</span>`;
+const avatar = a => { const t = a.ab || a.id; return `<span class="av t-${a.tone}${t.length > 3 ? ' sm' : ''}">${t}</span>`; };
+const elig = (a, k) => k === 'ct' ? true : k === 'pme' ? !!a.pme : a.eligible;
+const ELIG_LBL = {pea:'PEA', pme:'PEA-PME', ct:'compte-titres'};
 const big = mds => mds >= 1 ? F1.format(mds).replace(/,0$/,'') + ' Md€' : F0.format(mds*1000) + ' M€';
 
 /* price history: seeded random walk pinned to the displayed variations */
@@ -855,8 +1202,8 @@ function renderExplore(){
 }
 function renderExploreList(){
   const q = norm(EX.q.trim());
-  let list = MARKET.filter(a => (EX.type === 'all' || (EX.type === 'fav' ? S.favs.includes(a.id) : a.type === EX.type))
-    && (!q || norm(a.name + ' ' + a.id + ' ' + a.sub + ' ' + (a.country || '')).includes(q)));
+  let list = MARKET.filter(a => (EX.type === 'all' || (EX.type === 'fav' ? G.favs.includes(a.id) : a.type === EX.type))
+    && (!q || norm(a.name + ' ' + a.id + ' ' + (a.ab || '') + ' ' + a.sub + ' ' + (a.country || '')).includes(q)));
   const sorters = {up:(x,y) => y.day-x.day, down:(x,y) => x.day-y.day, y1:(x,y) => y.p1a-x.p1a, az:(x,y) => x.name.localeCompare(y.name, 'fr')};
   if (sorters[EX.sort]) list = list.slice().sort(sorters[EX.sort]);
   const movers = MARKET.filter(a => a.eligible).sort((x,y) => y.day - x.day);
@@ -864,7 +1211,7 @@ function renderExploreList(){
   const showTrends = !q && EX.type === 'all';
   $('#exBody').innerHTML = `
     ${showTrends ? `<h2 class="sec">Tendances du jour</h2><div class="hscroll">${trends.map(a => `<button class="trend" data-act="asset" data-id="${a.id}">${avatar(a)}<b>${esc(a.name)}</b>${spark(a, 124, 34)}${chgSpan(a.day)}</button>`).join('')}</div>` : ''}
-    ${EX.type === 'oblig' ? '<div class="notice">Les obligations ne sont pas éligibles au PEA. Tu peux suivre leurs cours ici, mais elles s’achètent sur un compte-titres ou une assurance vie.</div>' : ''}
+    ${EX.type === 'oblig' ? '<div class="notice">Les obligations ne sont pas éligibles au PEA. Tu peux les acheter sur ton compte-titres, ou en détenir via une assurance vie.</div>' : ''}
     <div class="listhead"><h2 class="sec" style="margin:0">${list.length} ${list.length > 1 ? 'résultats' : 'résultat'}</h2>
       <label class="sortlbl" for="exSort">Trier<select id="exSort" class="sort">${[['pop','Populaires'],['up','Hausse du jour'],['down','Baisse du jour'],['y1','Perf. 1 an'],['az','De A à Z']].map(([k,l]) => `<option value="${k}" ${EX.sort===k?'selected':''}>${l}</option>`).join('')}</select></label></div>
     <div class="card list">${list.map(mRow).join('') || `<p class="empty-note">${EX.type === 'fav' ? 'Pas encore de favoris. Touche ☆ sur une fiche pour l’ajouter.' : 'Aucun résultat pour « ' + esc(EX.q) + ' ».'}</p>`}</div>
@@ -878,15 +1225,16 @@ function openAsset(id){ AS.id = id; AS.range = '1A'; renderAsset(); $('#assetShe
 function closeAsset(){ $('#assetSheet').classList.remove('open'); }
 const assetOpen = () => $('#assetSheet').classList.contains('open');
 function renderAsset(){
-  const a = mk(AS.id) || pos(AS.id), p = pos(a.id), held = p && p.parts > 0;
+  const a = mk(AS.id) || pos(AS.id), p = isShares() ? pos(a.id) : null, held = !!(p && p.parts > 0);
+  const ek = isShares() ? G.active : 'pea', ok = elig(a, ek);
   const pts = assetSeries(a, AS.range), first = pts[0].v, chg = (a.price/first - 1)*100;
   const y = assetSeries(a, '1A').map(x => x.v), hi = Math.max(...y), lo = Math.min(...y);
-  const fav = S.favs.includes(a.id);
+  const fav = G.favs.includes(a.id);
   const common = [['Plus haut 1 an', fmtPrice(a, hi)], ['Plus bas 1 an', fmtPrice(a, lo)], ['Perf. 1 an', pct(a.p1a)], ['Perf. 5 ans', pct(a.p5a)]];
   const stats = a.type === 'etf' ? [['Frais annuels', F2.format(a.ter) + ' %'], ['Encours', big(a.aum/1000)], ['Entreprises', F0.format(a.lines)], ['Dividendes', 'Réinvestis']]
     : a.type === 'action' ? [['Capitalisation', big(a.cap)], ['PER', a.per ? F1.format(a.per) : '—'], ['Rendement', a.dy ? F1.format(a.dy) + ' %' : 'Aucun'], ['Pays', a.country]]
     : [['Coupon', a.coupon ? F2.format(a.coupon) + ' %' : '—'], ['Échéance', a.mat], ['Rendement', F2.format(a.ytm) + ' %'], ['Notation', a.rating]];
-  const about = a.type === 'etf' ? `Un seul achat pour ${F0.format(a.lines)} entreprises de l’indice ${a.sub}. ${F2.format(a.ter)} % de frais par an, dividendes réinvestis automatiquement. Éligible au PEA.`
+  const about = a.type === 'etf' ? `Un seul achat pour ${F0.format(a.lines)} entreprises de l’indice ${a.sub}. ${F2.format(a.ter)} % de frais par an, dividendes réinvestis automatiquement. ${a.eligible ? 'Éligible au PEA.' : 'Disponible sur compte-titres.'}`
     : a.type === 'action' ? esc(a.d) + ` Entreprise cotée (${a.country}), éligible au PEA.`
     : a.coupon ? `Obligation émise par ${/^État/.test(a.sub) ? 'l’' + a.sub : a.sub}. Elle verse ${F2.format(a.coupon)} % d’intérêts par an jusqu’au ${a.mat}. Le prix est exprimé en % de la valeur de remboursement.`
     : `Fonds qui regroupe des centaines d’obligations d’États et d’entreprises de la zone euro. Non éligible au PEA.`;
@@ -895,7 +1243,7 @@ function renderAsset(){
     <div class="sheet-top"><button class="close" data-act="close-asset" aria-label="Fermer">${I.x}</button><span class="spacer"></span>
       <button class="close star ${fav?'on':''}" data-act="fav" aria-pressed="${fav}" aria-label="${fav?'Retirer des favoris':'Ajouter aux favoris'}">${fav?'★':'☆'}</button></div>
     <div class="a-head">${avatar(a)}<div style="min-width:0"><b>${esc(a.name)}</b><span>${esc(a.sub)}${a.country ? ' · ' + a.country : ''}</span></div></div>
-    <div class="tags"><span class="tag">${TYPE_LBL[a.type]}</span><span class="tag ${a.eligible?'ok':'no'}">${a.eligible ? 'Éligible PEA' : 'Hors PEA'}</span></div>
+    <div class="tags"><span class="tag">${TYPE_LBL[a.type]}</span><span class="tag ${ok?'ok':'no'}">${ok ? 'Éligible ' : 'Hors '}${ELIG_LBL[ek]}</span></div>
     <p class="a-price num" id="aPrice">${fmtPrice(a)}</p>
     <p class="a-chg num" id="aChg">${chgSpan(chg)} <span class="muted">${RLBL[AS.range]}</span></p>
     <svg class="achart" id="achart" data-scrub viewBox="0 0 340 170" preserveAspectRatio="none" role="img" aria-label="Cours ${RLBL[AS.range]}">
@@ -909,9 +1257,10 @@ function renderAsset(){
     <div class="stats num" style="margin-top:0">${stats.concat(common).map(([l,v]) => `<div><span>${l}</span><b>${esc(v)}</b></div>`).join('')}</div>
     <h2 class="sec">À propos</h2><p class="sub" style="margin:0">${about}</p>
     <p class="m-note" style="margin-top:6px">Cours fictifs, pour la démo.</p>`;
-  $('#assetFoot').innerHTML = a.eligible
+  const target = elig(a, 'pea') ? 'pea' : 'ct';
+  $('#assetFoot').innerHTML = isShares() && ok
     ? `<button class="primary" data-act="a-buy">Acheter</button><button class="ghost" data-act="a-sell" ${held?'':'disabled'}>Vendre</button>`
-    : `<button class="primary" disabled style="grid-column:1/-1">Non éligible au PEA</button>`;
+    : `<button class="primary" data-act="buy-on" data-k="${target}" style="grid-column:1/-1">Acheter sur ${lower(PR[target].name)}</button>`;
   charts.achart = {pts, W:340,
     move: q => { $('#aPrice').textContent = fmtPrice(a, q.v); $('#aChg').innerHTML = chgSpan((q.v/first - 1)*100) + ` <span class="muted">${AS.range === '1J' ? 'à ' + new Date(q.t).toTimeString().slice(0,5) : 'le ' + dShort(new Date(q.t))}</span>`; },
     leave: () => { if (!$('#aPrice')) return; $('#aPrice').textContent = fmtPrice(a); $('#aChg').innerHTML = chgSpan(chg) + ` <span class="muted">${RLBL[AS.range]}</span>`; }};
@@ -939,47 +1288,75 @@ document.addEventListener('click', e => {
   const act = b.dataset.act;
   switch (act){
     case 'go': go(b.dataset.v); break;
-    case 'range': range = b.dataset.r; document.querySelectorAll('.ranges button').forEach(x => { x.classList.toggle('on', x.dataset.r === range); x.setAttribute('aria-selected', x.dataset.r === range); }); drawChart(); break;
-    case 'buy': openOrder('buy', 'MO'); break;
-    case 'sell': openOrder('sell', 'MO'); break;
-    case 'deposit': openOrder('deposit'); break;
-    case 'advice-buy': openOrder('buy', 'MO', Math.floor(S.cash)); break;
     case 'go-auto': go('auto'); break;
     case 'go-perks': go('perks'); break;
+    case 'go-wallet': go('wallet'); break;
+    case 'range': range = b.dataset.r; document.querySelectorAll('.ranges button').forEach(x => { x.classList.toggle('on', x.dataset.r === range); x.setAttribute('aria-selected', x.dataset.r === range); }); drawChart(); break;
+    case 'accounts': accountsPanel(); break;
+    case 'switch': switchAccount(b.dataset.k); break;
+    case 'buy': openOrder('buy'); break;
+    case 'sell': openOrder('sell'); break;
+    case 'deposit': openOrder('deposit'); break;
+    case 'verse': closePicker(); openOrder('verse'); break;
+    case 'withdraw': openOrder('withdraw'); break;
+    case 'arb': openOrder('arb'); break;
+    case 'arb-from': closePicker(); openOrder('arb', b.dataset.id); break;
+    case 'simulate': openOrder('simulate'); break;
+    case 'advice-buy': openOrder('buy', 'MO', Math.floor(S.cash)); break;
     case 'notifs': notifPanel(); break;
-    case 'asset': openAsset(b.dataset.id); break;
+    case 'support': supportDetail(b.dataset.id); break;
+    case 'profile': {
+      const pf = PROFILES[b.dataset.p]; S.profile = b.dataset.p; S.alloc = Object.assign({}, pf.alloc); save(); renderWallet();
+      toast(`Profil ${lower(pf.label)} : ${S.alloc.FE} / ${100 - S.alloc.FE}`); break;
+    }
+    case 'tmi': S.tmi = +b.dataset.v; save(); renderOrder(); break;
+    case 'asset': closePicker(); openAsset(b.dataset.id); break;
     case 'close-asset': closeAsset(); break;
     case 'a-range': AS.range = b.dataset.r; renderAsset(); break;
     case 'a-buy': openOrder('buy', AS.id); break;
     case 'a-sell': openOrder('sell', AS.id); break;
-    case 'fav': { const i = S.favs.indexOf(AS.id); if (i < 0){ S.favs.push(AS.id); toast(info(AS.id).name + ' ajouté aux favoris'); } else S.favs.splice(i, 1); save(); renderAsset(); if (view === 'explore') renderExploreList(); break; }
+    case 'buy-on': switchAccount(b.dataset.k, true); renderAsset(); openOrder('buy', AS.id); break;
+    case 'fav': { const i = G.favs.indexOf(AS.id); if (i < 0){ G.favs.push(AS.id); toast(info(AS.id).name + ' ajouté aux favoris'); } else G.favs.splice(i, 1); save(); renderAsset(); if (view === 'explore') renderExploreList(); break; }
     case 'ex-type': EX.type = b.dataset.t; document.querySelectorAll('.filters button').forEach(x => { x.classList.toggle('on', x.dataset.t === EX.type); x.setAttribute('aria-selected', x.dataset.t === EX.type); }); renderExploreList(); break;
     case 'explore-from-order': closePicker(); closeSheet(); closeAsset(); go('explore'); break;
     case 'close': closeSheet(); break;
     case 'close-picker': closePicker(); break;
-    case 'mode': O.mode = b.dataset.m; O.input = ''; if (O.mode==='sell' && pos(O.asset).parts===0){ const p = S.positions.find(p=>p.parts>0); if (p) O.asset = p.id; } renderOrder(); break;
+    case 'mode': setMode(b.dataset.m); break;
     case 'key': key(b.dataset.k); break;
-    case 'max': { const a = pos(O.asset); const x = O.mode === 'buy' ? Math.floor(S.cash*100)/100 : r2(a.parts*a.price); O.input = F2.format(x).replace(/\s| | /g,'').replace(/,00$/,''); renderOrder(); break; }
+    case 'max': {
+      const x = O.mode === 'buy' ? Math.floor(S.cash*100)/100 : O.mode === 'arb' ? val(pos(O.asset)) : val(pos(O.asset));
+      O.input = F2.format(x).replace(/[\s  ]/g,'').replace(/,00$/,''); renderOrder(); break;
+    }
     case 'preset': O.input = b.dataset.v; renderOrder(); break;
     case 'confirm': confirmOrder(); break;
     case 'back-home': { const t = O.done && O.done.toast; closeAsset(); closeSheet(); go('home'); if (t) setTimeout(() => toast(t), 250); break; }
     case 'pick-order': assetPicker('order'); break;
     case 'pick-auto': assetPicker('auto'); break;
-    case 'pick': if (pickTarget === 'auto'){ S.draft.asset = b.dataset.id; save(); closePicker(); renderAuto(); } else { ensurePos(b.dataset.id); O.asset = b.dataset.id; closePicker(); renderOrder(); } break;
+    case 'pick-from': assetPicker('from'); break;
+    case 'pick-to': assetPicker('to'); break;
+    case 'pick': {
+      const id = b.dataset.id;
+      if (pickTarget === 'auto'){ S.draft.asset = id; save(); closePicker(); renderAuto(); }
+      else if (pickTarget === 'from'){ O.asset = id; if (O.to === id) O.to = S.positions.find(p => p.id !== id).id; closePicker(); renderOrder(); }
+      else if (pickTarget === 'to'){ O.to = id; closePicker(); renderOrder(); }
+      else { ensurePos(id); O.asset = id; closePicker(); renderOrder(); }
+      break;
+    }
     case 'amt': {
       const from = S.draft.amount*120; S.draft.amount = +b.dataset.v; save(); autoShown = from; renderAuto(); autoShown = null;
       countUp($('#autoTot'), from, S.draft.amount*120, 700, eur0); break;
     }
     case 'roundups': S.draft.roundups = !S.draft.roundups; save(); renderAuto(); break;
     case 'launch': {
+      const sh = isShares();
       S.plan = {amount:S.draft.amount, asset:S.draft.asset, roundups:S.draft.roundups, since:Date.now()};
-      S.notifs.push({id:Date.now(), title:'Plan automatique activé', body:`${S.plan.amount} € sur ${info(S.plan.asset).name}, le 5 de chaque mois.`, t:Date.now(), read:false});
-      save(); renderAuto(); toast(`${S.plan.amount} € investis chaque 5 du mois`); break;
+      S.notifs.push({id:Date.now(), title: sh ? 'Plan automatique activé' : 'Versements programmés activés', body:`${S.plan.amount} € sur ${sh ? info(S.plan.asset).name : lower(P().name)}, le 5 de chaque mois.`, t:Date.now(), read:false});
+      save(); renderAuto(); toast(`${S.plan.amount} € ${sh ? 'investis' : 'versés'} chaque 5 du mois`); break;
     }
-    case 'stop-plan': S.plan = null; save(); renderAuto(); toast('Plan automatique arrêté'); break;
+    case 'stop-plan': S.plan = null; save(); renderAuto(); toast(isShares() ? 'Plan automatique arrêté' : 'Versements programmés arrêtés'); break;
     case 'reset': confirmReset = true; renderWallet(); break;
     case 'reset-no': confirmReset = false; renderWallet(); break;
-    case 'reset-yes': S = defaults(); save(); confirmReset = false; firstPaint = true; go('home'); toast('Démo réinitialisée'); break;
+    case 'reset-yes': G = defaults(); S = G.accounts[G.active]; save(); confirmReset = false; firstPaint = true; setNav(); go('home'); toast('Démo réinitialisée'); break;
   }
 });
 document.addEventListener('pointermove', chartMove);
@@ -992,12 +1369,15 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape'){ if ($('#picker').classList.contains('open')) closePicker(); else if (assetOpen() && !$('#sheet').classList.contains('open')) closeAsset(); else closeSheet(); }
     return;
   }
+  if (e.target.tagName === 'INPUT') return;
   if (/^[0-9]$/.test(e.key)) key(e.key);
   else if (e.key === ',' || e.key === '.') key(',');
   else if (e.key === 'Backspace') key('⌫');
   else if (e.key === 'Enter') confirmOrder();
   else if (e.key === 'Escape'){ if ($('#picker').classList.contains('open')) closePicker(); else closeSheet(); }
 });
+
+setNav();
 
 go('home');
 })();

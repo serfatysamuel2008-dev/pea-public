@@ -1,5 +1,7 @@
 # Mon PEA
 
+En touchant « Salut Léa · Mon PEA » sur l'Accueil, on ouvre **Mes comptes** et on passe d'un produit à l'autre : PEA, PEA-PME, compte-titres, assurance vie, contrat de capitalisation et PER. Chaque produit a ses 4 onglets adaptés (Supports, Avantages, Fiscalité, Transmission, Retraite…) et ses opérations : acheter / vendre, verser, retirer, arbitrer, simuler l'économie d'impôt.
+
 Application web (un seul fichier `index.html`, sans dépendance) qui reproduit la refonte de la rubrique PEA :
 
 - **Accueil** : valeur du PEA, gains depuis l'ouverture, graphique (1S, 1M, 1A, 5A, Tout) avec lecture au doigt, boutons Acheter / Vendre, conseil malin, compteur 5 ans, versements, mes placements, notifications.
