@@ -2,6 +2,14 @@
 
 App d'épargne complète : **PEA, PEA-PME, compte-titres, assurance vie, contrat de capitalisation et PER**, avec comptes utilisateurs et données enregistrées sur le serveur.
 
+## Version en ligne
+
+La version démo (sans connexion, données gardées dans le navigateur de chaque visiteur) est publiée automatiquement sur GitHub Pages à chaque mise à jour de `main` :
+
+https://serfatysamuel2008-dev.github.io/pea-public/
+
+La publication passe d'abord par les tests : si un test échoue, le site en ligne n'est pas modifié.
+
 ## Lancer l'app
 
 Il faut Node.js 22.13 ou plus récent. Aucune dépendance à installer.
