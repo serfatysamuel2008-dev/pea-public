@@ -6,8 +6,9 @@ Application web (un seul fichier `index.html`, sans dépendance) qui reproduit l
 - **Acheter / Vendre en 3 gestes** : choix du placement, pavé numérique, calcul automatique des parts entières, confirmation « C'est fait ! » et notification.
 - **Portefeuille** : valeur totale, répartition, détail de chaque placement (cours, PRU, plus-value), liquidités (verser / placer), historique, réinitialisation de la démo.
 - **Avantages** : compteur fiscal 5 ans calculé à partir de la date d'ouverture, plafond de 150 000 €, règles du PEA, estimation de l'impôt évité.
+- **Explorer** (bouton central ↗) : catalogue de 62 placements (15 ETF, 40 actions françaises et européennes, 7 obligations), recherche, filtres, favoris, tri, indices et tendances du jour. Chaque fiche a un graphique 1J / 1S / 1M / 1A / 5A, les chiffres clés et l'achat ou la vente directe. Les obligations sont affichées mais non achetables, car elles ne sont pas éligibles au PEA.
 - **Auto** : versement mensuel (25 / 50 / 100 / 200 €), simulation sur 10 ans à 5 %/an, arrondis, lancement / modification / arrêt du plan.
 
-Les données sont fictives et enregistrées dans le navigateur (localStorage).
+Les cours, graphiques et données sont fictifs et enregistrées dans le navigateur (localStorage).
 
 Pour l'utiliser : ouvrir `index.html` dans un navigateur, ou activer GitHub Pages sur la branche.
