@@ -23,7 +23,7 @@ const de = n => /^ETF/.test(n) || (!/^[A-Z]{2}/.test(n) && /^[AEIOUYHÉÈaeiouyh
 
 /* ---------- products ---------- */
 const PR = {
-  pea:{kind:'shares', name:'Mon PEA', ab:'PEA', tone:'blue', group:'Bourse', label:'Actions européennes, 0 impôt après 5 ans', vaut:'Ton PEA vaut', ton:'ton PEA', nav:['Portefeuille','Avantages'], open:new Date(2023,2,12), years:5},
+  pea:{kind:'shares', name:'Mon PEA', ab:'PEA', tone:'blue', group:'Bourse', label:'Actions européennes, fiscalité douce', vaut:'Ton PEA vaut', ton:'ton PEA', nav:['Portefeuille','Avantages'], open:new Date(2023,2,12), years:5},
   pme:{kind:'shares', name:'Mon PEA-PME', ab:'PME', tone:'teal', group:'Bourse', label:'PME et ETI européennes', vaut:'Ton PEA-PME vaut', ton:'ton PEA-PME', nav:['Portefeuille','Avantages'], open:new Date(2024,2,12), years:5},
   ct:{kind:'shares', name:'Mon compte-titres', ab:'CT', tone:'orange', group:'Bourse', label:'Toutes les bourses, sans plafond', vaut:'Ton compte-titres vaut', ton:'ton compte-titres', nav:['Portefeuille','Fiscalité'], open:new Date(2022,4,2)},
   av:{kind:'contract', name:'Mon assurance vie', ab:'AV', tone:'green', group:'Épargne long terme', label:'Épargne disponible et transmission', vaut:'Ton assurance vie vaut', ton:'ton assurance vie', nav:['Supports','Avantages'], open:new Date(2021,2,12), years:8, op2:['withdraw','Retirer'], sub:'Répartition selon ton profil'},

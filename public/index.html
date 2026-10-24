@@ -126,7 +126,7 @@ h2.sec{font-size:17px;font-weight:800;margin:10px 0 0;letter-spacing:-.01em}
 .chips button{height:42px;border-radius:12px;border:1.5px solid var(--line);font-weight:700;background:#fff;transition:background .15s,color .15s}
 .chips button.on{background:var(--navy);border-color:var(--navy);color:#fff}
 .asset-line{display:flex;align-items:center;gap:12px;background:var(--soft);border-radius:14px;padding:10px 12px;margin-top:12px;width:100%;text-align:left}
-.asset-line b{display:block;font-size:13px} .asset-line span{display:block;font-size:12px;color:var(--muted)}
+.asset-line b{display:block;font-size:13px;color:var(--ink)} .asset-line span{display:block;font-size:12px;color:var(--muted)}
 .asset-line .av{width:34px;height:34px;font-size:11px;border-radius:10px}
 .toggle-row{display:flex;align-items:center;gap:12px}
 .toggle-row>div{flex:1;min-width:0}
@@ -376,6 +376,7 @@ const val = Engine.val, held = Engine.held, totOf = Engine.totOf;
 const invested = () => S.positions.reduce((a,p) => a + val(p), 0);
 const total = () => totOf(S);
 const gain = () => r2(total() - S.deposits);
+const ratio = (g, base) => base > 0 ? g/base*100 : 0;
 const common = () => Engine.common(G);
 const allocShort = () => Engine.allocShort(S, G.active);
 const depositRoom = () => Engine.depositRoom(G, G.active);
@@ -420,9 +421,10 @@ function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let 
 const RANGES = {'1S':{days:7,start:.992,vol:.004,seed:3}, '1M':{days:30,start:.978,vol:.01,seed:7}, '1A':{days:365,start:.87,vol:.03,seed:11}, '5A':{days:0,start:0,vol:.05,seed:19}, 'Tout':{days:0,start:0,vol:.05,seed:19}};
 function series(key, end, seedExtra){
   const R = RANGES[key], N = 60, now = Date.now();
-  const days = R.days || Math.round((now - P().open) / 86400000);
-  const start = R.start ? end * R.start : Math.min(5000, end * .3);
-  const rand = rng(R.seed + (seedExtra || 0) + ORDER.indexOf(G.active)*101);
+  const since = Math.round((now - P().open) / 86400000);
+  const days = key === '5A' ? Math.min(1826, since) : R.days || since;
+  const start = R.start ? end * R.start : key === '5A' && since > 1826 ? end * .62 : Math.min(5000, end * .3);
+  const rand = rng(R.seed + (key === '5A' ? 5 : 0) + (seedExtra || 0) + ORDER.indexOf(G.active)*101);
   const w = [0]; for (let i = 1; i < N; i++) w.push(w[i-1] + (rand() - .5));
   const pts = [];
   for (let i = 0; i < N; i++){
@@ -546,7 +548,7 @@ function renderHome(){
     </div>
     <p class="lbl" id="valLbl">${P().vaut}</p>
     <p class="big num" id="totalVal">${eur(firstPaint ? 0 : total())}</p>
-    <div class="gainrow"><span class="pill-gain num ${g<0?'neg':''}">${tri(g)} ${sgn(g)}${eur(Math.abs(g))}</span><span class="num">${pct(g/S.deposits*100)} depuis l’ouverture</span></div>
+    <div class="gainrow"><span class="pill-gain num ${g<0?'neg':''}">${tri(g)} ${sgn(g)}${eur(Math.abs(g))}</span><span class="num">${pct(ratio(g, S.deposits))} depuis l’ouverture</span></div>
     <svg class="chart" id="chart" data-scrub viewBox="0 0 340 110" preserveAspectRatio="none" role="img" aria-label="Évolution de la valeur"></svg>
     <div class="ranges" role="tablist">${Object.keys(RANGES).map(k => `<button role="tab" data-act="range" data-r="${k}" class="${k===range?'on':''}" aria-selected="${k===range}">${k}</button>`).join('')}</div>
     <div class="cta2">${heroOps()}</div>
@@ -601,17 +603,17 @@ function histRow(h){
   const icon = {deposit:'+', auto:'+', sell:'↘', buy:'↗', arb:'⇆', withdraw:'−'}[h.kind] || '•';
   const neutral = h.kind === 'arb';
   return `<div class="row"><span class="av ${neutral ? 't-grey' : h.amount >= 0 ? 't-green' : 't-blue'}">${icon}</span>
-    <span class="mid-col"><b>${esc(h.label)}</b><span>${esc(h.detail)} · ${dShort(new Date(h.t))}</span></span>
+    <span class="mid-col"><b>${esc(h.label)}</b><span>${esc(h.detail)}</span><span>${dShort(new Date(h.t))}</span></span>
     <span class="right num"><b class="${!neutral && h.amount >= 0 ? 'up' : ''}" style="font-size:14px">${neutral ? '' : sgn(h.amount)}${eur(Math.abs(h.amount))}</b></span></div>`;
 }
 function renderWallet(){
   const g = gain();
   const hist = S.history.slice().sort((a,b) => b.t - a.t).slice(0, 12);
   $('#v-wallet').innerHTML = `
-  <h1 class="ptitle pad">${isShares() ? 'Mon portefeuille' : 'Mes supports'}</h1>
+  <h1 class="ptitle pad">${isShares() ? 'Mon portefeuille' : esc(P().name)}</h1>
   <div class="pad stack">
-    <div class="navy-card"><div class="k">${esc(P().name)} · valeur totale</div><div class="v num">${eur(total())}</div>
-      <div class="s num">${tri(g)} ${sgn(g)}${eur(Math.abs(g))} (${pct(g/S.deposits*100)}) depuis l’ouverture</div>
+    <div class="navy-card"><div class="k">Valeur totale</div><div class="v num">${eur(total())}</div>
+      <div class="s num">${tri(g)} ${sgn(g)}${eur(Math.abs(g))} (${pct(ratio(g, S.deposits))}) depuis l’ouverture</div>
       <div class="xs num">${isShares() ? `Placé : ${eur(invested())} · Liquidités : ${eur(S.cash)}` : `Versé : ${eur0(S.deposits)} · ouvert le ${dNum(P().open)}`}</div></div>
     <div class="card"><p class="strong" style="margin:0 0 12px">Répartition</p>${donut()}</div>
     <h2 class="sec">${isShares() ? 'Mes placements' : 'Mes supports'}</h2>
@@ -778,14 +780,14 @@ function openOrder(mode, asset, preset){
   O.mode = mode; O.input = preset ? String(preset).replace('.', ',') : ''; O.done = null;
   if (isShares()){
     O.asset = asset || (pos(O.asset) ? O.asset : S.draft.asset);
-    if (mode === 'sell' && !held(pos(O.asset))){ const p = S.positions.find(held); if (p) O.asset = p.id; }
+    if (mode === 'sell' && !held(pos(O.asset))){ const p = S.positions.find(held); if (!p){ toast('Tu n’as rien à vendre sur ce compte.'); return; } O.asset = p.id; }
   } else if (mode === 'arb'){ defaultArb(); if (asset && pos(asset)){ O.asset = asset; if (O.to === asset) O.to = S.positions.find(p => p.id !== asset).id; } }
   renderOrder(); $('#sheet').classList.add('open'); caption('order');
 }
 function setMode(m){
   O.mode = m; O.input = '';
   if (m === 'arb') defaultArb();
-  if (m === 'sell' && !held(pos(O.asset))){ const p = S.positions.find(held); if (p) O.asset = p.id; }
+  if (m === 'sell' && !held(pos(O.asset))){ const p = S.positions.find(held); if (!p){ O.mode = 'buy'; toast('Tu n’as rien à vendre sur ce compte.'); } else O.asset = p.id; }
   renderOrder();
 }
 function closeSheet(){ $('#sheet').classList.remove('open'); closePicker(); caption(view); if (assetOpen()) renderAsset(); }
@@ -916,13 +918,13 @@ function accountsPanel(){
     const name = pr.name.replace(/^Mon /, ''), nm = name.charAt(0).toUpperCase() + name.slice(1);
     return `<button class="row acc ${k===G.active?'on':''}" data-act="switch" data-k="${k}" aria-current="${k===G.active}">${avatar({id:pr.ab, tone:pr.tone})}
       <span class="mid-col"><b>${esc(nm)}</b><span>${esc(pr.label)}</span></span>
-      <span class="right num"><b>${eur(t)}</b><span class="${g>=0?'up':'down'}">${tri(g)} ${pct(g/a.deposits*100)}</span></span></button>`;
+      <span class="right num"><b>${eur(t)}</b><span class="${g>=0?'up':'down'}">${tri(g)} ${pct(ratio(g, a.deposits))}</span></span></button>`;
   };
   const groups = [...new Set(ORDER.map(k => PR[k].group))];
   openPicker(`<div class="sheet-top"><span class="sheet-title">Mes comptes</span><button class="close" data-act="close-picker" aria-label="Fermer">${I.x}</button></div>
     <div class="acc-scroll">
       <div class="navy-card" style="margin-top:12px"><div class="k">Ton patrimoine · ${ORDER.length} comptes</div><div class="v num" style="font-size:26px">${eur(all)}</div>
-        <div class="s num">${tri(allG)} ${sgn(allG)}${eur(Math.abs(allG))} (${pct(allG/allDep*100)}) depuis l’ouverture</div></div>
+        <div class="s num">${tri(allG)} ${sgn(allG)}${eur(Math.abs(allG))} (${pct(ratio(allG, allDep))}) depuis l’ouverture</div></div>
       ${groups.map(gr => `<p class="acc-h">${gr}</p><div class="list acc-list">${ORDER.filter(k => PR[k].group === gr).map(row).join('')}</div>`).join('')}
       ${MODE === 'server' && USER ? `<div class="acc-user"><span>Compte : <b>${esc(USER.email)}</b></span><button class="ghost" data-act="logout">Se déconnecter</button></div>`
         : '<p class="m-note" style="margin:16px 0 4px">Mode démo : tes données restent dans ce navigateur.</p>'}
