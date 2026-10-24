@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mon PEA</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: one phone-sized app. Full screen on mobile, centred in a device frame with a caption on desktop. */
+:root{
+  --navy:#0b3a8c; --navy-2:#2a58ad; --navy-ink:#081d47;
+  --ink:#0f1a33; --muted:#5b6478; --faint:#8a93a6;
+  --bg:#eef2f8; --stage:#e6ecf6; --card:#ffffff; --line:#e3e8f1; --soft:#f1f4f9;
+  --chip:#e6eefc; --green:#17804a; --green-soft:#e3f4ea; --red:#c2410c; --orange:#b45309; --orange-soft:#fdeee3;
+  --on-navy:#ffffff; --on-navy-dim:#c9d6f0;
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--stage);color:var(--ink);font-family:var(--font);font-size:14px;-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid #7aa2f7;outline-offset:2px;border-radius:12px}
+.num{font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+
+/* ---------- stage / device ---------- */
+.stage{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.caption{text-align:center;display:none}
+.caption h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.02em;text-wrap:balance}
+.caption p{margin:6px 0 0;color:var(--muted);font-size:13px;font-weight:500}
+.device{position:relative;width:100%;height:100%;background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
+@media (min-width:600px) and (min-height:640px){
+  .caption{display:block}
+  .device{width:390px;height:min(820px,calc(100% - 120px));border-radius:46px;border:10px solid var(--navy-ink);box-shadow:0 30px 60px -20px rgba(11,58,140,.35)}
+}
+
+/* ---------- screens ---------- */
+.screens{flex:1;position:relative;min-height:0}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:110px;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.pad{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.stack{display:flex;flex-direction:column;gap:12px}
+
+/* hero (navy band) */
+.hero{background:var(--navy);color:var(--on-navy);border-radius:0 0 28px 28px;padding-top:calc(18px + env(safe-area-inset-top,0px));padding-bottom:18px}
+.topbar{display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:34px;height:34px;border-radius:10px;background:#fff;color:var(--navy);display:grid;place-items:center;font-size:8px;font-weight:800;letter-spacing:.04em}
+.brand small{display:block;font-size:11px;color:var(--on-navy-dim)}
+.brand b{display:block;font-size:14px;font-weight:700}
+.icon-btn{position:relative;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.14);display:grid;place-items:center;color:#fff}
+.icon-btn .dot{position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:#ff8a4c;border:2px solid var(--navy)}
+.lbl{margin:18px 0 2px;font-size:12px;color:var(--on-navy-dim)}
+.big{margin:0;font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.gainrow{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--on-navy-dim);flex-wrap:wrap}
+.pill-gain{background:#fff;color:var(--green);font-weight:700;border-radius:999px;padding:3px 9px;font-size:12px}
+.pill-gain.neg{color:var(--red)}
+.chart{display:block;width:100%;height:110px;margin-top:10px;touch-action:pan-y;cursor:crosshair}
+.ranges{display:flex;gap:6px;margin-top:10px}
+.ranges button{flex:1;height:30px;border-radius:9px;background:rgba(255,255,255,.12);color:#fff;font-size:12px;font-weight:600}
+.ranges button.on{background:#fff;color:var(--navy)}
+.cta2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.btn-w,.btn-o{height:46px;border-radius:14px;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-w{background:#fff;color:var(--navy)}
+.btn-o{border:1.5px solid #fff;color:#fff}
+
+.content{padding-top:16px}
+.card{background:var(--card);border-radius:20px;padding:16px}
+.card.tap{text-align:left;width:100%;display:block;transition:transform .15s}
+.card.tap:active{transform:scale(.985)}
+.tag{display:inline-flex;align-items:center;gap:4px;background:var(--chip);color:var(--navy);font-weight:700;font-size:11px;border-radius:999px;padding:4px 10px}
+.card h3{margin:10px 0 4px;font-size:15px;font-weight:700;text-wrap:balance}
+.card p.sub{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ring{display:block}
+.small-lbl{font-size:12px;color:var(--muted);margin:8px 0 4px}
+.strong{font-weight:700;font-size:14px;line-height:1.3}
+.mid{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:2px 0 8px}
+.bar{height:7px;border-radius:99px;background:var(--chip);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--navy);border-radius:99px;transition:width .6s ease}
+h2.sec{font-size:17px;font-weight:800;margin:10px 0 0;letter-spacing:-.01em}
+.list{padding:4px 16px}
+.row{display:flex;align-items:center;gap:12px;padding:12px 0;width:100%;text-align:left}
+.row+.row{border-top:1px solid var(--line)}
+.av{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:12px}
+.t-blue{background:var(--chip);color:var(--navy)} .t-orange{background:var(--orange-soft);color:var(--orange)} .t-green{background:var(--green-soft);color:var(--green)} .t-grey{background:var(--soft);color:var(--muted)}
+.row .mid-col{flex:1;min-width:0}
+.row .mid-col b{display:block;font-size:14px}
+.row .mid-col span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .right{text-align:right;flex:none}
+.row .right b{display:block;font-size:14px}
+.up{color:var(--green);font-weight:700;font-size:12px}
+.down{color:var(--red);font-weight:700;font-size:12px}
+
+/* page titles (non-hero screens) */
+.ptitle{font-size:18px;font-weight:800;margin:0;padding-top:calc(22px + env(safe-area-inset-top,0px));padding-bottom:12px;letter-spacing:-.01em}
+.navy-card{background:var(--navy);color:#fff;border-radius:20px;padding:18px}
+.navy-card .k{font-size:12px;color:var(--on-navy-dim)}
+.navy-card .v{font-size:30px;font-weight:800;letter-spacing:-.03em;margin:4px 0 8px}
+.navy-card .s{font-size:12px;color:#fff}
+.navy-card .xs{font-size:11px;color:var(--on-navy-dim);margin-top:8px}
+
+/* perks hero */
+.perk-hero{padding-top:calc(22px + env(safe-area-inset-top,0px))}
+.perk-hero h1{margin:0 0 14px;font-size:17px;font-weight:800}
+.perk-hero .k{font-size:12px;color:var(--on-navy-dim)}
+.perk-hero .h{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:4px 0 6px;line-height:1.15;text-wrap:balance}
+.perk-hero .d{font-size:12px;color:var(--on-navy-dim);line-height:1.4}
+.wbar{height:8px;border-radius:99px;background:rgba(255,255,255,.22);margin:16px 0 10px;overflow:hidden}
+.wbar i{display:block;height:100%;background:#fff;border-radius:99px;transition:width .8s ease}
+.tl{display:flex;justify-content:space-between;font-size:11px;color:var(--on-navy-dim)}
+.tl div:nth-child(2){text-align:center} .tl div:last-child{text-align:right}
+.tl b{display:block;color:#fff;font-weight:600}
+.step{display:flex;gap:14px;align-items:flex-start}
+.step .n{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:800}
+.step b{display:block;font-size:14px;margin-bottom:3px}
+.step span{display:block;font-size:13px;color:var(--muted);line-height:1.45}
+.link-btn{color:var(--navy);font-weight:700;font-size:13px;margin-top:10px}
+
+/* auto */
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.chips button{height:42px;border-radius:12px;border:1.5px solid var(--line);font-weight:700;background:#fff;transition:background .15s,color .15s}
+.chips button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.asset-line{display:flex;align-items:center;gap:12px;background:var(--soft);border-radius:14px;padding:10px 12px;margin-top:12px;width:100%;text-align:left}
+.asset-line b{display:block;font-size:13px} .asset-line span{display:block;font-size:12px;color:var(--muted)}
+.asset-line .av{width:34px;height:34px;font-size:11px;border-radius:10px}
+.toggle-row{display:flex;align-items:center;gap:12px}
+.toggle-row>div{flex:1;min-width:0}
+.switch{flex:none;width:50px;height:30px;border-radius:99px;background:#c9d0dc;position:relative;transition:background .2s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+.switch[aria-checked="true"]{background:var(--navy)}
+.switch[aria-checked="true"]::after{transform:translateX(20px)}
+.primary{width:100%;height:52px;border-radius:14px;background:var(--navy);color:#fff;font-weight:700;font-size:15px;transition:background .2s}
+.primary:disabled{background:#7d879b;cursor:default}
+.ghost{width:100%;height:46px;border-radius:14px;border:1.5px solid var(--line);font-weight:700;color:var(--navy);background:#fff}
+.danger-link{color:var(--red);font-weight:600;font-size:13px}
+
+/* bottom nav */
+.nav{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);align-items:end;padding:8px max(6px,env(safe-area-inset-left,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-right,0px));z-index:5}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--faint)}
+.nav button.on{color:var(--navy)}
+.nav .fab{align-self:center}
+.nav .fab span{width:50px;height:50px;border-radius:16px;background:var(--navy);display:grid;place-items:center;color:#fff;margin-top:-26px;box-shadow:0 8px 18px -6px rgba(11,58,140,.6)}
+
+/* overlay sheet */
+.sheet{position:absolute;inset:0;background:var(--card);z-index:20;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1);visibility:hidden}
+.sheet.open{transform:none;visibility:visible}
+.sheet-body{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.sheet-top{display:flex;align-items:center;gap:10px}
+.close{flex:none;width:38px;height:38px;border-radius:50%;background:var(--soft);display:grid;place-items:center}
+.seg{flex:1;display:grid;grid-template-columns:1fr 1fr;background:var(--soft);border-radius:14px;padding:4px}
+.seg button{height:36px;border-radius:11px;font-weight:700;color:var(--muted)}
+.seg button.on{background:#fff;color:var(--navy);box-shadow:0 1px 4px rgba(15,26,51,.1)}
+.sheet-title{flex:1;font-weight:800;font-size:16px}
+.asset-card{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:16px;padding:10px 12px;margin-top:14px;width:100%;text-align:left}
+.asset-card b{display:block;font-size:14px}
+.asset-card span{display:block;font-size:12px;color:var(--muted)}
+.asset-card .chev{margin-left:auto;color:var(--faint)}
+.asset-card span span{display:inline}
+.asset-card .av,.asset-line .av{display:grid}
+.asset-card .t-blue,.asset-line .t-blue{color:var(--navy)} .asset-card .t-orange,.asset-line .t-orange{color:var(--orange)} .asset-card .t-green,.asset-line .t-green{color:var(--green)}
+.asset-card span.up{color:var(--green)} .asset-card span.down{color:var(--red)}
+.q{text-align:center;color:var(--muted);font-weight:600;font-size:13px;margin:18px 0 2px}
+.amt{text-align:center;font-size:46px;font-weight:800;letter-spacing:-.03em;margin:0;line-height:1.15}
+.amt.empty{color:#b9c0cd}
+.parts-pill{display:table;margin:8px auto 0;background:var(--chip);color:var(--navy);font-weight:700;font-size:12px;border-radius:999px;padding:5px 12px}
+.parts-pill.warn{background:var(--orange-soft);color:var(--orange)}
+.info{background:var(--soft);border-radius:14px;padding:12px;margin-top:14px;font-size:12px}
+.info .l{display:flex;justify-content:space-between;gap:10px;padding:3px 0;color:var(--muted)}
+.info .l b{color:var(--ink)}
+.info p{margin:6px 0 0;color:var(--muted);line-height:1.45}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin:12px 0 12px}
+.keypad button{height:50px;border-radius:14px;font-size:22px;font-weight:600}
+.keypad button:active{background:var(--soft)}
+.spacer{flex:1}
+.done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px}
+.done .tick{width:76px;height:76px;border-radius:50%;background:var(--navy);display:grid;place-items:center;color:#fff;margin-bottom:12px;animation:pop .45s cubic-bezier(.2,1.4,.4,1)}
+.done h2{margin:0;font-size:24px;font-weight:800}
+.done p{margin:0;max-width:30ch}
+.done p.b{font-weight:600}
+.done p.m{color:var(--muted);font-size:12px}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+.picker{position:absolute;inset:0;z-index:30;background:rgba(15,26,51,.35);display:flex;align-items:flex-end;opacity:0;visibility:hidden;transition:opacity .2s}
+.picker.open{opacity:1;visibility:visible}
+.picker .pk{background:#fff;width:100%;border-radius:22px 22px 0 0;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.picker h4{margin:0 0 6px;font-size:15px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.stats div{background:var(--soft);border-radius:14px;padding:10px 12px}
+.stats span{display:block;font-size:11px;color:var(--muted)}
+.stats b{display:block;font-size:15px;margin-top:2px}
+.donut-wrap{display:flex;align-items:center;gap:16px}
+.legend{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px;font-size:12px}
+.legend div{display:flex;align-items:center;gap:8px}
+.legend i{width:10px;height:10px;border-radius:3px;flex:none}
+.legend span{flex:1;color:var(--muted)}
+.empty-note{color:var(--muted);font-size:13px;padding:14px 0;text-align:center}
+.confirm{background:var(--orange-soft);border-radius:14px;padding:12px;font-size:13px}
+.confirm div{display:flex;gap:8px;margin-top:10px}
+.confirm button{flex:1;height:38px;border-radius:10px;font-weight:700}
+
+/* toast */
+.toast{position:absolute;left:12px;right:12px;top:calc(12px + env(safe-area-inset-top,0px));z-index:40;background:#0d1730;color:#fff;border-radius:14px;padding:12px 14px;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:center;transform:translateY(-140%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.toast.show{transform:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="caption"><h1 id="capT">Tout d'un coup d'œil</h1><p id="capS">Valeur, gains, conseils et compteur fiscal</p></div>
+  <div class="device" id="app">
+    <div class="toast" id="toast" role="status" aria-live="polite"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg><span id="toastTxt"></span></div>
+
+    <div class="screens">
+      <section class="screen" id="v-home" data-view="home"></section>
+      <section class="screen" id="v-wallet" data-view="wallet" hidden></section>
+      <section class="screen" id="v-perks" data-view="perks" hidden></section>
+      <section class="screen" id="v-auto" data-view="auto" hidden></section>
+    </div>
+
+    <nav class="nav" aria-label="Navigation principale">
+      <button data-act="go" data-v="home" class="on"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg>Accueil</button>
+      <button data-act="go" data-v="wallet"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5V12h8.5"/></svg>Portefeuille</button>
+      <button data-act="buy" class="fab" aria-label="Acheter ou vendre"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span></button>
+      <button data-act="go" data-v="perks"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6z"/></svg>Avantages</button>
+      <button data-act="go" data-v="auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>Auto</button>
+    </nav>
+
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Ordre"><div class="sheet-body pad" id="sheetBody"></div></div>
+    <div class="picker" id="picker"><div class="pk" id="pickerBody"></div></div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- formatting ---------- */
+const F2 = new Intl.NumberFormat('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const F0 = new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0});
+const F1 = new Intl.NumberFormat('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1});
+const eur = v => F2.format(v) + ' €';
+const eur0 = v => F0.format(Math.round(v)) + ' €';
+const sgn = v => v >= 0 ? '+' : '−';
+const pct = v => sgn(v) + F1.format(Math.abs(v)) + ' %';
+const tri = v => v >= 0 ? '▲' : '▼';
+const r2 = v => Math.round(v * 100) / 100;
+const MONTHS = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+const dShort = d => d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+const dNum = d => String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- state ---------- */
+const KEY = 'monpea:v1';
+const CAP = 150000;
+const OPEN = new Date(2023, 2, 12);
+
+function defaults(){
+  return {
+    firstName: 'Léa',
+    cash: 1250,
+    deposits: 21500,
+    positions: [
+      {id:'MO', name:'ETF Monde',   sub:'MSCI World',  tone:'blue',   parts:48,  price:320.63, cost:13020.51, day:0.8},
+      {id:'US', name:'ETF S&P 500', sub:'Actions US',  tone:'orange', parts:160, price:37.25,  cost:4909.39,  day:0.4},
+      {id:'EU', name:'ETF Europe',  sub:'Stoxx 600',   tone:'green',  parts:26,  price:86.93,  cost:2301.61,  day:-0.3}
+    ],
+    history: [
+      {t: Date.now() - 86400000*12, kind:'auto', label:'Versement programmé', detail:'ETF Monde', amount:50},
+      {t: Date.now() - 86400000*40, kind:'deposit', label:'Versement', detail:'Depuis ton compte courant', amount:1000},
+      {t: Date.now() - 86400000*75, kind:'buy', label:'Achat · 4 parts', detail:'ETF S&P 500', amount:-148.6}
+    ],
+    plan: null,
+    draft: {amount:50, asset:'MO', roundups:false},
+    notifs: [
+      {id:1, title:'Tu as 1 250 € qui dorment', body:'Place-les sur ton ETF Monde en 2 clics.', t: Date.now() - 3600000*5, read:false},
+      {id:2, title:'Plus que 1 an et 4 mois', body:'Ensuite, zéro impôt sur le revenu sur tes gains.', t: Date.now() - 86400000*3, read:false}
+    ]
+  };
+}
+let S;
+try { S = JSON.parse(localStorage.getItem(KEY)) || defaults(); } catch(e){ S = defaults(); }
+if (!S.positions || !S.draft) S = defaults();
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+
+const pos = id => S.positions.find(p => p.id === id);
+const val = p => r2(p.parts * p.price);
+const invested = () => S.positions.reduce((a,p) => a + val(p), 0);
+const total = () => r2(invested() + S.cash);
+const gain = () => r2(total() - S.deposits);
+
+/* ---------- dates / fiscal counter ---------- */
+function monthsBetween(a, b){
+  let m = (b.getFullYear() - a.getFullYear())*12 + (b.getMonth() - a.getMonth());
+  if (b.getDate() < a.getDate()) m--;
+  return Math.max(0, m);
+}
+function ym(m){
+  const y = Math.floor(m/12), mo = m % 12;
+  const ys = y ? y + (y > 1 ? ' ans' : ' an') : '';
+  const ms = mo ? mo + ' mois' : '';
+  return ys && ms ? ys + ' et ' + ms : (ys || ms || 'moins d’un mois');
+}
+function fiscal(){
+  const now = new Date();
+  const goal = new Date(OPEN); goal.setFullYear(OPEN.getFullYear() + 5);
+  const p = Math.min(1, Math.max(0, (now - OPEN) / (goal - OPEN)));
+  const elapsed = monthsBetween(OPEN, now);
+  const left = monthsBetween(now, goal);
+  return {now, goal, p, done: now >= goal, elapsedTxt: ym(elapsed).replace(' et ', ' '), leftTxt: ym(left)};
+}
+
+/* ---------- series for the chart ---------- */
+function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const RANGES = {'1S':{days:7,start:.992,vol:.004,seed:3}, '1M':{days:30,start:.978,vol:.01,seed:7}, '1A':{days:365,start:.87,vol:.03,seed:11}, '5A':{days:0,start:0,vol:.05,seed:19}, 'Tout':{days:0,start:0,vol:.05,seed:19}};
+function series(key, end, seedExtra){
+  const R = RANGES[key], N = 60, now = Date.now();
+  const days = R.days || Math.round((now - OPEN) / 86400000);
+  const start = R.start ? end * R.start : 5000;
+  const rand = rng(R.seed + (seedExtra||0));
+  const w = [0]; for (let i = 1; i < N; i++) w.push(w[i-1] + (rand() - .5));
+  const pts = [];
+  for (let i = 0; i < N; i++){
+    const t = i/(N-1);
+    const noise = w[i] - (w[0] + (w[N-1]-w[0])*t);
+    pts.push({t: now - (1-t)*days*86400000, v: Math.max(0, start + (end-start)*t + noise*end*R.vol)});
+  }
+  pts[N-1].v = end;
+  return pts;
+}
+function pathFor(pts, W, H, pad){
+  const vs = pts.map(p => p.v), mn = Math.min(...vs), mx = Math.max(...vs), span = (mx - mn) || 1;
+  const xy = pts.map((p,i) => [i*(W/(pts.length-1)), pad + (H - 2*pad)*(1 - (p.v - mn)/span)]);
+  const line = xy.map((p,i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  return {xy, line, area: line + ` L${W} ${H} L0 ${H} Z`};
+}
+
+/* ---------- UI state ---------- */
+let view = 'home', range = '1A', firstPaint = true;
+const CAPTIONS = {
+  home:['Tout d’un coup d’œil','Valeur, gains, conseils et compteur fiscal'],
+  wallet:['Ton portefeuille','Tes placements, tes liquidités, ton historique'],
+  perks:['Ton compteur fiscal, en clair','Combien de temps avant zéro impôt sur le revenu'],
+  auto:['Investis en automatique','Chaque mois, et avec les arrondis de ta carte'],
+  order:['Acheter en 3 gestes','Tu tapes un montant, l’app calcule les parts']
+};
+function caption(k){ const c = CAPTIONS[k]; $('#capT').textContent = c[0]; $('#capS').textContent = c[1]; }
+const $ = s => document.querySelector(s);
+
+/* ---------- icons ---------- */
+const I = {
+  bell:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15zM10 21h4"/></svg>',
+  x:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  chev:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  right:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
+  back:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 5H9l-6 7 6 7h12z"/><path d="M12 9.5l5 5M17 9.5l-5 5"/></svg>',
+  check:'<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>',
+  spark:'✦'
+};
+
+/* ---------- HOME ---------- */
+function advice(){
+  const mo = pos('MO');
+  if (S.cash >= mo.price) return {act:'advice-buy', tag:'Conseil malin', h:`Tu as ${eur0(S.cash)} qui dorment sur ton PEA.`, p:'Les liquidités ne rapportent rien ici. Place-les sur ton ETF Monde en 2 clics.'};
+  if (!S.plan) return {act:'go-auto', tag:'Conseil malin', h:'Investis un peu chaque mois, sans y penser.', p:'Dès 25 € par mois sur ton ETF Monde. Tu peux arrêter quand tu veux.'};
+  return {act:'go-perks', tag:'Bon à savoir', h:`Ton plan de ${eur0(S.plan.amount)} par mois tourne.`, p:'Chaque versement compte dans ton plafond de 150 000 €. Regarde où tu en es.'};
+}
+function ringSVG(p, size){
+  const r = size/2 - 5, c = 2*Math.PI*r;
+  return `<svg class="ring" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--chip)" stroke-width="6"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--navy)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(c*p).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 ${size/2} ${size/2})"/>
+    <text x="50%" y="50%" dy=".35em" text-anchor="middle" font-size="12" font-weight="800" fill="var(--ink)">${Math.round(p*100)}%</text></svg>`;
+}
+function posRow(p, act){
+  const perf = (val(p)/p.cost - 1)*100;
+  const share = invested() ? Math.round(val(p)/total()*100) : 0;
+  return `<button class="row" data-act="${act||'detail'}" data-id="${p.id}">
+    <span class="av t-${p.tone}">${p.id}</span>
+    <span class="mid-col"><b>${esc(p.name)}</b><span>${esc(p.sub)} · ${share} %</span></span>
+    <span class="right num"><b>${eur(val(p))}</b><span class="${perf>=0?'up':'down'}">${tri(perf)} ${pct(perf)}</span></span></button>`;
+}
+function renderHome(){
+  const f = fiscal(), a = advice(), g = gain();
+  const unread = S.notifs.some(n => !n.read);
+  $('#v-home').innerHTML = `
+  <header class="hero"><div class="pad">
+    <div class="topbar">
+      <div class="brand"><span class="logo">LOGO</span><div><small>Salut ${esc(S.firstName)}</small><b>Mon PEA</b></div></div>
+      <button class="icon-btn" data-act="notifs" aria-label="Notifications">${I.bell}<span class="dot" ${unread?'':'hidden'}></span></button>
+    </div>
+    <p class="lbl" id="valLbl">Ton PEA vaut</p>
+    <p class="big num" id="totalVal">${eur(firstPaint ? 0 : total())}</p>
+    <div class="gainrow"><span class="pill-gain num ${g<0?'neg':''}">${tri(g)} ${sgn(g)}${eur(Math.abs(g))}</span><span class="num">${pct(g/S.deposits*100)} depuis l’ouverture</span></div>
+    <svg class="chart" id="chart" viewBox="0 0 340 110" preserveAspectRatio="none" role="img" aria-label="Évolution de la valeur du PEA"></svg>
+    <div class="ranges" role="tablist">${Object.keys(RANGES).map(k => `<button role="tab" data-act="range" data-r="${k}" class="${k===range?'on':''}" aria-selected="${k===range}">${k}</button>`).join('')}</div>
+    <div class="cta2"><button class="btn-w" data-act="buy">+ Acheter</button><button class="btn-o" data-act="sell">− Vendre</button></div>
+  </div></header>
+  <div class="content pad stack">
+    <button class="card tap" data-act="${a.act}"><span class="tag">${I.spark} ${a.tag}</span><h3>${esc(a.h)}</h3><p class="sub">${esc(a.p)}</p></button>
+    <div class="grid2">
+      <button class="card tap" data-act="go" data-v="perks">${ringSVG(f.p, 54)}<p class="small-lbl">Compteur 5 ans</p><p class="strong" style="margin:0">${f.done ? 'Zéro impôt sur tes gains, c’est acquis' : 'Zéro impôt sur tes gains dans ' + f.leftTxt}</p></button>
+      <button class="card tap" data-act="go" data-v="perks"><p class="small-lbl" style="margin-top:0">Versements</p><p class="mid num">${eur0(S.deposits)}</p><div class="bar"><i style="width:${Math.max(3,S.deposits/CAP*100)}%"></i></div><p class="small-lbl">sur 150 000 €</p><p class="strong" style="margin:0">Encore ${eur0(CAP - S.deposits)} possibles</p></button>
+    </div>
+    <h2 class="sec">Mes placements</h2>
+    <div class="card list">${S.positions.filter(p => p.parts > 0).map(p => posRow(p)).join('') || '<p class="empty-note">Aucun placement pour l’instant.</p>'}</div>
+  </div>`;
+  drawChart();
+  if (firstPaint){ firstPaint = false; countUp($('#totalVal'), 0, total(), 1100, eur); }
+}
+let chartPts = [];
+function drawChart(){
+  const svg = $('#chart'); if (!svg) return;
+  chartPts = series(range, total());
+  const {line, area} = pathFor(chartPts, 340, 110, 8);
+  svg.innerHTML = `<defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".32"/><stop offset="1" stop-color="#fff" stop-opacity=".06"/></linearGradient></defs>
+    <path d="${area}" fill="url(#ga)"/><path d="${line}" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+    <line id="scrubL" x1="0" x2="0" y1="0" y2="110" stroke="#fff" stroke-opacity=".5" stroke-width="1" vector-effect="non-scaling-stroke" visibility="hidden"/>`;
+}
+function scrub(e){
+  const svg = $('#chart'); if (!svg || !chartPts.length) return;
+  const b = svg.getBoundingClientRect();
+  const x = Math.min(1, Math.max(0, (e.clientX - b.left)/b.width));
+  const i = Math.round(x*(chartPts.length-1)), p = chartPts[i];
+  $('#totalVal').textContent = eur(p.v);
+  $('#valLbl').textContent = 'Le ' + dShort(new Date(p.t));
+  const l = $('#scrubL'); l.setAttribute('x1', x*340); l.setAttribute('x2', x*340); l.setAttribute('visibility','visible');
+}
+function unscrub(){
+  if (!$('#totalVal')) return;
+  $('#totalVal').textContent = eur(total()); $('#valLbl').textContent = 'Ton PEA vaut';
+  const l = $('#scrubL'); if (l) l.setAttribute('visibility','hidden');
+}
+
+/* ---------- WALLET ---------- */
+const TONE_COL = {blue:'#0b3a8c', orange:'#e08a3c', green:'#2f9e64', grey:'#b9c3d6'};
+function donut(){
+  const parts = S.positions.filter(p => p.parts>0).map(p => ({label:p.name, v:val(p), c:TONE_COL[p.tone]}));
+  parts.push({label:'Liquidités', v:S.cash, c:TONE_COL.grey});
+  const T = parts.reduce((a,p) => a+p.v, 0) || 1, r = 38, C = 2*Math.PI*r;
+  let off = 0;
+  const arcs = parts.map(p => { const len = p.v/T*C; const s = `<circle cx="50" cy="50" r="${r}" fill="none" stroke="${p.c}" stroke-width="14" stroke-dasharray="${len.toFixed(2)} ${C.toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 50 50)"/>`; off += len; return s; }).join('');
+  return `<div class="donut-wrap"><svg width="104" height="104" viewBox="0 0 100 100" aria-hidden="true">${arcs}</svg>
+    <div class="legend">${parts.map(p => `<div><i style="background:${p.c}"></i><span>${esc(p.label)}</span><b class="num">${Math.round(p.v/T*100)} %</b></div>`).join('')}</div></div>`;
+}
+let confirmReset = false;
+function renderWallet(){
+  const inv = invested(), g = gain();
+  const hist = S.history.slice().sort((a,b) => b.t - a.t).slice(0, 12);
+  $('#v-wallet').innerHTML = `
+  <h1 class="ptitle pad">Mon portefeuille</h1>
+  <div class="pad stack">
+    <div class="navy-card"><div class="k">Valeur totale</div><div class="v num">${eur(total())}</div>
+      <div class="s num">${tri(g)} ${sgn(g)}${eur(Math.abs(g))} (${pct(g/S.deposits*100)}) depuis l’ouverture</div>
+      <div class="xs num">Placé : ${eur(inv)} · Liquidités : ${eur(S.cash)}</div></div>
+    <div class="card"><p class="strong" style="margin:0 0 12px">Répartition</p>${donut()}</div>
+    <h2 class="sec">Mes placements</h2>
+    <div class="card list">${S.positions.map(p => posRow(p)).join('')}</div>
+    <h2 class="sec">Liquidités</h2>
+    <div class="card"><div class="row" style="padding:0"><span class="av t-grey">€</span><span class="mid-col"><b class="num">${eur(S.cash)}</b><span>Disponibles pour acheter des parts</span></span></div>
+      <div class="grid2" style="margin-top:14px"><button class="ghost" data-act="deposit">Verser</button><button class="ghost" data-act="buy" ${S.cash<1?'disabled':''}>Placer</button></div></div>
+    <h2 class="sec">Historique</h2>
+    <div class="card list">${hist.length ? hist.map(h => `<div class="row"><span class="av ${h.amount>=0?'t-green':'t-blue'}">${h.kind==='deposit'||h.kind==='auto'?'+':h.kind==='sell'?'↘':'↗'}</span>
+      <span class="mid-col"><b>${esc(h.label)}</b><span>${esc(h.detail)} · ${dShort(new Date(h.t))}</span></span>
+      <span class="right num"><b class="${h.amount>=0?'up':''}" style="font-size:14px">${sgn(h.amount)}${eur(Math.abs(h.amount))}</b></span></div>`).join('') : '<p class="empty-note">Aucune opération.</p>'}</div>
+    ${confirmReset ? `<div class="confirm">Remettre la démo à zéro ? Tes achats, ventes et réglages seront effacés.<div><button style="background:var(--red);color:#fff" data-act="reset-yes">Réinitialiser</button><button style="background:#fff" data-act="reset-no">Annuler</button></div></div>`
+      : `<button class="danger-link" data-act="reset" style="align-self:center;margin:6px 0">Réinitialiser la démo</button>`}
+  </div>`;
+}
+
+/* ---------- PERKS ---------- */
+function renderPerks(){
+  const f = fiscal();
+  const g = Math.max(0, gain()), saved = g*0.128;
+  $('#v-perks').innerHTML = `
+  <header class="hero perk-hero"><div class="pad">
+    <h1>Mes avantages PEA</h1>
+    <div class="k">Compteur 5 ans</div>
+    <div class="h">${f.done ? 'C’est bon, tes 5 ans sont passés' : 'Plus que ' + f.leftTxt}</div>
+    <div class="d">${f.done ? 'Tes gains ne paient plus d’impôt sur le revenu.' : 'avant de ne plus payer d’impôt sur le revenu sur tes gains'}</div>
+    <div class="wbar"><i id="perkBar" style="width:0%"></i></div>
+    <div class="tl"><div>Ouvert<b>${dNum(OPEN)}</b></div><div>Aujourd’hui<b>${f.elapsedTxt}</b></div><div>Objectif<b>${dNum(f.goal)}</b></div></div>
+  </div></header>
+  <div class="content pad stack">
+    <div class="card"><p class="strong" style="margin:0">Ce que tu as versé</p><p class="mid num" style="font-size:28px;margin:8px 0 10px">${eur0(S.deposits)}</p>
+      <div class="bar"><i style="width:${Math.max(3,S.deposits/CAP*100)}%"></i></div>
+      <p class="sub" style="margin-top:10px">Encore <b style="color:var(--ink)">${eur0(CAP - S.deposits)}</b> possibles sur 150 000 €</p>
+      <button class="link-btn" data-act="deposit">Verser de l’argent →</button></div>
+    <div class="card step"><span class="n t-blue">1</span><div><b>Jusqu’à 150 000 € de versements</b><span>Tes gains et dividendes restent dans le PEA sans être taxés tant que tu ne retires rien.</span></div></div>
+    <div class="card step"><span class="n t-green">2</span><div><b>Après 5 ans, pas d’impôt sur le revenu</b><span>Seuls les prélèvements sociaux restent dus quand tu retires.</span></div></div>
+    <div class="card step"><span class="n t-orange">3</span><div><b>Avant 5 ans, attention au retrait</b><span>Retirer avant 5 ans ferme ton PEA (sauf cas particuliers).</span></div></div>
+    <div class="card"><span class="tag">${I.spark} Ton estimation</span><h3>Environ ${eur0(saved)} d’impôt évités</h3>
+      <p class="sub">Sur tes ${eur0(g)} de gains actuels, au taux de 12,8 % de l’impôt sur le revenu. Estimation indicative.</p></div>
+  </div>`;
+  requestAnimationFrame(() => requestAnimationFrame(() => { const b = $('#perkBar'); if (b) b.style.width = (f.p*100).toFixed(1) + '%'; }));
+}
+
+/* ---------- AUTO ---------- */
+const AMOUNTS = [25,50,100,200];
+const fv = (m, years, rate) => { const r = rate/12, n = years*12; return m*((Math.pow(1+r,n)-1)/r); };
+let autoShown = null;
+function renderAuto(){
+  const d = S.draft, a = pos(d.asset);
+  const same = S.plan && S.plan.amount === d.amount && S.plan.asset === d.asset && S.plan.roundups === d.roundups;
+  const next = nextDebit();
+  $('#v-auto').innerHTML = `
+  <h1 class="ptitle pad">Investir en automatique</h1>
+  <div class="pad stack">
+    <div class="navy-card"><div class="k">Dans 10 ans, tu auras versé</div><div class="v num" id="autoTot">${eur0(autoShown ?? d.amount*120)}</div>
+      <div class="s num">Exemple à 5 %/an : environ <b id="autoFv">${eur0(fv(d.amount,10,.05))}</b></div><div class="xs">Simulation indicative, non garantie.</div></div>
+    <div class="card"><p class="strong" style="margin:0">Combien chaque mois ?</p>
+      <div class="chips">${AMOUNTS.map(v => `<button data-act="amt" data-v="${v}" class="${v===d.amount?'on':''}" aria-pressed="${v===d.amount}">${v} €</button>`).join('')}</div>
+      <button class="asset-line" data-act="pick-auto"><span class="av t-${a.tone}">${a.id}</span><span style="flex:1;min-width:0"><b>${esc(a.name)}</b><span>Le 5 du mois · depuis ton compte</span></span><span style="color:var(--faint)">${I.chev}</span></button></div>
+    <div class="card toggle-row"><div><p class="strong" style="margin:0">Les arrondis</p><p class="sub">Un café à 2,60 € ? 0,40 € part sur ton PEA.</p></div>
+      <button class="switch" role="switch" aria-checked="${d.roundups}" aria-label="Activer les arrondis" data-act="roundups"></button></div>
+    ${S.plan ? `<div class="card toggle-row"><span class="av t-green">✓</span><div><b>Plan actif : ${eur0(S.plan.amount)} par mois</b><p class="sub">${esc(pos(S.plan.asset).name)} · prochain versement le ${dShort(next)}${S.plan.roundups?' · arrondis activés':''}</p></div></div>` : ''}
+    <button class="primary" data-act="launch" ${same?'disabled':''}>${same ? 'Ton plan est en place' : (S.plan ? 'Passer à ' + d.amount + ' € par mois' : 'Lancer ' + d.amount + ' € par mois')}</button>
+    ${S.plan ? '<button class="danger-link" data-act="stop-plan" style="align-self:center">Arrêter le plan</button>' : ''}
+  </div>`;
+}
+function nextDebit(){ const n = new Date(); const d = new Date(n.getFullYear(), n.getMonth(), 5); if (d <= n) d.setMonth(d.getMonth()+1); return d; }
+
+/* ---------- animation helper ---------- */
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function countUp(el, from, to, ms, f, done){
+  if (!el) return;
+  if (reduce){ el.textContent = f(to); done && done(); return; }
+  const t0 = performance.now();
+  const step = now => { const k = Math.min(1, (now - t0)/ms), e = 1 - Math.pow(1-k, 3); el.textContent = f(from + (to-from)*e); if (k < 1) requestAnimationFrame(step); else done && done(); };
+  requestAnimationFrame(step);
+}
+
+/* ---------- navigation ---------- */
+function render(){
+  ({home:renderHome, wallet:renderWallet, perks:renderPerks, auto:renderAuto})[view]();
+}
+function go(v){
+  if (v !== 'wallet') confirmReset = false;
+  view = v;
+  document.querySelectorAll('.screen').forEach(s => s.hidden = s.dataset.view !== v);
+  document.querySelectorAll('.nav [data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  $('#v-' + v).scrollTop = 0;
+  caption(v); render();
+}
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg){ $('#toastTxt').textContent = msg; const t = $('#toast'); t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2800); }
+
+/* ---------- ORDER SHEET (buy / sell / deposit) ---------- */
+const O = {mode:'buy', asset:'MO', input:'', done:null};
+function openOrder(mode, asset, preset){
+  O.mode = mode; O.asset = asset || O.asset || 'MO'; O.input = preset ? String(preset).replace('.', ',') : ''; O.done = null;
+  if (mode === 'sell' && pos(O.asset).parts === 0){ const p = S.positions.find(p => p.parts > 0); if (p) O.asset = p.id; }
+  renderOrder(); $('#sheet').classList.add('open'); caption('order');
+}
+function closeSheet(){ $('#sheet').classList.remove('open'); closePicker(); caption(view); }
+function amount(){ const n = parseFloat(O.input.replace(',', '.')); return isNaN(n) ? 0 : n; }
+function quote(){
+  const a = pos(O.asset), x = amount();
+  if (O.mode === 'deposit'){
+    const room = CAP - S.deposits;
+    return {a, x, ok: x > 0 && x <= room, pill: x > room ? 'Au-delà du plafond' : (x > 0 ? 'Versement depuis ton compte' : 'Saisis un montant'), warn: x > room,
+      btn: x <= 0 ? 'Saisis un montant' : x > room ? 'Plafond dépassé' : 'Verser ' + eur(x).replace(',00',''), room};
+  }
+  const n = Math.floor(x / a.price + 1e-9), cost = r2(n * a.price), rest = r2(x - cost);
+  if (O.mode === 'buy'){
+    const over = x > S.cash;
+    return {a, x, n, cost, rest, ok: n > 0 && !over, warn: over,
+      pill: over ? 'Plus que ton disponible' : n === 0 ? 'Moins d’une part' : '≈ ' + n + (n>1?' parts':' part'),
+      btn: over ? 'Montant trop élevé' : n === 0 ? 'Saisis un montant' : 'Acheter ' + n + (n>1?' parts':' part')};
+  }
+  const over = n > a.parts;
+  return {a, x, n, cost, rest, ok: n > 0 && !over, warn: over,
+    pill: over ? 'Tu as ' + a.parts + ' parts au maximum' : n === 0 ? 'Moins d’une part' : '≈ ' + n + (n>1?' parts':' part'),
+    btn: over ? 'Montant trop élevé' : n === 0 ? 'Saisis un montant' : 'Vendre ' + n + (n>1?' parts':' part')};
+}
+function renderOrder(){
+  const body = $('#sheetBody');
+  if (O.done){
+    body.innerHTML = `<div class="sheet-top"><span class="spacer"></span></div>
+      <div class="done"><div class="tick">${I.check}</div><h2>C’est fait !</h2><p class="b num">${O.done.line1}</p><p class="m num">${O.done.line2}</p></div>
+      <button class="primary" data-act="back-home">Retour à mon PEA</button>`;
+    return;
+  }
+  const q = quote(), a = q.a;
+  const top = O.mode === 'deposit'
+    ? `<div class="sheet-top"><button class="close" data-act="close" aria-label="Fermer">${I.x}</button><span class="sheet-title">Verser sur mon PEA</span></div>`
+    : `<div class="sheet-top"><button class="close" data-act="close" aria-label="Fermer">${I.x}</button>
+        <div class="seg" role="tablist"><button role="tab" data-act="mode" data-m="buy" class="${O.mode==='buy'?'on':''}">Acheter</button><button role="tab" data-act="mode" data-m="sell" class="${O.mode==='sell'?'on':''}">Vendre</button></div></div>
+       <button class="asset-card" data-act="pick-order"><span class="av t-${a.tone}">${a.id}</span><span style="min-width:0"><b>${esc(a.name)}</b><span class="num">${eur(a.price)} la part · <span class="${a.day>=0?'up':'down'}">${tri(a.day)} ${pct(a.day)}</span></span></span><span class="chev">${I.chev}</span></button>`;
+  let info;
+  if (O.mode === 'deposit'){
+    info = `<div class="l"><span>Depuis</span><b>Ton compte courant</b></div><div class="l"><span>Plafond restant</span><b class="num">${eur(q.room)}</b></div><p>L’argent arrive en liquidités sur ton PEA. Tu choisis ensuite où le placer.</p>`;
+  } else if (O.mode === 'buy'){
+    info = `<div class="l"><span>Disponible</span><b class="num">${eur(S.cash)}</b></div><div class="l"><span>Type d’ordre</span><b>Au prix du marché</b></div>
+      <p>Sur un PEA, on achète des parts entières. ${q.n > 0 && q.rest > 0 ? 'Les ' + eur(q.rest) + ' restants restent dispo.' : 'Le reste reste dispo.'}</p>`;
+  } else {
+    info = `<div class="l"><span>Tu détiens</span><b class="num">${a.parts} parts · ${eur(val(a))}</b></div><div class="l"><span>Type d’ordre</span><b>Au prix du marché</b></div>
+      <p>L’argent de la vente reste sur ton PEA, en liquidités. Le retirer avant 5 ans fermerait ton PEA.</p>`;
+  }
+  const label = O.mode === 'buy' ? 'Combien veux-tu investir ?' : O.mode === 'sell' ? 'Combien veux-tu récupérer ?' : 'Combien veux-tu verser ?';
+  const shown = O.input ? O.input : '0';
+  body.innerHTML = `${top}
+    <p class="q">${label}</p>
+    <p class="amt num ${O.input?'':'empty'}" aria-live="polite">${shown} €</p>
+    <span class="parts-pill ${q.warn?'warn':''}">${q.pill}</span>
+    <div class="info">${info}</div>
+    ${O.mode !== 'deposit' ? `<div style="display:flex;gap:8px;justify-content:center;margin-top:10px">${O.mode==='buy'
+        ? `<button class="tag" data-act="max">Tout investir · ${eur0(S.cash)}</button>`
+        : `<button class="tag" data-act="max">Tout vendre · ${a.parts} parts</button>`}</div>` : `<div style="display:flex;gap:8px;justify-content:center;margin-top:10px">${[100,500,1000].map(v=>`<button class="tag" data-act="preset" data-v="${v}">${F0.format(v)} €</button>`).join('')}</div>`}
+    <div class="keypad">${['1','2','3','4','5','6','7','8','9',',','0','⌫'].map(k => `<button data-act="key" data-k="${k}" aria-label="${k==='⌫'?'Effacer':k}">${k==='⌫'?I.back:k}</button>`).join('')}</div>
+    <span class="spacer"></span>
+    <button class="primary" data-act="confirm" ${q.ok?'':'disabled'}>${q.btn}</button>`;
+}
+function key(k){
+  let s = O.input;
+  if (k === '⌫') s = s.slice(0, -1);
+  else if (k === ','){ if (!s.includes(',')) s = (s || '0') + ','; }
+  else {
+    const [i, d] = s.split(',');
+    if (d !== undefined){ if (d.length < 2) s += k; }
+    else if (i.length < 6) s = (s === '0' ? '' : s) + k;
+  }
+  O.input = s; renderOrder();
+}
+function confirmOrder(){
+  const q = quote(); if (!q.ok) return;
+  const now = Date.now();
+  if (O.mode === 'deposit'){
+    S.cash = r2(S.cash + q.x); S.deposits = r2(S.deposits + q.x);
+    S.history.push({t:now, kind:'deposit', label:'Versement', detail:'Depuis ton compte courant', amount:q.x});
+    O.done = {line1: eur(q.x) + ' versés sur ton PEA', line2: 'Tes liquidités : ' + eur(S.cash) + '.', toast: eur0(q.x) + ' versés sur ton PEA'};
+  } else if (O.mode === 'buy'){
+    const a = q.a; a.parts += q.n; a.cost = r2(a.cost + q.cost); S.cash = r2(S.cash - q.cost);
+    S.history.push({t:now, kind:'buy', label:'Achat · ' + q.n + (q.n>1?' parts':' part'), detail:a.name, amount:-q.cost});
+    O.done = {line1: `${q.n} ${q.n>1?'parts':'part'} d’${a.name} ${q.n>1?'achetées':'achetée'} pour ${eur(q.cost)}`, line2: `Il te reste ${eur(S.cash)} de liquidités.`, toast: `+${q.n} ${q.n>1?'parts':'part'} d’${a.name} dans ton PEA`};
+  } else {
+    const a = q.a; a.cost = r2(a.cost * (a.parts - q.n) / a.parts); a.parts -= q.n; S.cash = r2(S.cash + q.cost);
+    S.history.push({t:now, kind:'sell', label:'Vente · ' + q.n + (q.n>1?' parts':' part'), detail:a.name, amount:q.cost});
+    O.done = {line1: `${q.n} ${q.n>1?'parts':'part'} d’${a.name} ${q.n>1?'vendues':'vendue'} pour ${eur(q.cost)}`, line2: `Tes liquidités : ${eur(S.cash)}.`, toast: `${eur(q.cost)} ajoutés à tes liquidités`};
+  }
+  save(); renderOrder(); render();
+}
+
+/* ---------- pickers (asset, notifications, detail) ---------- */
+let pickTarget = null;
+function openPicker(html){ $('#pickerBody').innerHTML = html; $('#picker').classList.add('open'); }
+function closePicker(){ $('#picker').classList.remove('open'); }
+function assetPicker(target){
+  pickTarget = target;
+  const cur = target === 'auto' ? S.draft.asset : O.asset;
+  openPicker(`<h4>Choisis ton placement</h4>${S.positions.map(p => `<button class="row" data-act="pick" data-id="${p.id}"><span class="av t-${p.tone}">${p.id}</span><span class="mid-col"><b>${esc(p.name)}</b><span class="num">${esc(p.sub)} · ${eur(p.price)} la part${O.mode==='sell'&&target==='order'?' · '+p.parts+' parts détenues':''}</span></span>${p.id===cur?'<span class="up">✓</span>':''}</button>`).join('')}`);
+}
+function notifPanel(){
+  const list = S.notifs.slice().sort((a,b) => b.t - a.t);
+  openPicker(`<div class="sheet-top" style="margin-bottom:6px"><span class="sheet-title">Notifications</span><button class="close" data-act="close-picker" aria-label="Fermer">${I.x}</button></div>
+    ${list.length ? list.map(n => `<div class="row"><span class="av ${n.read?'t-grey':'t-blue'}">${I.bell}</span><span class="mid-col"><b>${esc(n.title)}</b><span style="white-space:normal">${esc(n.body)}</span><span>${dShort(new Date(n.t))}</span></span></div>`).join('') : '<p class="empty-note">Rien de nouveau.</p>'}`);
+  S.notifs.forEach(n => n.read = true); save();
+  const d = document.querySelector('#v-home .dot'); if (d) d.hidden = true;
+}
+function detail(id){
+  const p = pos(id), perf = (val(p)/p.cost - 1)*100, pts = series('1A', p.price, p.id.charCodeAt(0));
+  const {line, area} = pathFor(pts, 300, 80, 6);
+  openPicker(`<div class="sheet-top"><span class="av t-${p.tone}">${p.id}</span><span class="sheet-title">${esc(p.name)}<br><span style="font-size:12px;font-weight:500;color:var(--muted)">${esc(p.sub)}</span></span><button class="close" data-act="close-picker" aria-label="Fermer">${I.x}</button></div>
+    <p class="mid num" style="margin:14px 0 0">${eur(p.price)} <span class="${p.day>=0?'up':'down'}">${tri(p.day)} ${pct(p.day)} aujourd’hui</span></p>
+    <svg viewBox="0 0 300 80" preserveAspectRatio="none" style="width:100%;height:80px;display:block;margin-top:8px" aria-label="Cours sur 1 an" role="img"><path d="${area}" fill="var(--chip)"/><path d="${line}" fill="none" stroke="var(--navy)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
+    <div class="stats num"><div><span>Parts détenues</span><b>${p.parts}</b></div><div><span>Valeur</span><b>${eur(val(p))}</b></div>
+      <div><span>Prix moyen d’achat</span><b>${p.parts ? eur(p.cost/p.parts) : '—'}</b></div><div><span>Plus-value</span><b class="${perf>=0?'up':'down'}" style="font-size:15px">${sgn(val(p)-p.cost)}${eur(Math.abs(val(p)-p.cost))} · ${pct(p.parts?perf:0)}</b></div></div>
+    <div class="grid2" style="margin-top:14px"><button class="primary" data-act="detail-buy" data-id="${p.id}">Acheter</button><button class="ghost" data-act="detail-sell" data-id="${p.id}" ${p.parts?'':'disabled'}>Vendre</button></div>`);
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b){ if (e.target.id === 'picker') closePicker(); return; }
+  if (b.disabled) return;
+  const act = b.dataset.act;
+  switch (act){
+    case 'go': go(b.dataset.v); break;
+    case 'range': range = b.dataset.r; document.querySelectorAll('.ranges button').forEach(x => { x.classList.toggle('on', x.dataset.r === range); x.setAttribute('aria-selected', x.dataset.r === range); }); drawChart(); break;
+    case 'buy': openOrder('buy', 'MO'); break;
+    case 'sell': openOrder('sell', 'MO'); break;
+    case 'deposit': openOrder('deposit'); break;
+    case 'advice-buy': openOrder('buy', 'MO', Math.floor(S.cash)); break;
+    case 'go-auto': go('auto'); break;
+    case 'go-perks': go('perks'); break;
+    case 'notifs': notifPanel(); break;
+    case 'detail': detail(b.dataset.id); break;
+    case 'detail-buy': closePicker(); openOrder('buy', b.dataset.id); break;
+    case 'detail-sell': closePicker(); openOrder('sell', b.dataset.id); break;
+    case 'close': closeSheet(); break;
+    case 'close-picker': closePicker(); break;
+    case 'mode': O.mode = b.dataset.m; O.input = ''; if (O.mode==='sell' && pos(O.asset).parts===0){ const p = S.positions.find(p=>p.parts>0); if (p) O.asset = p.id; } renderOrder(); break;
+    case 'key': key(b.dataset.k); break;
+    case 'max': { const a = pos(O.asset); const x = O.mode === 'buy' ? Math.floor(S.cash*100)/100 : r2(a.parts*a.price); O.input = F2.format(x).replace(/\s| | /g,'').replace(/,00$/,''); renderOrder(); break; }
+    case 'preset': O.input = b.dataset.v; renderOrder(); break;
+    case 'confirm': confirmOrder(); break;
+    case 'back-home': { const t = O.done && O.done.toast; closeSheet(); go('home'); if (t) setTimeout(() => toast(t), 250); break; }
+    case 'pick-order': assetPicker('order'); break;
+    case 'pick-auto': assetPicker('auto'); break;
+    case 'pick': if (pickTarget === 'auto'){ S.draft.asset = b.dataset.id; save(); closePicker(); renderAuto(); } else { O.asset = b.dataset.id; closePicker(); renderOrder(); } break;
+    case 'amt': {
+      const from = S.draft.amount*120; S.draft.amount = +b.dataset.v; save(); autoShown = from; renderAuto(); autoShown = null;
+      countUp($('#autoTot'), from, S.draft.amount*120, 700, eur0); break;
+    }
+    case 'roundups': S.draft.roundups = !S.draft.roundups; save(); renderAuto(); break;
+    case 'launch': {
+      S.plan = {amount:S.draft.amount, asset:S.draft.asset, roundups:S.draft.roundups, since:Date.now()};
+      S.notifs.push({id:Date.now(), title:'Plan automatique activé', body:`${S.plan.amount} € sur ${pos(S.plan.asset).name}, le 5 de chaque mois.`, t:Date.now(), read:false});
+      save(); renderAuto(); toast(`${S.plan.amount} € investis chaque 5 du mois`); break;
+    }
+    case 'stop-plan': S.plan = null; save(); renderAuto(); toast('Plan automatique arrêté'); break;
+    case 'reset': confirmReset = true; renderWallet(); break;
+    case 'reset-no': confirmReset = false; renderWallet(); break;
+    case 'reset-yes': S = defaults(); save(); confirmReset = false; firstPaint = true; go('home'); toast('Démo réinitialisée'); break;
+  }
+});
+document.addEventListener('pointermove', e => { if (e.target.closest && e.target.closest('#chart')) scrub(e); });
+document.addEventListener('pointerout', e => { if (e.target.closest && e.target.closest('#chart') && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('#chart'))) unscrub(); });
+document.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') unscrub(); });
+document.addEventListener('keydown', e => {
+  if (!$('#sheet').classList.contains('open') || O.done){ if (e.key === 'Escape'){ closePicker(); closeSheet(); } return; }
+  if (/^[0-9]$/.test(e.key)) key(e.key);
+  else if (e.key === ',' || e.key === '.') key(',');
+  else if (e.key === 'Backspace') key('⌫');
+  else if (e.key === 'Enter') confirmOrder();
+  else if (e.key === 'Escape'){ if ($('#picker').classList.contains('open')) closePicker(); else closeSheet(); }
+});
+
+go('home');
+})();
+</script>
+</body>
+</html>
