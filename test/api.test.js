@@ -91,6 +91,12 @@ test('opérations des contrats : versement, retrait, arbitrage, PER', async () =
   await c('/api/login', { email: 'lea@example.com', password: 'motdepasse1' });
   let r = await c('/api/op', { type: 'order', account: 'av', mode: 'verse', amount: 300 });
   assert.equal(sp(r.data.done.line2), '180 € sur le fonds euros, 120 € en unités de compte.');
+  r = await c('/api/op', { type: 'order', account: 'cc', mode: 'verse', amount: 100 });
+  assert.equal(r.status, 400, 'contrat pas encore ouvert');
+  r = await c('/api/op', { type: 'openAccount', account: 'cc', amount: 5000 });
+  assert.equal(r.status, 200);
+  assert.equal(r.data.state.accounts.cc.opened, true);
+  assert.equal((await c('/api/op', { type: 'openAccount', account: 'cc' })).status, 400, 'déjà ouvert');
   r = await c('/api/op', { type: 'order', account: 'cc', mode: 'arb', asset: 'MO', to: 'FE', amount: 2000 });
   assert.equal(r.status, 200);
   r = await c('/api/op', { type: 'order', account: 'per', mode: 'verse', amount: 1000 });

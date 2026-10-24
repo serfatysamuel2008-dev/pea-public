@@ -23,12 +23,12 @@ const de = n => /^ETF/.test(n) || (!/^[A-Z]{2}/.test(n) && /^[AEIOUYHÉÈaeiouyh
 
 /* ---------- products ---------- */
 const PR = {
-  pea:{kind:'shares', name:'Mon PEA', ab:'PEA', tone:'blue', group:'Bourse', label:'Actions européennes, fiscalité douce', vaut:'Ton PEA vaut', ton:'ton PEA', nav:['Portefeuille','Avantages'], open:new Date(2023,2,12), years:5},
-  pme:{kind:'shares', name:'Mon PEA-PME', ab:'PME', tone:'teal', group:'Bourse', label:'PME et ETI européennes', vaut:'Ton PEA-PME vaut', ton:'ton PEA-PME', nav:['Portefeuille','Avantages'], open:new Date(2024,2,12), years:5},
-  ct:{kind:'shares', name:'Mon compte-titres', ab:'CT', tone:'orange', group:'Bourse', label:'Toutes les bourses, sans plafond', vaut:'Ton compte-titres vaut', ton:'ton compte-titres', nav:['Portefeuille','Fiscalité'], open:new Date(2022,4,2)},
-  av:{kind:'contract', name:'Mon assurance vie', ab:'AV', tone:'green', group:'Épargne long terme', label:'Épargne disponible et transmission', vaut:'Ton assurance vie vaut', ton:'ton assurance vie', nav:['Supports','Avantages'], open:new Date(2021,2,12), years:8, op2:['withdraw','Retirer'], sub:'Répartition selon ton profil'},
-  cc:{kind:'contract', name:'Mon contrat de capitalisation', ab:'CC', tone:'purple', group:'Épargne long terme', label:'Gestion libre, donation possible', vaut:'Ton contrat vaut', ton:'ton contrat', nav:['Supports','Transmission'], open:new Date(2021,2,12), years:8, op2:['arb','Arbitrer'], sub:'Gestion libre · ta répartition'},
-  per:{kind:'contract', name:'Mon PER', ab:'PER', tone:'rose', group:'Épargne long terme', label:'Retraite, versements déductibles', vaut:'Ton PER vaut', ton:'ton PER', nav:['Supports','Retraite'], open:new Date(2024,0,12), retire:2064, op2:['simulate','Simuler'], sub:'Versement déductible'}
+  pea:{points:['Actions européennes et ETF', 'Zéro impôt sur le revenu sur tes gains après 5 ans', 'Jusqu’à 150 000 € de versements'], kind:'shares', name:'Mon PEA', ab:'PEA', tone:'blue', group:'Bourse', label:'Actions européennes, fiscalité douce', vaut:'Ton PEA vaut', ton:'ton PEA', nav:['Portefeuille','Avantages'], open:new Date(2023,2,12), years:5},
+  pme:{points:['Tu finances des PME et ETI européennes', 'Zéro impôt sur le revenu sur tes gains après 5 ans', 'Plafond commun avec ton PEA : 225 000 €'], kind:'shares', name:'Mon PEA-PME', ab:'PME', tone:'teal', group:'Bourse', label:'PME et ETI européennes', vaut:'Ton PEA-PME vaut', ton:'ton PEA-PME', nav:['Portefeuille','Avantages'], open:new Date(2024,2,12), years:5},
+  ct:{points:['Toutes les bourses : actions, ETF, obligations', 'Sans plafond ni durée minimale', 'Gains imposés à 31,4 % quand tu vends'], kind:'shares', name:'Mon compte-titres', ab:'CT', tone:'orange', group:'Bourse', label:'Toutes les bourses, sans plafond', vaut:'Ton compte-titres vaut', ton:'ton compte-titres', nav:['Portefeuille','Fiscalité'], open:new Date(2022,4,2)},
+  av:{points:['Fonds euros sécurisé et unités de compte', 'Ton argent reste disponible à tout moment', 'Un cadre fiscal avantageux pour tes bénéficiaires'], kind:'contract', name:'Mon assurance vie', ab:'AV', tone:'green', group:'Épargne long terme', label:'Épargne disponible et transmission', vaut:'Ton assurance vie vaut', ton:'ton assurance vie', nav:['Supports','Avantages'], open:new Date(2021,2,12), years:8, op2:['withdraw','Retirer'], sub:'Répartition selon ton profil'},
+  cc:{points:['Fonds euros, ETF et immobilier, en gestion libre', 'Tu peux le donner de ton vivant sans perdre son ancienneté', 'Fiscalité allégée sur les gains après 8 ans'], kind:'contract', name:'Mon contrat de capitalisation', ab:'CC', tone:'purple', group:'Épargne long terme', label:'Gestion libre, donation possible', vaut:'Ton contrat vaut', ton:'ton contrat', nav:['Supports','Transmission'], open:new Date(2021,2,12), years:8, op2:['arb','Arbitrer'], sub:'Gestion libre · ta répartition'},
+  per:{points:['Prépare ta retraite à ton rythme', 'Tes versements se déduisent de ton revenu imposable', 'À la retraite : capital, rente ou les deux'], kind:'contract', name:'Mon PER', ab:'PER', tone:'rose', group:'Épargne long terme', label:'Retraite, versements déductibles', vaut:'Ton PER vaut', ton:'ton PER', nav:['Supports','Retraite'], open:new Date(2024,0,12), retire:2064, op2:['simulate','Simuler'], sub:'Versement déductible'}
 };
 const ORDER = ['pea','pme','ct','av','cc','per'];
 const PROFILES = {
@@ -219,22 +219,28 @@ function accountSeries(acc, from, to, max){
 const elig = (a, k) => k === 'ct' ? true : k === 'pme' ? !!a.pme : a.eligible;
 
 /* ---------- default state ---------- */
+/* An account the customer doesn't hold yet: same shape, empty. */
+function emptyAccount(k){
+  const pr = PR[k];
+  if (pr.kind === 'shares') return Object.assign({opened:false, cash:0, deposits:0, positions:[], history:[], plan:null,
+    draft:{amount:50, asset:{pea:'MO', pme:'PME', ct:'NQU'}[k], roundups:false}, notifs:[]}, k === 'ct' ? {realized:0, losses:0} : {});
+  const SUP = {FE:['€','Fonds euros','Sécurisé','blue'], MO:['MO','ETF Monde','Unité de compte','orange'], IM:['IM','Immobilier','Unité de compte','green'], OB:['OB','Obligations','Unité de compte','green']};
+  const alloc = {av:{FE:60, MO:30, IM:10}, cc:{MO:50, FE:30, IM:20}, per:{MO:60, FE:25, OB:15}}[k];
+  return Object.assign({opened:false, deposits:0, alloc: Object.assign({}, alloc),
+    positions: Object.keys(alloc).map(id => ({id, ab:SUP[id][0], name:SUP[id][1], sub:SUP[id][2], tone:SUP[id][3], value:0, cost:0, day:0, units:0})),
+    history:[], plan:null, draft:{amount:50, roundups:false}, notifs:[]}, k === 'av' ? {profile:'equilibre'} : k === 'per' ? {year:0, tmi:30} : {});
+}
 function defaults(firstName){
   const now = Date.now(), D = 86400000, H = 3600000;
   const ps = (id, ab, name, sub, tone, parts, price, cost, day) => ({id, ab, name, sub, tone, parts, price, cost, day});
   const sp = (id, ab, name, sub, tone, value, cost, day) => ({id, ab, name, sub, tone, value, cost, day, units: value / navAt(id, 0)});
   const dep = (days, amount, detail) => ({t: now - D*days, kind:'deposit', label:'Versement', detail: detail || 'Depuis ton compte courant', amount});
-  return {v:3, firstName: firstName || 'Léa', active:'pea', favs:['MO','AIR','ASML'], accounts:{
+  const G = {v:4, firstName: firstName || 'Léa', active:'pea', favs:['MO','AIR','ASML'], accounts:{
     pea:{cash:1250, deposits:21500,
       positions:[ps('MO','MO','ETF Monde','MSCI World','blue',48,320.63,13020.51,0.8), ps('US','US','ETF S&P 500','Actions US','orange',160,37.25,4909.39,0.4), ps('EU','EU','ETF Europe','Stoxx 600','green',26,86.93,2301.61,-0.3)],
       history:[{t: now - D*12, kind:'auto', label:'Versement programmé', detail:'ETF Monde', amount:50}, dep(40, 1000), {t: now - D*75, kind:'buy', label:'Achat · 4 parts', detail:'ETF S&P 500', amount:-148.6}],
       plan:null, draft:{amount:50, asset:'MO', roundups:false},
       notifs:[{id:1, title:'Tu as 1 250 € qui dorment', body:'Place-les sur ton ETF Monde en 2 clics.', t: now - H*5, read:false}, {id:2, title:'Plus que 1 an et 4 mois', body:'Ensuite, zéro impôt sur le revenu sur tes gains.', t: now - D*3, read:false}]},
-    pme:{cash:640, deposits:8500,
-      positions:[ps('PME','EU','ETF PME Europe','Petites capi.','blue',91,58.40,4613.19,0.6), ps('FPF','FR','Fonds PME France','Fonds actions','orange',18,160.67,2563.88,0.3), ps('SCF','SC','ETF Small Caps France','Actions','green',6,132.29,813.26,-0.5)],
-      history:[{t: now - D*20, kind:'buy', label:'Achat · 5 parts', detail:'ETF PME Europe', amount:-292}, dep(61, 1000)],
-      plan:null, draft:{amount:50, asset:'PME', roundups:false},
-      notifs:[{id:1, title:'Plafond commun : 30 000 € versés', body:'PEA et PEA-PME partagent un plafond de 225 000 €.', t: now - D*2, read:false}]},
     ct:{cash:850, deposits:10200, realized:1240, losses:340,
       positions:[ps('NQU','NQ','ETF Nasdaq 100','Actions US','blue',54,102.35,4183.88,1.2), ps('EMU','EM','ETF Émergents','Monde','orange',48,76.91,3374.47,0.4), ps('OBL','OB','ETF Obligations','Obligations','green',74,30.23,2250.52,-0.1)],
       history:[{t: now - D*9, kind:'sell', label:'Vente · 10 parts', detail:'ETF Nasdaq 100', amount:1012.4}, dep(33, 500)],
@@ -245,17 +251,16 @@ function defaults(firstName){
       history:[{t: now - D*15, kind:'auto', label:'Versement programmé', detail:'Réparti 60 / 40', amount:100}, dep(120, 2000)],
       plan:null, draft:{amount:50, roundups:false},
       notifs:[{id:1, title:'Ta clause bénéficiaire est à jour', body:'2 personnes désignées. Tu peux la modifier quand tu veux.', t: now - D*6, read:false}]},
-    cc:{deposits:28000, alloc:{MO:50, FE:30, IM:20},
-      positions:[sp('MO','MO','ETF Monde','Unité de compte','orange',16205.45,12730.11,0.8), sp('FE','€','Fonds euros','Sécurisé','blue',9723.27,9155.62,0.01), sp('IM','IM','Immobilier','Unité de compte','green',6482.18,6759.31,-0.1)],
-      history:[{t: now - D*44, kind:'arb', label:'Arbitrage', detail:'Fonds euros → ETF Monde', amount:1500}, dep(90, 3000, 'Réparti 50 / 30 / 20')],
-      plan:null, draft:{amount:50, roundups:false},
-      notifs:[{id:1, title:'Tes 8 ans arrivent en mars 2029', body:'Ensuite, abattement annuel sur les gains que tu retires.', t: now - D*4, read:false}]},
     per:{deposits:7000, year:3000, tmi:30, alloc:{MO:60, FE:25, OB:15},
       positions:[sp('MO','MO','ETF Monde','Unité de compte','orange',4716.18,3946.59,0.8), sp('FE','€','Fonds euros','Sécurisé','blue',1965.08,1919.02,0.01), sp('OB','OB','Obligations','Unité de compte','green',1179.04,1166.21,0.1)],
       history:[{t: now - D*25, kind:'deposit', label:'Versement déductible', detail:'Réparti 60 / 25 / 15', amount:1000}],
       plan:null, draft:{amount:50, roundups:false},
       notifs:[{id:1, title:'Verse avant le 31 décembre', body:'Tes versements 2026 se déduisent de ton revenu imposable 2026.', t: now - H*8, read:false}]}
   }};
+  ['pea','ct','av','per'].forEach(k => { G.accounts[k].opened = true; G.accounts[k].openedAt = null; });
+  G.accounts.pme = emptyAccount('pme');
+  G.accounts.cc = emptyAccount('cc');
+  return G;
 }
 
 /* ---------- read helpers ---------- */
@@ -297,8 +302,9 @@ function ym(m){
   const ms = mo ? mo + ' mois' : '';
   return ys && ms ? ys + ' et ' + ms : (ys || ms || 'moins d’un mois');
 }
-function fiscal(k){
-  const pr = PR[k], now = new Date(), open = pr.open;
+const openOf = (acc, k) => acc && acc.openedAt ? new Date(acc.openedAt) : PR[k].open;
+function fiscal(k, acc){
+  const pr = PR[k], now = new Date(), open = openOf(acc, k);
   const goal = pr.retire ? new Date(pr.retire, open.getMonth(), open.getDate()) : new Date(open.getFullYear() + (pr.years || 5), open.getMonth(), open.getDate());
   const p = Math.min(1, Math.max(0, (now - open) / (goal - open)));
   return {now, open, goal, p, done: now >= goal, elapsedTxt: ym(monthsBetween(open, now)).replace(' et ', ' '), leftTxt: ym(monthsBetween(now, goal)), leftYears: goal.getFullYear() - now.getFullYear()};
@@ -357,10 +363,9 @@ function refresh(G, now){
   const d = dayIndex(now), year = new Date(now).getFullYear();
   refreshMarket(d);
   let changed = false;
-  if (G.v !== 3){
-    ORDER.forEach(k => G.accounts[k].positions.forEach(p => { if (p.value != null && p.units == null) p.units = p.value / navAt(p.id, d); }));
-    G.v = 3; changed = true;
-  }
+  if (!G.v || G.v < 3) ORDER.forEach(k => G.accounts[k].positions.forEach(p => { if (p.value != null && p.units == null) p.units = p.value / navAt(p.id, d); }));
+  if (!G.v || G.v < 4) ORDER.forEach(k => { if (G.accounts[k].opened == null) G.accounts[k].opened = true; });
+  if (G.v !== 4){ G.v = 4; changed = true; }
   ORDER.forEach(k => {
     const S = G.accounts[k];
     if (k === 'per' && S.yearOf !== year){ if (S.yearOf != null) S.year = 0; S.yearOf = year; changed = true; }
@@ -510,9 +515,22 @@ function apply(G, op){
   if (!op || typeof op !== 'object') fail('Opération invalide.');
   const k = accountOf(G, op), S = G.accounts[k], pr = PR[k];
   refresh(G);
+  if (!S.opened && !['openAccount', 'fav', 'reset'].includes(op.type)) fail('Ouvre d’abord ce compte.');
   switch (op.type){
     case 'order': return order(G, k, op);
     case 'switch': G.active = k; return null;
+    case 'openAccount': {
+      if (S.opened) fail('Ce compte est déjà ouvert.');
+      const first = op.amount == null || op.amount === 0 ? 0 : cleanAmount(op.amount);
+      if (pr.kind === 'shares' && first > depositRoom(G, k)) fail('Au-delà du plafond de versements.');
+      S.opened = true; S.openedAt = Date.now(); G.active = k;
+      S.history.push({t:Date.now(), kind:'open', label:'Ouverture du compte', detail:pr.name, amount:0});
+      S.notifs.push({id:Date.now(), title:`${pr.ton.charAt(0).toUpperCase() + pr.ton.slice(1)} est ouvert`, body:'Bienvenue ! Tu peux verser et investir quand tu veux.', t:Date.now(), read:false});
+      let line2 = 'Tu peux verser et investir quand tu veux.';
+      if (first > 0) line2 = order(G, k, {mode: pr.kind === 'shares' ? 'deposit' : 'verse', amount:first}).line1 + '.';
+      const Ton = pr.ton.charAt(0).toUpperCase() + pr.ton.slice(1);
+      return {line1:`${Ton} est ouvert`, line2, toast:`${Ton} est ouvert`, enter:k};
+    }
     case 'draft': {
       if (op.amount != null){
         if (typeof op.amount !== 'number' || !isFinite(op.amount) || op.amount < PLAN_MIN || op.amount > PLAN_MAX) fail(`Choisis un montant entre ${PLAN_MIN} et ${F0.format(PLAN_MAX)} € par mois.`);
@@ -551,7 +569,7 @@ function apply(G, op){
   fail('Opération inconnue.');
 }
 
-return {DAY, ANCHOR, BACK, dayIndex, dateOf, priceAt, navAt, refreshSpec, refreshMarket, specSeries, navSeries, accountSeries, refresh, PLAN_MIN, PLAN_MAX, hash, rng,
+return {openOf, emptyAccount, DAY, ANCHOR, BACK, dayIndex, dateOf, priceAt, navAt, refreshSpec, refreshMarket, specSeries, navSeries, accountSeries, refresh, PLAN_MIN, PLAN_MAX, hash, rng,
   F0, F1, F2, eur, eur0, sgn, pct, tri, r2, money, lower, de,
   PR, ORDER, PROFILES, SHORT, PEA_CAP, COMMON_CAP, AMOUNTS, TMIS, MARKET, mk, elig,
   defaults, val, held, totOf, pos, common, depositRoom, allocShort, splitAlloc, splitTxt,

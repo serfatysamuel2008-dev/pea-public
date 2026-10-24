@@ -304,6 +304,27 @@ div.asset-card{cursor:default}
 .split b{font-size:15px;font-weight:700}
 .split span.flash{background:rgba(255,255,255,.32)}
 
+/* main page */
+.hub-top{background:var(--navy);color:#fff;border-radius:0 0 28px 28px;padding-top:calc(26px + env(safe-area-inset-top,0px));padding-bottom:22px}
+.hub-brand{display:flex;align-items:center;gap:14px}
+.logo.lg{width:56px;height:56px;border-radius:16px;font-size:10px;flex:none}
+img.logo{object-fit:contain;background:#fff}
+.hub-brand b{display:block;font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.hub-brand div span{display:block;font-size:15px;font-weight:600;color:var(--on-navy-dim);letter-spacing:.02em;margin-top:2px}
+.hub-hello{margin:26px 0 0;font-size:20px;font-weight:700}
+.hub-hello span{display:block;font-size:13px;font-weight:500;color:var(--on-navy-dim);margin-top:2px}
+.hub-hello span::first-letter{text-transform:uppercase}
+.hub-total{margin-top:16px}
+.hub-total small{display:block;font-size:12px;color:var(--on-navy-dim)}
+.hub-total b{display:block;font-size:34px;font-weight:800;letter-spacing:-.03em;margin:2px 0 0}
+.hub-bar{display:flex;gap:3px;height:8px;margin-top:16px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.14)}
+.hub-bar i{display:block;height:100%}
+.badge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:#ff8a4c;color:#fff;font-size:11px;font-style:normal;font-weight:700;vertical-align:1px;margin-left:4px}
+.open-btn{flex:none;height:34px;padding:0 16px;border-radius:99px;background:var(--navy);color:#fff;font-weight:700;font-size:13px}
+.points{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:13px}
+.points li{display:flex;gap:10px;align-items:flex-start;line-height:1.4}
+.points li span{flex:none;width:22px;height:22px;border-radius:50%;background:var(--green-soft);color:var(--green);display:grid;place-items:center}
+
 /* toast */
 .toast{position:absolute;left:12px;right:12px;top:calc(12px + env(safe-area-inset-top,0px));z-index:40;background:#0d1730;color:#fff;border-radius:14px;padding:12px 14px;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:center;transform:translateY(-140%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
 .toast.show{transform:none}
@@ -317,6 +338,7 @@ div.asset-card{cursor:default}
     <div class="toast" id="toast" role="status" aria-live="polite"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg><span id="toastTxt"></span></div>
 
     <div class="screens">
+      <section class="screen" id="v-hub" data-view="hub" hidden></section>
       <section class="screen" id="v-home" data-view="home"></section>
       <section class="screen" id="v-wallet" data-view="wallet" hidden></section>
       <section class="screen" id="v-perks" data-view="perks" hidden></section>
@@ -324,7 +346,7 @@ div.asset-card{cursor:default}
       <section class="screen" id="v-explore" data-view="explore" hidden></section>
     </div>
 
-    <nav class="nav" aria-label="Navigation principale">
+    <nav class="nav" id="nav" aria-label="Navigation principale">
       <button data-act="go" data-v="home" class="on"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg>Accueil</button>
       <button data-act="go" data-v="wallet"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5V12h8.5"/></svg><span id="navWallet">Portefeuille</span></button>
       <button data-act="go" data-v="explore" class="fab" aria-label="Explorer le marché"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span></button>
@@ -336,7 +358,7 @@ div.asset-card{cursor:default}
     <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Ordre"><div class="sheet-body pad" id="sheetBody"></div></div>
     <div class="picker" id="picker"><div class="pk" id="pickerBody"></div></div>
     <div class="auth" id="auth" hidden>
-      <div class="auth-top pad"><span class="logo">LOGO</span><h1>Mon épargne</h1><p>PEA, assurance vie, PER… tous tes comptes au même endroit.</p></div>
+      <div class="auth-top pad"><span class="logo" id="authLogo">LOGO</span><h1 id="authBrand">Mon épargne</h1><p>PEA, assurance vie, PER… tous tes comptes au même endroit.</p></div>
       <div class="auth-card pad">
         <div class="seg" role="tablist"><button type="button" role="tab" data-act="auth-tab" data-t="login" class="on" aria-selected="true">Se connecter</button><button type="button" role="tab" data-act="auth-tab" data-t="register" aria-selected="false">Créer un compte</button></div>
         <form id="authForm" novalidate>
@@ -356,6 +378,12 @@ div.asset-card{cursor:default}
 <script>
 (function(){
 "use strict";
+
+/* ---------- brand ----------
+   Nom et logo affichés sur la page d'accueil, l'écran de connexion et l'en-tête des comptes.
+   logo : null pour l'emplacement « LOGO », ou l'adresse d'une image (ex. 'logo.svg' dans public/). */
+const BRAND = {name:'Mon épargne', sub:'Investissement', logo:null};
+const brandLogo = cls => BRAND.logo ? `<img class="logo ${cls || ''}" src="${BRAND.logo}" alt="${BRAND.name}">` : `<span class="logo ${cls || ''}">LOGO</span>`;
 
 /* ---------- formatting (shared engine) ---------- */
 const {F0, F1, F2, eur, eur0, sgn, pct, tri, r2, money, lower, de, PR, ORDER, PROFILES, SHORT, PEA_CAP, COMMON_CAP, MARKET, mk, elig} = Engine;
@@ -430,7 +458,8 @@ async function refresh(){
 }
 
 /* ---------- dates / counters ---------- */
-const fiscal = () => Engine.fiscal(G.active);
+const fiscal = () => Engine.fiscal(G.active, S);
+const openDate = () => Engine.openOf(S, G.active);
 const my = d => String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
 
 /* ---------- series for the chart ---------- */
@@ -439,7 +468,7 @@ const SPAN = {'1S':7, '1M':30, '1A':365, '5A':1826};
 let curDay = Engine.dayIndex();
 /* Value of the account's current holdings over the chosen period, from the daily price model. */
 function series(key){
-  const d = Engine.dayIndex(), open = Math.max(Engine.dayIndex(P().open.getTime()), -Engine.BACK + 1);
+  const d = Engine.dayIndex(), open = Math.max(Engine.dayIndex(openDate().getTime()), -Engine.BACK + 1);
   const from = key === 'Tout' ? open : Math.max(open, d - SPAN[key]);
   return Engine.accountSeries(S, from, d, 90);
 }
@@ -459,7 +488,8 @@ const CAPTIONS = {
   auto:['Investis en automatique','Chaque mois, et avec les arrondis de ta carte'],
   order:['Acheter en 3 gestes','Tu tapes un montant, l’app calcule les parts'],
   explore:['Tout le marché, en clair','ETF, actions et obligations, avec leurs graphiques'],
-  auth:['Tous tes comptes, au même endroit','PEA, assurance vie, PER… connecte-toi pour continuer']
+  auth:['Tous tes comptes, au même endroit','PEA, assurance vie, PER… connecte-toi pour continuer'],
+  hub:['Ta page d’accueil','Tous tes comptes, ouverts ou à ouvrir']
 };
 const CONTRACT_CAPS = {wallet:['Tes supports','Ta répartition et ton historique'], auto:['Verse en automatique','Chaque mois, et avec les arrondis de ta carte'], order:['Verser en 3 gestes','Tu tapes un montant, l’app le répartit']};
 const CAPS = {
@@ -473,6 +503,7 @@ const $ = s => document.querySelector(s);
 
 /* ---------- icons ---------- */
 const I = {
+  tick:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>',
   bell:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15zM10 21h4"/></svg>',
   x:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   chev:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
@@ -558,7 +589,7 @@ function renderHome(){
   $('#v-home').innerHTML = `
   <header class="hero"><div class="pad">
     <div class="topbar">
-      <button class="brand" data-act="accounts" aria-label="Changer de compte : ${esc(P().name)}"><span class="logo">LOGO</span><span class="brand-t"><small>Salut ${esc(G.firstName)}</small><b>${esc(P().name)} <span class="brand-chev">${I.down}</span></b></span></button>
+      <button class="brand" data-act="hub" aria-label="Retour à l’accueil : tous mes comptes">${brandLogo()}<span class="brand-t"><small>Salut ${esc(G.firstName)}</small><b>${esc(P().name)} <span class="brand-chev">${I.down}</span></b></span></button>
       <button class="icon-btn" data-act="notifs" aria-label="Notifications">${I.bell}<span class="dot" ${unread?'':'hidden'}></span></button>
     </div>
     <p class="lbl" id="valLbl">${P().vaut}</p>
@@ -630,7 +661,7 @@ function renderWallet(){
   <div class="pad stack">
     <div class="navy-card"><div class="k">Valeur totale</div><div class="v num">${eur(total())}</div>
       <div class="s num">${tri(g)} ${sgn(g)}${eur(Math.abs(g))} (${pct(ratio(g, S.deposits))}) depuis l’ouverture</div>
-      <div class="xs num">${isShares() ? `Placé : ${eur(invested())} · Liquidités : ${eur(S.cash)}` : `Versé : ${eur0(S.deposits)} · ouvert le ${dNum(P().open)}`}</div></div>
+      <div class="xs num">${isShares() ? `Placé : ${eur(invested())} · Liquidités : ${eur(S.cash)}` : `Versé : ${eur0(S.deposits)} · ouvert le ${dNum(openDate())}`}</div></div>
     <div class="card"><p class="strong" style="margin:0 0 12px">Répartition</p>${donut()}</div>
     <h2 class="sec">${isShares() ? 'Mes placements' : 'Mes supports'}</h2>
     <div class="card list">${S.positions.filter(held).map(posRow).join('') || '<p class="empty-note">Aucun placement pour l’instant.</p>'}</div>
@@ -764,20 +795,22 @@ function countUp(el, from, to, ms, f, done){
 
 /* ---------- navigation ---------- */
 function render(){
-  ({home:renderHome, wallet:renderWallet, perks:renderPerks, auto:renderAuto, explore:renderExplore})[view]();
+  ({hub:renderHub, home:renderHome, wallet:renderWallet, perks:renderPerks, auto:renderAuto, explore:renderExplore})[view]();
 }
 function setNav(){ $('#navWallet').textContent = P().nav[0]; $('#navPerks').textContent = P().nav[1]; }
 function go(v){
   if (v !== 'wallet') confirmReset = false;
   view = v;
   document.querySelectorAll('.screen').forEach(s => s.hidden = s.dataset.view !== v);
+  $('#nav').hidden = v === 'hub';
   document.querySelectorAll('.nav [data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === v));
   $('#v-' + v).scrollTop = 0;
   caption(v); render();
 }
 function switchAccount(k, stay){
   closePicker();
-  if (k === G.active) return;
+  if (!G.accounts[k].opened){ openAccountSheet(k); return; }
+  if (k === G.active){ if (!stay) go('home'); return; }
   op({type:'switch', account:k}, true);
   range = '1A'; firstPaint = true; setNav();
   if (!stay) go('home'); else render();
@@ -812,10 +845,11 @@ function amount(){ const n = parseFloat(O.input.replace(',', '.')); return isNaN
 function quote(){ return Engine.quote(G, G.active, {mode:O.mode, asset:O.asset, to:O.to, x:amount()}); }
 function renderOrder(){
   const body = $('#sheetBody');
+  if (O.mode === 'open' && !O.done) return renderOpen();
   if (O.done){
     body.innerHTML = `<div class="sheet-top"><span class="spacer"></span></div>
       <div class="done"><div class="tick">${I.check}</div><h2>C’est fait !</h2><p class="b num">${O.done.line1}</p><p class="m num">${O.done.line2}</p></div>
-      <button class="primary" data-act="back-home">Retour à ${esc(lower(P().name))}</button>`;
+      <button class="primary" data-act="back-home">${O.done.enter ? 'Découvrir ' + esc(P().ton) : 'Retour à ' + esc(lower(P().name))}</button>`;
     return;
   }
   const q = quote(), sh = isShares(), close = `<button class="close" data-act="close" aria-label="Fermer">${I.x}</button>`;
@@ -889,6 +923,14 @@ function key(k){
 }
 let busy = false;
 async function confirmOrder(){
+  if (O.mode === 'open'){
+    if (busy) return;
+    busy = true;
+    const r = await op({type:'openAccount', account:O.acc, amount:amount()});
+    busy = false;
+    if (r.error){ if (r.error !== 'auth') renderOrder(); return; }
+    O.done = r.done; renderOrder(); return;
+  }
   const q = quote(); if (!q.ok || busy) return;
   if (O.mode === 'simulate'){ O.mode = 'verse'; renderOrder(); return; }
   busy = true;
@@ -928,25 +970,62 @@ function notifPanel(){
   if (S.notifs.some(n => !n.read)) op({type:'readNotifs'}, true);
   const d = document.querySelector('#v-home .dot'); if (d) d.hidden = true;
 }
-function accountsPanel(){
-  const all = ORDER.reduce((s,k) => s + totOf(G.accounts[k]), 0);
-  const allDep = ORDER.reduce((s,k) => s + G.accounts[k].deposits, 0), allG = all - allDep;
+const productName = k => { const n = PR[k].name.replace(/^Mon /, ''); return n.charAt(0).toUpperCase() + n.slice(1); };
+function renderHub(){
+  const owned = ORDER.filter(k => G.accounts[k].opened), others = ORDER.filter(k => !G.accounts[k].opened);
+  const tot = k => totOf(G.accounts[k]);
+  const all = owned.reduce((a,k) => a + tot(k), 0), dep = owned.reduce((a,k) => a + G.accounts[k].deposits, 0), g = r2(all - dep);
+  const unread = k => G.accounts[k].notifs.filter(n => !n.read).length;
   const row = k => {
-    const a = G.accounts[k], pr = PR[k], t = totOf(a), g = t - a.deposits;
-    const name = pr.name.replace(/^Mon /, ''), nm = name.charAt(0).toUpperCase() + name.slice(1);
-    return `<button class="row acc ${k===G.active?'on':''}" data-act="switch" data-k="${k}" aria-current="${k===G.active}">${avatar({id:pr.ab, tone:pr.tone})}
-      <span class="mid-col"><b>${esc(nm)}</b><span>${esc(pr.label)}</span></span>
-      <span class="right num"><b>${eur(t)}</b><span class="${g>=0?'up':'down'}">${tri(g)} ${pct(ratio(g, a.deposits))}</span></span></button>`;
+    const a = G.accounts[k], t = tot(k), gk = t - a.deposits, n = unread(k);
+    return `<button class="row" data-act="enter" data-k="${k}">${avatar({id:PR[k].ab, tone:PR[k].tone})}
+      <span class="mid-col"><b>${esc(productName(k))}${n ? ` <i class="badge">${n}</i>` : ''}</b><span>${esc(PR[k].label)}</span></span>
+      <span class="right num"><b>${eur(t)}</b><span class="${gk>=0?'up':'down'}">${tri(gk)} ${pct(ratio(gk, a.deposits))}</span></span></button>`;
   };
-  const groups = [...new Set(ORDER.map(k => PR[k].group))];
-  openPicker(`<div class="sheet-top"><span class="sheet-title">Mes comptes</span><button class="close" data-act="close-picker" aria-label="Fermer">${I.x}</button></div>
-    <div class="acc-scroll">
-      <div class="navy-card" style="margin-top:12px"><div class="k">Ton patrimoine · ${ORDER.length} comptes</div><div class="v num" style="font-size:26px">${eur(all)}</div>
-        <div class="s num">${tri(allG)} ${sgn(allG)}${eur(Math.abs(allG))} (${pct(ratio(allG, allDep))}) depuis l’ouverture</div></div>
-      ${groups.map(gr => `<p class="acc-h">${gr}</p><div class="list acc-list">${ORDER.filter(k => PR[k].group === gr).map(row).join('')}</div>`).join('')}
-      ${MODE === 'server' && USER ? `<div class="acc-user"><span>Compte : <b>${esc(USER.email)}</b></span><button class="ghost" data-act="logout">Se déconnecter</button></div>`
-        : '<p class="m-note" style="margin:16px 0 4px">Mode démo : tes données restent dans ce navigateur.</p>'}
-    </div>`);
+  const toOpen = k => `<div class="row">${avatar({id:PR[k].ab, tone:'grey'})}
+      <span class="mid-col"><b>${esc(productName(k))}</b><span>${esc(PR[k].label)}</span></span>
+      <button class="open-btn" data-act="open-acc" data-k="${k}">Ouvrir</button></div>`;
+  const now = new Date();
+  $('#v-hub').innerHTML = `
+  <header class="hub-top"><div class="pad">
+    <div class="hub-brand">${brandLogo('lg')}<div><b>${esc(BRAND.name)}</b><span>${esc(BRAND.sub)}</span></div></div>
+    <p class="hub-hello">Bonjour ${esc(G.firstName)}<span>${now.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'})}</span></p>
+    <div class="hub-total">
+      <small>Ton patrimoine · ${owned.length} ${owned.length > 1 ? 'comptes' : 'compte'}</small>
+      <b class="num">${eur(all)}</b>
+      <div class="gainrow"><span class="pill-gain num ${g<0?'neg':''}">${tri(g)} ${sgn(g)}${eur(Math.abs(g))}</span><span class="num">${pct(ratio(g, dep))} depuis l’ouverture</span></div>
+    </div>
+    <div class="hub-bar" aria-hidden="true">${owned.map(k => `<i style="width:${all ? tot(k)/all*100 : 0}%;background:${PR[k].tone === 'blue' ? '#8fb0f0' : TONE_COL[PR[k].tone]}"></i>`).join('')}</div>
+  </div></header>
+  <div class="content pad stack">
+    <h2 class="sec">Mes comptes</h2>
+    <div class="card list">${owned.map(row).join('') || '<p class="empty-note">Tu n’as pas encore de compte. Ouvre ton premier ci-dessous.</p>'}</div>
+    ${others.length ? `<h2 class="sec">À ouvrir</h2><div class="card list">${others.map(toOpen).join('')}</div>` : ''}
+    ${exploreCta()}
+    ${MODE === 'server' && USER ? `<div class="acc-user"><span>Connexion : <b>${esc(USER.email)}</b></span><button class="ghost" data-act="logout">Se déconnecter</button></div>`
+      : '<p class="m-note">Mode démo : tes données restent dans ce navigateur. Cours et montants fictifs.</p>'}
+  </div>`;
+}
+function openAccountSheet(k){
+  closePicker();
+  O.mode = 'open'; O.acc = k; O.input = ''; O.done = null;
+  renderOrder(); $('#sheet').classList.add('open'); caption('order');
+}
+function renderOpen(){
+  const k = O.acc, pr = PR[k], x = amount();
+  const room = pr.kind === 'shares' ? Engine.depositRoom(G, k) : Infinity, over = x > room;
+  const pill = over ? 'Au-delà du plafond de versements' : x > 0 ? (pr.kind === 'shares' ? 'Arrive en liquidités, prêt à investir' : 'Réparti ' + Engine.allocShort(G.accounts[k], k)) : 'Tu pourras verser plus tard';
+  $('#sheetBody').innerHTML = `
+    <div class="sheet-top"><button class="close" data-act="close" aria-label="Fermer">${I.x}</button><span class="sheet-title">Ouvrir ${esc(pr.ton)}</span></div>
+    <div class="asset-card">${avatar({id:pr.ab, tone:pr.tone})}<span style="min-width:0"><b>${esc(productName(k))}</b><span>${esc(pr.label)}</span></span></div>
+    <ul class="points">${pr.points.map(t => `<li><span>${I.tick}</span>${esc(t)}</li>`).join('')}</ul>
+    <p class="q">Premier versement (facultatif)</p>
+    <p class="amt num ${O.input?'':'empty'}" aria-live="polite">${O.input || '0'} €</p>
+    <span class="parts-pill ${over?'warn':''}">${pill}</span>
+    <div class="presets">${[100,500,1000].map(v => `<button class="tag" data-act="preset" data-v="${v}">${F0.format(v)} €</button>`).join('')}</div>
+    <div class="keypad">${['1','2','3','4','5','6','7','8','9',',','0','⌫'].map(c => `<button data-act="key" data-k="${c}" aria-label="${c==='⌫'?'Effacer':c}">${c==='⌫'?I.back:c}</button>`).join('')}</div>
+    <span class="spacer"></span>
+    <button class="primary" data-act="confirm" ${over?'disabled':''}>${x > 0 ? 'Ouvrir et verser ' + money(x) : 'Ouvrir ' + esc(pr.ton)}</button>`;
 }
 function supportDetail(id){
   const p = pos(id), perf = p.cost ? (val(p)/p.cost - 1)*100 : 0, pts = p.units != null ? Engine.navSeries(id, p.units, Engine.dayIndex() - 365, Engine.dayIndex(), 90) : series('1A');
@@ -1121,7 +1200,9 @@ document.addEventListener('click', e => {
     case 'go-perks': go('perks'); break;
     case 'go-wallet': go('wallet'); break;
     case 'range': range = b.dataset.r; document.querySelectorAll('.ranges button').forEach(x => { x.classList.toggle('on', x.dataset.r === range); x.setAttribute('aria-selected', x.dataset.r === range); }); drawChart(); break;
-    case 'accounts': accountsPanel(); break;
+    case 'hub': go('hub'); break;
+    case 'enter': switchAccount(b.dataset.k); break;
+    case 'open-acc': openAccountSheet(b.dataset.k); break;
     case 'switch': switchAccount(b.dataset.k); break;
     case 'buy': openOrder('buy'); break;
     case 'sell': openOrder('sell'); break;
@@ -1144,7 +1225,7 @@ document.addEventListener('click', e => {
     case 'a-range': AS.range = b.dataset.r; renderAsset(); break;
     case 'a-buy': openOrder('buy', AS.id); break;
     case 'a-sell': openOrder('sell', AS.id); break;
-    case 'buy-on': switchAccount(b.dataset.k, true); renderAsset(); openOrder('buy', AS.id); break;
+    case 'buy-on': if (!G.accounts[b.dataset.k].opened){ openAccountSheet(b.dataset.k); break; } switchAccount(b.dataset.k, true); renderAsset(); openOrder('buy', AS.id); break;
     case 'fav': { const added = !G.favs.includes(AS.id); op({type:'fav', id:AS.id}, true); if (added) toast(info(AS.id).name + ' ajouté aux favoris'); renderAsset(); if (view === 'explore') renderExploreList(); break; }
     case 'ex-type': EX.type = b.dataset.t; document.querySelectorAll('.filters button').forEach(x => { x.classList.toggle('on', x.dataset.t === EX.type); x.setAttribute('aria-selected', x.dataset.t === EX.type); }); renderExploreList(); break;
     case 'explore-from-order': closePicker(); closeSheet(); closeAsset(); go('explore'); break;
@@ -1160,6 +1241,7 @@ document.addEventListener('click', e => {
     case 'confirm': confirmOrder(); break;
     case 'back-home': {
       const t = O.done && O.done.toast, before = O.done && O.done.before;
+      if (O.done && O.done.enter){ sync(); range = '1A'; firstPaint = true; setNav(); }
       closeAsset(); closeSheet(); go('home');
       if (before && isShares()){
         const pairs = [['#hCash', before.cash, S.cash], ['#hInv', before.inv, invested()]];
@@ -1239,7 +1321,8 @@ function showAuth(msg){
 }
 function start(){
   $('#auth').hidden = true;
-  firstPaint = true; range = '1A'; setNav(); go('home');
+  $('#authBrand').textContent = BRAND.name;
+  firstPaint = true; range = '1A'; setNav(); go('hub');
 }
 $('#authForm').addEventListener('submit', async e => {
   e.preventDefault();
@@ -1253,6 +1336,8 @@ $('#authForm').addEventListener('submit', async e => {
   $('#authErr').textContent = (r.data && r.data.error) || 'Connexion impossible. Vérifie ton réseau et réessaie.';
 });
 async function boot(){
+  $('#authBrand').textContent = BRAND.name;
+  if (BRAND.logo) $('#authLogo').outerHTML = brandLogo();
   const timeout = new Promise(res => setTimeout(() => res({ok:false, status:0, data:null}), 4000));
   const r = location.protocol === 'file:' ? {ok:false, status:0, data:null} : await Promise.race([api('/api/me'), timeout]);
   if (r.data && (r.data.state || (r.status === 401 && r.data.error))){

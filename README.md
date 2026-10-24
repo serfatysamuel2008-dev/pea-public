@@ -35,7 +35,8 @@ npm test
 
 - **Comptes utilisateurs** : inscription, connexion, déconnexion. Mots de passe hachés (scrypt), sessions dans un cookie `HttpOnly` / `SameSite=Lax`, connexion limitée après 8 échecs.
 - **Le serveur fait foi** : chaque opération (achat, vente, versement, retrait, arbitrage…) est recalculée et vérifiée côté serveur avant d'être enregistrée. Le navigateur ne peut pas modifier un solde lui-même. Chaque opération est journalisée.
-- **Mes comptes** : en touchant « Salut … · Mon PEA » sur l'Accueil, on passe d'un produit à l'autre. Chaque produit a ses 4 onglets (Supports, Avantages, Fiscalité, Transmission, Retraite…) et ses opérations.
+- **Page d'accueil principale** : nom et logo en grand, patrimoine total, comptes détenus (on touche un compte pour y entrer) et comptes à ouvrir (ouverture avec un premier versement facultatif). Dans un compte, toucher le logo en haut ramène à cette page.
+- **6 produits** : chaque compte a ses 4 onglets (Supports, Avantages, Fiscalité, Transmission, Retraite…) et ses opérations.
 - **Les cours bougent chaque jour** : chaque placement suit une évolution quotidienne calculée à l'identique sur le serveur et dans le navigateur. Les graphiques (1S, 1M, 1A, 5A, Tout), les performances et la valeur des comptes se mettent à jour tous les jours.
 - **L'argent fructifie** : les supports des contrats (fonds euros à 2,6 %/an, ETF, immobilier, obligations) sont détenus en parts dont la valeur évolue. Un versement reste et suit cette valeur.
 - **Versements programmés réels** : le montant choisi (libre, de 10 à 10 000 € par mois) est versé le 5 de chaque mois, arrondis compris. Sur un compte boursier, les mois s'additionnent jusqu'à pouvoir acheter une part.
@@ -43,6 +44,16 @@ npm test
 - **Mode démo** : si l'app est ouverte sans serveur (fichier local, hébergement statique), elle fonctionne quand même, avec les données gardées dans le navigateur.
 
 Les cours, graphiques et montants sont fictifs.
+
+## Nom et logo
+
+Ils se règlent en haut du script de `public/index.html` :
+
+```js
+const BRAND = {name:'Mon épargne', sub:'Investissement', logo:null};
+```
+
+`logo` accepte l'adresse d'une image placée dans `public/` (par exemple `'logo.svg'`). N'utilise le nom ou le logo d'une marque que si tu as le droit de le faire.
 
 ## Organisation du code
 
