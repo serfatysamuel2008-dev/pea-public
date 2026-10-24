@@ -298,6 +298,12 @@ div.asset-card{cursor:default}
 .custom-amt .primary{width:auto;height:44px;padding:0 18px}
 .custom-amt .auth-err{min-height:0}
 
+.split{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:12px;text-align:left;color:#fff}
+.split span{display:flex;flex-direction:column;gap:2px;background:rgba(255,255,255,.12);border-radius:12px;padding:8px 12px;transition:background .4s}
+.split small{font-size:11px;color:var(--on-navy-dim)}
+.split b{font-size:15px;font-weight:700}
+.split span.flash{background:rgba(255,255,255,.32)}
+
 /* toast */
 .toast{position:absolute;left:12px;right:12px;top:calc(12px + env(safe-area-inset-top,0px));z-index:40;background:#0d1730;color:#fff;border-radius:14px;padding:12px 14px;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:center;transform:translateY(-140%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
 .toast.show{transform:none}
@@ -558,6 +564,7 @@ function renderHome(){
     <p class="lbl" id="valLbl">${P().vaut}</p>
     <p class="big num" id="totalVal">${eur(firstPaint ? 0 : total())}</p>
     <div class="gainrow"><span class="pill-gain num ${g<0?'neg':''}">${tri(g)} ${sgn(g)}${eur(Math.abs(g))}</span><span class="num">${pct(ratio(g, S.deposits))} depuis l’ouverture</span></div>
+    ${isShares() ? `<button class="split" data-act="go" data-v="wallet" aria-label="Voir le détail du portefeuille"><span><small>Placé</small><b class="num" id="hInv">${eur(invested())}</b></span><span><small>Liquidités</small><b class="num" id="hCash">${eur(S.cash)}</b></span></button>` : ''}
     <svg class="chart" id="chart" data-scrub viewBox="0 0 340 110" preserveAspectRatio="none" role="img" aria-label="Évolution de la valeur"></svg>
     <div class="ranges" role="tablist">${Object.keys(RANGES).map(k => `<button role="tab" data-act="range" data-r="${k}" class="${k===range?'on':''}" aria-selected="${k===range}">${k}</button>`).join('')}</div>
     <div class="cta2">${heroOps()}</div>
@@ -886,10 +893,11 @@ async function confirmOrder(){
   if (O.mode === 'simulate'){ O.mode = 'verse'; renderOrder(); return; }
   busy = true;
   const btn = $('#sheet [data-act="confirm"]'); if (btn){ btn.disabled = true; btn.textContent = 'Un instant…'; }
+  const before = isShares() ? {cash:S.cash, inv:invested()} : null;
   const r = await op({type:'order', account:G.active, mode:O.mode, asset:O.asset, to:O.to, amount:amount()});
   busy = false;
   if (r.error){ if (r.error !== 'auth') renderOrder(); return; }
-  O.done = r.done;
+  O.done = Object.assign({before}, r.done);
   renderOrder(); render(); if (assetOpen()) renderAsset();
 }
 
@@ -1150,7 +1158,16 @@ document.addEventListener('click', e => {
     }
     case 'preset': O.input = b.dataset.v; renderOrder(); break;
     case 'confirm': confirmOrder(); break;
-    case 'back-home': { const t = O.done && O.done.toast; closeAsset(); closeSheet(); go('home'); if (t) setTimeout(() => toast(t), 250); break; }
+    case 'back-home': {
+      const t = O.done && O.done.toast, before = O.done && O.done.before;
+      closeAsset(); closeSheet(); go('home');
+      if (before && isShares()){
+        const pairs = [['#hCash', before.cash, S.cash], ['#hInv', before.inv, invested()]];
+        pairs.forEach(([sel, from, to]) => { const el = $(sel); if (!el || Math.abs(from - to) < .01) return; el.parentNode.classList.add('flash'); countUp(el, from, to, 900, eur, () => setTimeout(() => el.parentNode.classList.remove('flash'), 700)); });
+      }
+      if (t) setTimeout(() => toast(t), 250);
+      break;
+    }
     case 'pick-order': assetPicker('order'); break;
     case 'pick-auto': assetPicker('auto'); break;
     case 'pick-from': assetPicker('from'); break;
