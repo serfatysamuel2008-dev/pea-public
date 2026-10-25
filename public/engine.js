@@ -128,7 +128,10 @@ const mk = id => MARKET.find(a => a.id === id);
 const DAY = 86400000;
 const ANCHOR = Date.UTC(2026, 9, 24);
 const BACK = 2300;
-const dayIndex = t => Math.floor(((t == null ? Date.now() : t) - ANCHOR) / DAY);
+/* The clock can be pinned (tests, presentations); by default it is the real time. */
+let clock = () => Date.now();
+const setClock = fn => { clock = fn || (() => Date.now()); marketDay = null; };
+const dayIndex = t => Math.floor(((t == null ? clock() : t) - ANCHOR) / DAY);
 const dateOf = d => new Date(ANCHOR + d*DAY + 12*3600000);
 const VOL = {etf:.16, action:.27, oblig:.05, euro:0, immo:.05, bond:.05};
 const DRIFT = {etf:.065, action:.07, oblig:.03, euro:.026, immo:.03, bond:.03};
@@ -364,7 +367,7 @@ function runPlan(G, k, t){
 /* Brings a state up to date: migration, yearly counters, plans due since the last visit, today's prices.
    Returns true when something worth saving changed. */
 function refresh(G, now){
-  now = now == null ? Date.now() : now;
+  now = now == null ? clock() : now;
   const d = dayIndex(now), year = new Date(now).getFullYear();
   refreshMarket(d);
   let changed = false;
@@ -607,7 +610,7 @@ function apply(G, op){
   fail('Opération inconnue.');
 }
 
-return {BANK, bankOf, maskIban, cashoutOpen, closingOf, openOf, emptyAccount, DAY, ANCHOR, BACK, dayIndex, dateOf, priceAt, navAt, refreshSpec, refreshMarket, specSeries, navSeries, accountSeries, refresh, PLAN_MIN, PLAN_MAX, hash, rng,
+return {setClock, BANK, bankOf, maskIban, cashoutOpen, closingOf, openOf, emptyAccount, DAY, ANCHOR, BACK, dayIndex, dateOf, priceAt, navAt, refreshSpec, refreshMarket, specSeries, navSeries, accountSeries, refresh, PLAN_MIN, PLAN_MAX, hash, rng,
   F0, F1, F2, eur, eur0, sgn, pct, tri, r2, money, lower, de,
   PR, ORDER, PROFILES, SHORT, PEA_CAP, COMMON_CAP, AMOUNTS, TMIS, MARKET, mk, elig,
   defaults, val, held, totOf, pos, common, depositRoom, allocShort, splitAlloc, splitTxt,

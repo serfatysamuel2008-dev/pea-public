@@ -3,6 +3,9 @@ const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 
 process.env.DB_PATH = ':memory:';
+// Tests run on the reference day, whatever today's date is.
+const Engine = require('../public/engine.js');
+Engine.setClock(() => Engine.ANCHOR + 10 * 3600000);
 const { server } = require('../server.js');
 let base;
 const sp = s => s.replace(/[\u00a0\u202f]/g, ' ');
