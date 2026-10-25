@@ -1,0 +1,14 @@
+{
+  "name": "mon-pea",
+  "version": "1.0.0",
+  "private": true,
+  "description": "App d'épargne (PEA, PEA-PME, compte-titres, assurance vie, contrat de capitalisation, PER) avec comptes utilisateurs.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server.js",
+    "test": "node --disable-warning=ExperimentalWarning --test"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}

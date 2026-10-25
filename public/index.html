@@ -1,0 +1,1411 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mon PEA</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: one phone-sized app. Full screen on mobile, centred in a device frame with a caption on desktop. */
+:root{
+  --navy:#0b3a8c; --navy-2:#2a58ad; --navy-ink:#081d47;
+  --ink:#0f1a33; --muted:#5b6478; --faint:#8a93a6;
+  --bg:#eef2f8; --stage:#e6ecf6; --card:#ffffff; --line:#e3e8f1; --soft:#f1f4f9;
+  --chip:#e6eefc; --green:#17804a; --green-soft:#e3f4ea; --red:#c2410c; --orange:#b45309; --orange-soft:#fdeee3;
+  --on-navy:#ffffff; --on-navy-dim:#c9d6f0;
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--stage);color:var(--ink);font-family:var(--font);font-size:14px;-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid #7aa2f7;outline-offset:2px;border-radius:12px}
+.num{font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+
+/* ---------- stage / device ---------- */
+.stage{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.caption{text-align:center;display:none}
+.caption h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.02em;text-wrap:balance}
+.caption p{margin:6px 0 0;color:var(--muted);font-size:13px;font-weight:500}
+.device{position:relative;width:100%;height:100%;background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
+@media (min-width:600px) and (min-height:640px){
+  .caption{display:block}
+  .device{width:390px;height:min(820px,calc(100% - 120px));border-radius:46px;border:10px solid var(--navy-ink);box-shadow:0 30px 60px -20px rgba(11,58,140,.35)}
+}
+
+/* ---------- screens ---------- */
+.screens{flex:1;position:relative;min-height:0}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:110px;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.pad{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.stack{display:flex;flex-direction:column;gap:12px}
+
+/* hero (navy band) */
+.hero{background:var(--navy);color:var(--on-navy);border-radius:0 0 28px 28px;padding-top:calc(18px + env(safe-area-inset-top,0px));padding-bottom:18px}
+.topbar{display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:34px;height:34px;border-radius:10px;background:#fff;color:var(--navy);display:grid;place-items:center;font-size:8px;font-weight:800;letter-spacing:.04em}
+.brand small{display:block;font-size:11px;color:var(--on-navy-dim)}
+.brand b{display:block;font-size:14px;font-weight:700}
+.icon-btn{position:relative;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.14);display:grid;place-items:center;color:#fff}
+.icon-btn .dot{position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:#ff8a4c;border:2px solid var(--navy)}
+.lbl{margin:18px 0 2px;font-size:12px;color:var(--on-navy-dim)}
+.big{margin:0;font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.gainrow{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--on-navy-dim);flex-wrap:wrap}
+.pill-gain{background:#fff;color:var(--green);font-weight:700;border-radius:999px;padding:3px 9px;font-size:12px}
+.pill-gain.neg{color:var(--red)}
+.chart{display:block;width:100%;height:110px;margin-top:10px;touch-action:pan-y;cursor:crosshair}
+.ranges{display:flex;gap:6px;margin-top:10px}
+.ranges button{flex:1;height:30px;border-radius:9px;background:rgba(255,255,255,.12);color:#fff;font-size:12px;font-weight:600}
+.ranges button.on{background:#fff;color:var(--navy)}
+.cta2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.btn-w,.btn-o{height:46px;border-radius:14px;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-w{background:#fff;color:var(--navy)}
+.btn-o{border:1.5px solid #fff;color:#fff}
+
+.content{padding-top:16px}
+.card{background:var(--card);border-radius:20px;padding:16px}
+.card.tap{text-align:left;width:100%;display:block;transition:transform .15s}
+.card.tap:active{transform:scale(.985)}
+.tag{display:inline-flex;align-items:center;gap:4px;background:var(--chip);color:var(--navy);font-weight:700;font-size:11px;border-radius:999px;padding:4px 10px}
+.card h3{margin:10px 0 4px;font-size:15px;font-weight:700;text-wrap:balance}
+.card p.sub{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ring{display:block}
+.small-lbl{font-size:12px;color:var(--muted);margin:8px 0 4px}
+.strong{font-weight:700;font-size:14px;line-height:1.3}
+.mid{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:2px 0 8px}
+.bar{height:7px;border-radius:99px;background:var(--chip);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--navy);border-radius:99px;transition:width .6s ease}
+h2.sec{font-size:17px;font-weight:800;margin:10px 0 0;letter-spacing:-.01em}
+.list{padding:4px 16px}
+.row{display:flex;align-items:center;gap:12px;padding:12px 0;width:100%;text-align:left}
+.row+.row{border-top:1px solid var(--line)}
+.av{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:12px}
+.t-blue{background:var(--chip);color:var(--navy)} .t-orange{background:var(--orange-soft);color:var(--orange)} .t-green{background:var(--green-soft);color:var(--green)} .t-grey{background:var(--soft);color:var(--muted)}
+.row .mid-col{flex:1;min-width:0}
+.row .mid-col b{display:block;font-size:14px}
+.row .mid-col span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .right{text-align:right;flex:none}
+.row .right b{display:block;font-size:14px}
+.up{color:var(--green);font-weight:700;font-size:12px}
+.down{color:var(--red);font-weight:700;font-size:12px}
+
+/* page titles (non-hero screens) */
+.ptitle{font-size:18px;font-weight:800;margin:0;padding-top:calc(22px + env(safe-area-inset-top,0px));padding-bottom:12px;letter-spacing:-.01em}
+.navy-card{background:var(--navy);color:#fff;border-radius:20px;padding:18px}
+.navy-card .k{font-size:12px;color:var(--on-navy-dim)}
+.navy-card .v{font-size:30px;font-weight:800;letter-spacing:-.03em;margin:4px 0 8px}
+.navy-card .s{font-size:12px;color:#fff}
+.navy-card .xs{font-size:11px;color:var(--on-navy-dim);margin-top:8px}
+
+/* perks hero */
+.perk-hero{padding-top:calc(22px + env(safe-area-inset-top,0px))}
+.perk-hero h1{margin:0 0 14px;font-size:17px;font-weight:800}
+.perk-hero .k{font-size:12px;color:var(--on-navy-dim)}
+.perk-hero .h{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:4px 0 6px;line-height:1.15;text-wrap:balance}
+.perk-hero .d{font-size:12px;color:var(--on-navy-dim);line-height:1.4}
+.wbar{height:8px;border-radius:99px;background:rgba(255,255,255,.22);margin:16px 0 10px;overflow:hidden}
+.wbar i{display:block;height:100%;background:#fff;border-radius:99px;transition:width .8s ease}
+.tl{display:flex;justify-content:space-between;font-size:11px;color:var(--on-navy-dim)}
+.tl div:nth-child(2){text-align:center} .tl div:last-child{text-align:right}
+.tl b{display:block;color:#fff;font-weight:600}
+.step{display:flex;gap:14px;align-items:flex-start}
+.step .n{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:800}
+.step b{display:block;font-size:14px;margin-bottom:3px}
+.step span{display:block;font-size:13px;color:var(--muted);line-height:1.45}
+.link-btn{color:var(--navy);font-weight:700;font-size:13px;margin-top:10px}
+
+/* auto */
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.chips button{height:42px;border-radius:12px;border:1.5px solid var(--line);font-weight:700;background:#fff;transition:background .15s,color .15s}
+.chips button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.asset-line{display:flex;align-items:center;gap:12px;background:var(--soft);border-radius:14px;padding:10px 12px;margin-top:12px;width:100%;text-align:left}
+.asset-line b{display:block;font-size:13px;color:var(--ink)} .asset-line span{display:block;font-size:12px;color:var(--muted)}
+.asset-line .av{width:34px;height:34px;font-size:11px;border-radius:10px}
+.toggle-row{display:flex;align-items:center;gap:12px}
+.toggle-row>div{flex:1;min-width:0}
+.switch{flex:none;width:50px;height:30px;border-radius:99px;background:#c9d0dc;position:relative;transition:background .2s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+.switch[aria-checked="true"]{background:var(--navy)}
+.switch[aria-checked="true"]::after{transform:translateX(20px)}
+.primary{width:100%;height:52px;border-radius:14px;background:var(--navy);color:#fff;font-weight:700;font-size:15px;transition:background .2s}
+.primary:disabled{background:#7d879b;cursor:default}
+.ghost{width:100%;height:46px;border-radius:14px;border:1.5px solid var(--line);font-weight:700;color:var(--navy);background:#fff}
+.danger-link{color:var(--red);font-weight:600;font-size:13px}
+
+/* bottom nav */
+.nav{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);align-items:end;padding:8px max(6px,env(safe-area-inset-left,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-right,0px));z-index:5}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--faint)}
+.nav button.on{color:var(--navy)}
+.nav .fab{align-self:center}
+.nav .fab span{width:50px;height:50px;border-radius:16px;background:var(--navy);display:grid;place-items:center;color:#fff;margin-top:-26px;box-shadow:0 8px 18px -6px rgba(11,58,140,.6)}
+
+/* overlay sheet */
+.sheet{position:absolute;inset:0;background:var(--card);z-index:20;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1);visibility:hidden}
+.sheet.open{transform:none;visibility:visible}
+.sheet-body{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.sheet-top{display:flex;align-items:center;gap:10px}
+.close{flex:none;width:38px;height:38px;border-radius:50%;background:var(--soft);display:grid;place-items:center}
+.seg{flex:1;display:grid;grid-template-columns:1fr 1fr;background:var(--soft);border-radius:14px;padding:4px}
+.seg button{height:36px;border-radius:11px;font-weight:700;color:var(--muted)}
+.seg button.on{background:#fff;color:var(--navy);box-shadow:0 1px 4px rgba(15,26,51,.1)}
+.sheet-title{flex:1;font-weight:800;font-size:16px}
+.asset-card{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:16px;padding:10px 12px;margin-top:14px;width:100%;text-align:left}
+.asset-card b{display:block;font-size:14px;color:var(--ink)}
+.asset-card span{display:block;font-size:12px;color:var(--muted)}
+.asset-card .chev{margin-left:auto;color:var(--faint)}
+.asset-card span span{display:inline}
+.asset-card .av,.asset-line .av{display:grid}
+.asset-card .t-blue,.asset-line .t-blue{color:var(--navy)} .asset-card .t-orange,.asset-line .t-orange{color:var(--orange)} .asset-card .t-green,.asset-line .t-green{color:var(--green)}
+.asset-card span.up{color:var(--green)} .asset-card span.down{color:var(--red)}
+.q{text-align:center;color:var(--muted);font-weight:600;font-size:13px;margin:18px 0 2px}
+.amt{text-align:center;font-size:46px;font-weight:800;letter-spacing:-.03em;margin:0;line-height:1.15}
+.amt.empty{color:#b9c0cd}
+.parts-pill{display:table;margin:8px auto 0;background:var(--chip);color:var(--navy);font-weight:700;font-size:12px;border-radius:999px;padding:5px 12px}
+.parts-pill.warn{background:var(--orange-soft);color:var(--orange)}
+.info{background:var(--soft);border-radius:14px;padding:12px;margin-top:14px;font-size:12px}
+.info .l{display:flex;justify-content:space-between;gap:10px;padding:3px 0;color:var(--muted)}
+.info .l b{color:var(--ink)}
+.info p{margin:6px 0 0;color:var(--muted);line-height:1.45}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin:12px 0 12px}
+.keypad button{height:50px;border-radius:14px;font-size:22px;font-weight:600}
+.keypad button:active{background:var(--soft)}
+.spacer{flex:1}
+.done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px}
+.done .tick{width:76px;height:76px;border-radius:50%;background:var(--navy);display:grid;place-items:center;color:#fff;margin-bottom:12px;animation:pop .45s cubic-bezier(.2,1.4,.4,1)}
+.done h2{margin:0;font-size:24px;font-weight:800}
+.done p{margin:0;max-width:30ch}
+.done p.b{font-weight:600}
+.done p.m{color:var(--muted);font-size:12px}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+.picker{position:absolute;inset:0;z-index:30;background:rgba(15,26,51,.35);display:flex;align-items:flex-end;opacity:0;visibility:hidden;transition:opacity .2s}
+.picker.open{opacity:1;visibility:visible}
+.picker .pk{background:#fff;width:100%;border-radius:22px 22px 0 0;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.picker h4{margin:0 0 6px;font-size:15px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.stats div{background:var(--soft);border-radius:14px;padding:10px 12px}
+.stats span{display:block;font-size:11px;color:var(--muted)}
+.stats b{display:block;font-size:15px;margin-top:2px}
+.donut-wrap{display:flex;align-items:center;gap:16px}
+.legend{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px;font-size:12px}
+.legend div{display:flex;align-items:center;gap:8px}
+.legend i{width:10px;height:10px;border-radius:3px;flex:none}
+.legend span{flex:1;color:var(--muted)}
+.empty-note{color:var(--muted);font-size:13px;padding:14px 0;text-align:center}
+.confirm{background:var(--orange-soft);border-radius:14px;padding:12px;font-size:13px}
+.confirm div{display:flex;gap:8px;margin-top:10px}
+.confirm button{flex:1;height:38px;border-radius:10px;font-weight:700}
+
+/* explore + asset sheet */
+.t-purple{background:#efe9fb;color:#6d3fc0} .t-teal{background:#dff3f2;color:#0f7470} .t-rose{background:#fce8ee;color:#b4235a}
+.av.sm{font-size:10px}
+.row .mid-col b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.search{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:14px;padding:0 12px;height:46px;border:1.5px solid var(--line);color:var(--faint)}
+.search:focus-within{border-color:var(--navy)}
+.search input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:15px;background:transparent;color:var(--ink)}
+.hscroll{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin-left:calc(-1*max(16px,env(safe-area-inset-left,0px)));margin-right:calc(-1*max(16px,env(safe-area-inset-right,0px)));padding:2px max(16px,env(safe-area-inset-right,0px)) 2px max(16px,env(safe-area-inset-left,0px))}
+.hscroll::-webkit-scrollbar{display:none}
+.idx{flex:none;width:132px;background:var(--card);border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.idx>span:first-child{font-size:11px;color:var(--muted);font-weight:600}
+.idx b{font-size:14px}
+.idx .spark{margin:4px 0}
+.filters{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.filters button{flex:none;height:34px;padding:0 14px;border-radius:99px;background:var(--card);border:1.5px solid var(--line);font-weight:600;font-size:13px}
+.filters button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.trend{flex:none;width:148px;background:var(--card);border-radius:16px;padding:12px;text-align:left;display:flex;flex-direction:column;gap:4px}
+.trend .av{width:32px;height:32px;font-size:10px;border-radius:9px}
+.trend b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px}
+.spark{display:block;flex:none}
+.listhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px}
+.sortlbl{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.sort{font:inherit;font-size:13px;font-weight:700;color:var(--navy);background:transparent;border:0;padding:4px 0;cursor:pointer}
+.notice{background:var(--orange-soft);color:#7a3a07;border-radius:14px;padding:12px;font-size:13px;line-height:1.45}
+.m-note{text-align:center;color:var(--faint);font-size:12px;margin:2px 0}
+.card.explore-cta{display:flex;align-items:center;gap:12px}
+#assetBody h2.sec{margin:22px 0 10px}
+.explore-cta .mid-col{flex:1;min-width:0}
+.explore-cta b{display:block;font-size:14px}
+.explore-cta span.s{display:block;font-size:12px;color:var(--muted)}
+#assetSheet{z-index:15}
+.a-head{display:flex;gap:12px;align-items:center;margin-top:12px}
+.a-head b{display:block;font-size:19px;font-weight:800;letter-spacing:-.01em}
+.a-head div span{display:block;font-size:12px;color:var(--muted)}
+.tags{display:flex;gap:6px;margin-top:10px}
+.tag.ok{background:var(--green-soft);color:var(--green)} .tag.no{background:var(--orange-soft);color:var(--orange)}
+.a-price{font-size:32px;font-weight:800;letter-spacing:-.03em;margin:14px 0 0}
+.a-chg{font-size:13px;margin:2px 0 0}
+.a-chg .up,.a-chg .down{font-size:13px}
+.muted{color:var(--muted);font-weight:500}
+.achart{display:block;width:100%;height:170px;margin-top:10px;touch-action:pan-y;cursor:crosshair}
+.lranges button{background:var(--soft);color:var(--muted)}
+.lranges button.on{background:var(--navy);color:#fff}
+.mypos{background:var(--soft);margin-top:14px}
+.mypos .stats div{background:var(--card)}
+.star{font-size:19px;color:var(--navy)} .star.on{color:#c98a00}
+.a-foot{display:grid;grid-template-columns:1fr 1fr;gap:10px;border-top:1px solid var(--line);padding-top:10px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+.nav .fab.on span{box-shadow:0 0 0 4px var(--chip),0 8px 18px -6px rgba(11,58,140,.6)}
+
+/* accounts */
+.brand{text-align:left;color:inherit;border-radius:12px;min-width:0}
+.brand-t{display:block;min-width:0}
+.brand-t b{display:flex;align-items:center;gap:4px;white-space:nowrap}
+.brand-chev{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.16)}
+.topbar{gap:10px}
+.acc-scroll{max-height:68vh;overflow-y:auto;margin:0 -4px;padding:0 4px}
+.acc-h{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 4px}
+.acc-list{padding:0}
+.row.acc.on .mid-col b::after{content:" ✓";color:var(--green)}
+.alloc{display:flex;flex-direction:column;gap:10px}
+.alloc>div{display:grid;grid-template-columns:1fr auto;gap:4px 8px;font-size:13px}
+.alloc>div span{color:var(--muted)}
+.alloc .bar{grid-column:1/-1}
+.tmi{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:4px 0 8px}
+.tmi button{height:34px;border-radius:10px;background:var(--card);border:1.5px solid var(--line);font-weight:700;font-size:13px}
+.tmi button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.presets{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+div.asset-card{cursor:default}
+.t-grey{background:var(--soft);color:var(--muted)}
+
+/* auth */
+.auth{position:absolute;inset:0;z-index:45;background:var(--bg);overflow-y:auto;display:flex;flex-direction:column}
+.auth-top{background:var(--navy);color:#fff;padding-top:calc(48px + env(safe-area-inset-top,0px));padding-bottom:40px;border-radius:0 0 28px 28px}
+.auth-top .logo{width:44px;height:44px;font-size:9px}
+.auth-top h1{margin:18px 0 6px;font-size:28px;font-weight:800;letter-spacing:-.02em}
+.auth-top p{margin:0;color:var(--on-navy-dim);font-size:14px;line-height:1.45;max-width:30ch}
+.auth-card{display:flex;flex-direction:column;gap:14px;padding-top:20px;padding-bottom:24px}
+.auth-card form{display:flex;flex-direction:column;gap:12px}
+.fld{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--muted)}
+.fld input{height:48px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);padding:0 14px;font:inherit;font-size:15px;color:var(--ink)}
+.fld input:focus{outline:none;border-color:var(--navy)}
+.auth-err{margin:0;min-height:18px;color:var(--red);font-size:13px;font-weight:600}
+.acc-user{display:flex;flex-direction:column;gap:10px;margin:18px 0 4px;font-size:13px;color:var(--muted)}
+.acc-user b{color:var(--ink)}
+
+.chips5{grid-template-columns:repeat(5,1fr);gap:6px}
+.chips5 button{font-size:13px;padding:0 2px}
+.custom-amt{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.custom-amt label{font-size:12px;font-weight:600;color:var(--muted)}
+.custom-amt div{display:flex;align-items:center;gap:8px}
+.custom-amt input{flex:1;min-width:0;height:44px;border-radius:12px;border:1.5px solid var(--line);padding:0 12px;font:inherit;font-size:16px;font-weight:700;color:var(--ink);background:var(--card)}
+.custom-amt input:focus{outline:none;border-color:var(--navy)}
+.custom-amt span{font-weight:700}
+.custom-amt .primary{width:auto;height:44px;padding:0 18px}
+.custom-amt .auth-err{min-height:0}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:12px;text-align:left;color:#fff}
+.split span{display:flex;flex-direction:column;gap:2px;background:rgba(255,255,255,.12);border-radius:12px;padding:8px 12px;transition:background .4s}
+.split small{font-size:11px;color:var(--on-navy-dim)}
+.split b{font-size:15px;font-weight:700}
+.split span.flash{background:rgba(255,255,255,.32)}
+
+/* main page */
+.hub-top{background:var(--navy);color:#fff;border-radius:0 0 28px 28px;padding-top:calc(26px + env(safe-area-inset-top,0px));padding-bottom:22px}
+.hub-brand{display:flex;align-items:center;gap:14px}
+.logo.lg{width:56px;height:56px;border-radius:16px;font-size:10px;flex:none}
+img.logo{object-fit:contain;background:#fff}
+.hub-brand b{display:block;font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.hub-brand div span{display:block;font-size:15px;font-weight:600;color:var(--on-navy-dim);letter-spacing:.02em;margin-top:2px}
+.hub-hello{margin:26px 0 0;font-size:20px;font-weight:700}
+.hub-hello span{display:block;font-size:13px;font-weight:500;color:var(--on-navy-dim);margin-top:2px}
+.hub-hello span::first-letter{text-transform:uppercase}
+.hub-total{margin-top:16px}
+.hub-total small{display:block;font-size:12px;color:var(--on-navy-dim)}
+.hub-total b{display:block;font-size:34px;font-weight:800;letter-spacing:-.03em;margin:2px 0 0}
+.hub-bar{display:flex;gap:3px;height:8px;margin-top:16px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.14)}
+.hub-bar i{display:block;height:100%}
+.badge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:#ff8a4c;color:#fff;font-size:11px;font-style:normal;font-weight:700;vertical-align:1px;margin-left:4px}
+.open-btn{flex:none;height:34px;padding:0 16px;border-radius:99px;background:var(--navy);color:#fff;font-weight:700;font-size:13px}
+.points{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:13px}
+.points li{display:flex;gap:10px;align-items:flex-start;line-height:1.4}
+.points li span{flex:none;width:22px;height:22px;border-radius:50%;background:var(--green-soft);color:var(--green);display:grid;place-items:center}
+
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.primary.danger{background:var(--red)}
+.bank-card{display:flex;align-items:center;gap:12px}
+.bank-card .mid-col{flex:1;min-width:0}
+.bank-card b{display:block;font-size:14px}
+.bank-card span span{display:block;font-size:12px;color:var(--muted)}
+
+/* toast */
+.toast{position:absolute;left:12px;right:12px;top:calc(12px + env(safe-area-inset-top,0px));z-index:40;background:#0d1730;color:#fff;border-radius:14px;padding:12px 14px;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:center;transform:translateY(-140%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.toast.show{transform:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="caption"><h1 id="capT">Tout d'un coup d'œil</h1><p id="capS">Valeur, gains, conseils et compteur fiscal</p></div>
+  <div class="device" id="app">
+    <div class="toast" id="toast" role="status" aria-live="polite"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg><span id="toastTxt"></span></div>
+
+    <div class="screens">
+      <section class="screen" id="v-hub" data-view="hub" hidden></section>
+      <section class="screen" id="v-home" data-view="home"></section>
+      <section class="screen" id="v-wallet" data-view="wallet" hidden></section>
+      <section class="screen" id="v-perks" data-view="perks" hidden></section>
+      <section class="screen" id="v-auto" data-view="auto" hidden></section>
+      <section class="screen" id="v-explore" data-view="explore" hidden></section>
+    </div>
+
+    <nav class="nav" id="nav" aria-label="Navigation principale">
+      <button data-act="go" data-v="home" class="on"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg>Accueil</button>
+      <button data-act="go" data-v="wallet"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5V12h8.5"/></svg><span id="navWallet">Portefeuille</span></button>
+      <button data-act="go" data-v="explore" class="fab" aria-label="Explorer le marché"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span></button>
+      <button data-act="go" data-v="perks"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6z"/></svg><span id="navPerks">Avantages</span></button>
+      <button data-act="go" data-v="auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>Auto</button>
+    </nav>
+
+    <div class="sheet" id="assetSheet" role="dialog" aria-modal="true" aria-label="Fiche du placement"><div class="sheet-body pad" id="assetBody"></div><div class="a-foot pad" id="assetFoot"></div></div>
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Ordre"><div class="sheet-body pad" id="sheetBody"></div></div>
+    <div class="picker" id="picker"><div class="pk" id="pickerBody"></div></div>
+    <div class="auth" id="auth" hidden>
+      <div class="auth-top pad"><span class="logo" id="authLogo">LOGO</span><h1 id="authBrand">Mon épargne</h1><p>PEA, assurance vie, PER… tous tes comptes au même endroit.</p></div>
+      <div class="auth-card pad">
+        <div class="seg" role="tablist"><button type="button" role="tab" data-act="auth-tab" data-t="login" class="on" aria-selected="true">Se connecter</button><button type="button" role="tab" data-act="auth-tab" data-t="register" aria-selected="false">Créer un compte</button></div>
+        <form id="authForm" novalidate>
+          <label class="fld" id="fldName" hidden><span>Prénom</span><input id="aName" autocomplete="given-name" maxlength="40"></label>
+          <label class="fld"><span>E-mail</span><input id="aEmail" type="email" autocomplete="email" maxlength="120"></label>
+          <label class="fld"><span>Mot de passe</span><input id="aPass" type="password" autocomplete="current-password" minlength="8" maxlength="200"></label>
+          <p class="auth-err" id="authErr" role="alert"></p>
+          <button class="primary" id="authBtn" type="submit">Se connecter</button>
+        </form>
+        <p class="m-note">À l’inscription, tes 6 comptes démarrent avec des montants d’exemple.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="engine.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- brand ----------
+   Nom et logo affichés sur la page d'accueil, l'écran de connexion et l'en-tête des comptes.
+   logo : null pour l'emplacement « LOGO », ou l'adresse d'une image (ex. 'logo.svg' dans public/). */
+const BRAND = {name:'Mon épargne', sub:'Investissement', logo:null};
+const brandLogo = cls => BRAND.logo ? `<img class="logo ${cls || ''}" src="${BRAND.logo}" alt="${BRAND.name}">` : `<span class="logo ${cls || ''}">LOGO</span>`;
+
+/* ---------- formatting (shared engine) ---------- */
+const {F0, F1, F2, eur, eur0, sgn, pct, tri, r2, money, lower, de, PR, ORDER, PROFILES, SHORT, PEA_CAP, COMMON_CAP, MARKET, mk, elig} = Engine;
+const MONTHS = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+const dShort = d => d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+const dNum = d => String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- support descriptions ---------- */
+const SUPPORT_TXT = {
+  FE:'Capital garanti par l’assureur. Le rendement est crédité chaque année et reste acquis.',
+  MO:'Unité de compte investie dans un ETF Monde : plus de potentiel sur la durée, mais le capital n’est pas garanti.',
+  IM:'Unité de compte en immobilier (SCPI, SCI) : des loyers réguliers, mais le capital n’est pas garanti.',
+  OB:'Unité de compte en obligations : moins de variations que les actions, capital non garanti.'
+};
+
+/* ---------- state ---------- */
+/* In server mode the server owns the state: every change goes through POST /api/op.
+   With no server (static hosting, preview), the app runs in demo mode on localStorage. */
+const KEY = 'monpea:v2';
+let G = null, S = null, MODE = 'demo', USER = null;
+function sync(){ S = G.accounts[G.active]; }
+function saveLocal(){ if (MODE === 'demo') try { localStorage.setItem(KEY, JSON.stringify(G)); } catch(e){} }
+function loadLocal(){
+  let g = null;
+  try { g = JSON.parse(localStorage.getItem(KEY)); } catch(e){}
+  if (!g || !g.accounts || !ORDER.every(k => g.accounts[k]) || !PR[g.active]) g = Engine.defaults('Léa');
+  if (!g.firstName) g.firstName = 'Léa';
+  return g;
+}
+const P = () => PR[G.active];
+const isShares = () => P().kind === 'shares';
+const pos = id => Engine.pos(S, id);
+const val = Engine.val, held = Engine.held, totOf = Engine.totOf;
+const invested = () => S.positions.reduce((a,p) => a + val(p), 0);
+const total = () => totOf(S);
+const gain = () => r2(total() - S.deposits);
+const ratio = (g, base) => base > 0 ? g/base*100 : 0;
+const common = () => Engine.common(G);
+const allocShort = () => Engine.allocShort(S, G.active);
+const depositRoom = () => Engine.depositRoom(G, G.active);
+
+/* ---------- API ---------- */
+async function api(path, body){
+  try {
+    const opts = body === undefined ? {credentials:'same-origin'} : {method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)};
+    const res = await fetch(path, opts);
+    let data = null; try { data = await res.json(); } catch(e){}
+    return {ok: res.ok, status: res.status, data};
+  } catch(e){ return {ok:false, status:0, data:null}; }
+}
+/* Runs one operation. Light ones are applied locally first so the screen reacts at once;
+   the server's answer then replaces the state. Orders wait for the server. */
+async function op(o, optimistic){
+  let done = null;
+  if (optimistic || MODE === 'demo'){
+    try { done = Engine.apply(G, o); sync(); saveLocal(); }
+    catch(e){ toast(e.message); return {error: e.message}; }
+    if (MODE === 'demo') return {done};
+  }
+  const r = await api('/api/op', o);
+  if (r.ok && r.data && r.data.state){ G = r.data.state; sync(); return {done: r.data.done}; }
+  if (r.status === 401){ showAuth('Ta session a expiré. Reconnecte-toi.'); return {error:'auth'}; }
+  const msg = (r.data && r.data.error) || 'Connexion impossible. Vérifie ton réseau et réessaie.';
+  toast(msg);
+  if (optimistic) await refresh();
+  return {error: msg};
+}
+async function refresh(){
+  const r = await api('/api/me');
+  if (r.ok && r.data && r.data.state){ G = r.data.state; sync(); render(); }
+}
+
+/* ---------- dates / counters ---------- */
+const fiscal = () => Engine.fiscal(G.active, S);
+const openDate = () => Engine.openOf(S, G.active);
+const my = d => String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+
+/* ---------- series for the chart ---------- */
+const RANGES = {'1S':1, '1M':1, '1A':1, '5A':1, 'Tout':1};
+const SPAN = {'1S':7, '1M':30, '1A':365, '5A':1826};
+let curDay = Engine.dayIndex();
+/* Value of the account's current holdings over the chosen period, from the daily price model. */
+function series(key){
+  const d = Engine.dayIndex(), open = Math.max(Engine.dayIndex(openDate().getTime()), -Engine.BACK + 1);
+  const from = key === 'Tout' ? open : Math.max(open, d - SPAN[key]);
+  return Engine.accountSeries(S, from, d, 90);
+}
+function pathFor(pts, W, H, pad){
+  const vs = pts.map(p => p.v), mn = Math.min(...vs), mx = Math.max(...vs), span = (mx - mn) || 1;
+  const xy = pts.map((p,i) => [i*(W/(pts.length-1)), pad + (H - 2*pad)*(1 - (p.v - mn)/span)]);
+  const line = xy.map((p,i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  return {xy, line, area: line + ` L${W} ${H} L0 ${H} Z`};
+}
+
+/* ---------- UI state ---------- */
+let view = 'home', range = '1A', firstPaint = true;
+const CAPTIONS = {
+  home:['Tout d’un coup d’œil','Valeur, gains, conseils et compteur fiscal'],
+  wallet:['Ton portefeuille','Tes placements, tes liquidités, ton historique'],
+  perks:['Ton compteur fiscal, en clair','Combien de temps avant zéro impôt sur le revenu'],
+  auto:['Investis en automatique','Chaque mois, et avec les arrondis de ta carte'],
+  order:['Acheter en 3 gestes','Tu tapes un montant, l’app calcule les parts'],
+  explore:['Tout le marché, en clair','ETF, actions et obligations, avec leurs graphiques'],
+  auth:['Tous tes comptes, au même endroit','PEA, assurance vie, PER… connecte-toi pour continuer'],
+  hub:['Ta page d’accueil','Tous tes comptes, ouverts ou à ouvrir']
+};
+const CONTRACT_CAPS = {wallet:['Tes supports','Ta répartition et ton historique'], auto:['Verse en automatique','Chaque mois, et avec les arrondis de ta carte'], order:['Verser en 3 gestes','Tu tapes un montant, l’app le répartit']};
+const CAPS = {
+  ct:{perks:['Ta fiscalité, en clair','Combien d’impôt sur tes gains cette année']},
+  av:Object.assign({perks:['Ton compteur 8 ans, en clair','Combien de temps avant l’abattement sur tes gains']}, CONTRACT_CAPS),
+  cc:Object.assign({perks:['Transmission et fiscalité','Donation, succession et compteur 8 ans']}, CONTRACT_CAPS),
+  per:Object.assign({perks:['Ta retraite, en clair','Ton horizon et ton avantage fiscal']}, CONTRACT_CAPS, {order:['Verser en 3 gestes','L’app calcule ton économie d’impôt']})
+};
+function caption(k){ const c = (G && CAPS[G.active] && CAPS[G.active][k]) || CAPTIONS[k]; $('#capT').textContent = c[0]; $('#capS').textContent = c[1]; }
+const $ = s => document.querySelector(s);
+
+/* ---------- icons ---------- */
+const I = {
+  bank:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-5 9 5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg>',
+  tick:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>',
+  bell:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15zM10 21h4"/></svg>',
+  x:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  chev:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  right:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
+  back:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 5H9l-6 7 6 7h12z"/><path d="M12 9.5l5 5M17 9.5l-5 5"/></svg>',
+  check:'<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>',
+  spark:'✦',
+  search:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>',
+  compass:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>',
+  swap:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg>',
+  bars:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 20h14M7 16v-4M12 16V7M17 16v-6"/></svg>',
+  down:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>'
+};
+
+/* ---------- HOME ---------- */
+function advice(){
+  switch (G.active){
+    case 'pea': {
+      const mo = pos('MO');
+      if (mo && S.cash >= mo.price) return {act:'advice-buy', tag:'Conseil malin', h:`Tu as ${eur0(S.cash)} qui dorment sur ton PEA.`, p:'Les liquidités ne rapportent rien ici. Place-les sur ton ETF Monde en 2 clics.'};
+      if (!S.plan) return {act:'go-auto', tag:'Conseil malin', h:'Investis un peu chaque mois, sans y penser.', p:'Dès 25 € par mois sur ton ETF Monde. Tu peux arrêter quand tu veux.'};
+      return {act:'go-perks', tag:'Bon à savoir', h:`Ton plan de ${eur0(S.plan.amount)} par mois tourne.`, p:'Chaque versement compte dans ton plafond de 150 000 €. Regarde où tu en es.'};
+    }
+    case 'pme': return {act:'go-perks', tag:'Bon à savoir', h:'Ton argent finance des PME et ETI.', p:'Plus de potentiel qu’un ETF Monde, mais plus de variations. Garde un horizon long.'};
+    case 'ct': return S.losses > 0
+      ? {act:'go-perks', tag:'Conseil malin', h:`Tu as ${eur0(S.losses)} de pertes à valoriser.`, p:'Tes moins-values réduisent l’impôt sur tes gains, cette année ou les 10 suivantes.'}
+      : {act:'go-perks', tag:'Bon à savoir', h:'Tes gains sont imposés quand tu vends.', p:'Flat tax de 31,4 % sur les plus-values et les dividendes.'};
+    case 'av': { const pf = PROFILES[S.profile]; return {act:'go-wallet', tag:'Conseil malin', h:`Ton profil est ${pf.adj}.`, p:`${S.alloc.FE} % sécurisé sur le fonds euros, ${100 - S.alloc.FE} % en unités de compte pour ${pf.why}.`}; }
+    case 'cc': return {act:'arb', tag:'Gestion libre', h:'C’est toi qui choisis tes supports.', p:'Fonds euros, ETF, immobilier : tu répartis comme tu veux et tu arbitres quand tu veux.'};
+    case 'per': return {act:'verse', tag:'Conseil malin', h:'Verse avant le 31 décembre.', p:'Tes versements 2026 se déduisent de ton revenu imposable 2026, dans la limite de ton plafond.'};
+  }
+}
+function ringSVG(p, size){
+  const r = size/2 - 5, c = 2*Math.PI*r;
+  return `<svg class="ring" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--chip)" stroke-width="6"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--navy)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(c*p).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 ${size/2} ${size/2})"/>
+    <text x="50%" y="50%" dy=".35em" text-anchor="middle" font-size="12" font-weight="800" fill="var(--ink)">${Math.round(p*100)}%</text></svg>`;
+}
+function tiles(){
+  const f = fiscal();
+  const card = inner => `<button class="card tap" data-act="go" data-v="perks">${inner}</button>`;
+  const ring = (lbl, txt) => card(`${ringSVG(f.p, 54)}<p class="small-lbl">${lbl}</p><p class="strong" style="margin:0">${txt}</p>`);
+  const big = (lbl, v, sub, strong, bar) => card(`<p class="small-lbl" style="margin-top:0">${lbl}</p><p class="mid num">${v}</p>${bar != null ? `<div class="bar"><i style="width:${Math.max(3, bar*100)}%"></i></div>` : ''}${sub ? `<p class="small-lbl">${sub}</p>` : ''}<p class="strong" style="margin:0">${strong}</p>`);
+  switch (G.active){
+    case 'pea': return ring('Compteur 5 ans', f.done ? 'Zéro impôt sur tes gains, c’est acquis' : 'Zéro impôt sur tes gains dans ' + f.leftTxt)
+      + big('Versements', eur0(S.deposits), 'sur 150 000 €', `Encore ${eur0(PEA_CAP - S.deposits)} possibles`, S.deposits/PEA_CAP);
+    case 'pme': return ring('Compteur 5 ans', f.done ? 'Zéro impôt sur tes gains, c’est acquis' : 'Zéro impôt sur le revenu sur tes gains dans ' + f.leftTxt)
+      + big('Plafond commun', eur0(common()), 'PEA + PEA-PME sur 225 000 €', `Encore ${eur0(COMMON_CAP - common())} possibles`, common()/COMMON_CAP);
+    case 'ct': return big('Gains réalisés 2026', eur0(S.realized), '', 'Imposés quand tu vends') + big('Moins-values', eur0(S.losses), 'reportables 10 ans', 'Elles réduisent ton impôt');
+    case 'av': return ring('Compteur 8 ans', f.done ? 'Fiscalité allégée sur tes gains, c’est acquis' : 'Fiscalité allégée sur tes gains dans ' + f.leftTxt)
+      + big('Bénéficiaires', '2 personnes', 'Clause bénéficiaire', 'À jour');
+    case 'cc': return ring('Compteur 8 ans', f.done ? 'Fiscalité allégée sur tes gains, c’est acquis' : 'Fiscalité allégée sur tes gains dans ' + f.leftTxt)
+      + big('Transmission', 'Donation', 'possible de ton vivant', 'Ancienneté fiscale conservée');
+    case 'per': return big('Impôt économisé', '≈ ' + eur0(S.year*S.tmi/100), `pour ${eur0(S.year)} versés en ${new Date().getFullYear()}`, `Exemple avec une tranche à ${S.tmi} %`)
+      + big('Ta retraite', 'dans ' + f.leftYears + ' ans', 'horizon long', 'Plus de potentiel sur la durée');
+  }
+}
+function posRow(p){
+  const perf = p.cost ? (val(p)/p.cost - 1)*100 : 0;
+  const share = total() ? Math.round(val(p)/total()*100) : 0;
+  return `<button class="row" data-act="${isShares() ? 'asset' : 'support'}" data-id="${p.id}">
+    ${avatar(p)}
+    <span class="mid-col"><b>${esc(p.name)}</b><span>${esc(p.sub)} · ${share} %</span></span>
+    <span class="right num"><b>${eur(val(p))}</b><span class="${perf>=0?'up':'down'}">${tri(perf)} ${pct(perf)}</span></span></button>`;
+}
+function cashRow(){
+  if (!isShares()) return '';
+  const share = total() ? Math.round(S.cash/total()*100) : 0;
+  return `<button class="row" data-act="buy" ${S.cash < 1 ? 'disabled' : ''}><span class="av t-grey">€</span>
+    <span class="mid-col"><b>Liquidités</b><span>Disponibles pour investir · ${share} %</span></span>
+    <span class="right num"><b>${eur(S.cash)}</b><span class="muted" style="font-size:12px">${S.cash >= 1 ? 'Placer' : '—'}</span></span></button>`;
+}
+function heroOps(){
+  if (isShares()) return `<button class="btn-w" data-act="buy">+ Acheter</button><button class="btn-o" data-act="sell">− Vendre</button>`;
+  const [act, lbl] = P().op2, ic = {withdraw:'−', arb:I.swap, simulate:I.bars}[act];
+  return `<button class="btn-w" data-act="verse">+ Verser</button><button class="btn-o" data-act="${act}">${ic} ${lbl}</button>`;
+}
+const exploreCta = () => `<button class="card tap explore-cta" data-act="go" data-v="explore"><span class="av t-blue">${I.compass}</span><span class="mid-col"><b>Explorer le marché</b><span class="s">${MARKET.length} ETF, actions et obligations</span></span><span style="color:var(--faint)">${I.right}</span></button>`;
+function renderHome(){
+  const a = advice(), g = gain();
+  const unread = S.notifs.some(n => !n.read);
+  $('#v-home').innerHTML = `
+  <header class="hero"><div class="pad">
+    <div class="topbar">
+      <button class="brand" data-act="hub" aria-label="Retour à l’accueil : tous mes comptes">${brandLogo()}<span class="brand-t"><small>Salut ${esc(G.firstName)}</small><b>${esc(P().name)} <span class="brand-chev">${I.down}</span></b></span></button>
+      <button class="icon-btn" data-act="notifs" aria-label="Notifications">${I.bell}<span class="dot" ${unread?'':'hidden'}></span></button>
+    </div>
+    <p class="lbl" id="valLbl">${P().vaut}</p>
+    <p class="big num" id="totalVal">${eur(firstPaint ? 0 : total())}</p>
+    <div class="gainrow"><span class="pill-gain num ${g<0?'neg':''}">${tri(g)} ${sgn(g)}${eur(Math.abs(g))}</span><span class="num">${pct(ratio(g, S.deposits))} depuis l’ouverture</span></div>
+    ${isShares() ? `<button class="split" data-act="go" data-v="wallet" aria-label="Voir le détail du portefeuille"><span><small>Placé</small><b class="num" id="hInv">${eur(invested())}</b></span><span><small>Liquidités</small><b class="num" id="hCash">${eur(S.cash)}</b></span></button>` : ''}
+    <svg class="chart" id="chart" data-scrub viewBox="0 0 340 110" preserveAspectRatio="none" role="img" aria-label="Évolution de la valeur"></svg>
+    <div class="ranges" role="tablist">${Object.keys(RANGES).map(k => `<button role="tab" data-act="range" data-r="${k}" class="${k===range?'on':''}" aria-selected="${k===range}">${k}</button>`).join('')}</div>
+    <div class="cta2">${heroOps()}</div>
+  </div></header>
+  <div class="content pad stack">
+    <button class="card tap" data-act="${a.act}"><span class="tag">${I.spark} ${a.tag}</span><h3>${esc(a.h)}</h3><p class="sub">${esc(a.p)}</p></button>
+    <div class="grid2">${tiles()}</div>
+    <h2 class="sec">${isShares() ? 'Mes placements' : 'Mes supports'}</h2>
+    <div class="card list">${S.positions.filter(held).map(posRow).join('') || '<p class="empty-note">Aucun placement pour l’instant.</p>'}${cashRow()}</div>
+    ${exploreCta()}
+  </div>`;
+  drawChart();
+  if (firstPaint){ firstPaint = false; countUp($('#totalVal'), 0, total(), 1100, eur); }
+}
+function drawChart(){
+  const svg = $('#chart'); if (!svg) return;
+  const pts = series(range);
+  const {line, area} = pathFor(pts, 340, 110, 8);
+  svg.innerHTML = `<defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".32"/><stop offset="1" stop-color="#fff" stop-opacity=".06"/></linearGradient></defs>
+    <path d="${area}" fill="url(#ga)"/><path d="${line}" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+    <line class="scrubL" x1="0" x2="0" y1="0" y2="110" stroke="#fff" stroke-opacity=".5" stroke-width="1" vector-effect="non-scaling-stroke" visibility="hidden"/>`;
+  charts.chart = {pts, W:340,
+    move: p => { $('#totalVal').textContent = eur(p.v); $('#valLbl').textContent = 'Le ' + dShort(new Date(p.t)); },
+    leave: () => { if (!$('#totalVal')) return; $('#totalVal').textContent = eur(total()); $('#valLbl').textContent = P().vaut; }};
+}
+
+/* ---------- WALLET ---------- */
+const TONE_COL = {blue:'#0b3a8c', orange:'#e08a3c', green:'#2f9e64', purple:'#7c4fd0', teal:'#14928c', rose:'#c93a6e', grey:'#b9c3d6'};
+function donut(){
+  const parts = S.positions.filter(held).map(p => ({label:p.name, v:val(p), c:TONE_COL[p.tone] || TONE_COL.grey}));
+  if (isShares()) parts.push({label:'Liquidités', v:S.cash, c:TONE_COL.grey});
+  const T = parts.reduce((a,p) => a+p.v, 0) || 1, r = 38, C = 2*Math.PI*r;
+  let off = 0;
+  const arcs = parts.map(p => { const len = p.v/T*C; const s = `<circle cx="50" cy="50" r="${r}" fill="none" stroke="${p.c}" stroke-width="14" stroke-dasharray="${len.toFixed(2)} ${C.toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 50 50)"/>`; off += len; return s; }).join('');
+  return `<div class="donut-wrap"><svg width="104" height="104" viewBox="0 0 100 100" aria-hidden="true">${arcs}</svg>
+    <div class="legend">${parts.map(p => `<div><i style="background:${p.c}"></i><span>${esc(p.label)}</span><b class="num">${Math.round(p.v/T*100)} %</b></div>`).join('')}</div></div>`;
+}
+function allocBars(){
+  return `<div class="alloc">${Object.entries(S.alloc).map(([id, pc]) => { const p = pos(id); return `<div><span>${esc(p ? p.name : id)}</span><b class="num">${pc} %</b><div class="bar"><i style="width:${pc}%;background:${TONE_COL[p ? p.tone : 'grey']}"></i></div></div>`; }).join('')}</div>`;
+}
+function contractCard(){
+  const av = G.active === 'av', [act, lbl] = P().op2;
+  return `<h2 class="sec">${av ? 'Mon profil' : 'Ma répartition'}</h2>
+  <div class="card">
+    ${av ? `<div class="chips" style="grid-template-columns:repeat(3,1fr);margin:0 0 14px">${Object.entries(PROFILES).map(([k,pf]) => `<button data-act="profile" data-p="${k}" class="${S.profile===k?'on':''}" aria-pressed="${S.profile===k}">${pf.label}</button>`).join('')}</div>` : ''}
+    ${allocBars()}
+    <p class="sub" style="margin-top:12px">Chaque versement est réparti comme ça. ${av ? 'Tu peux changer de profil à tout moment.' : G.active === 'per' ? 'Gestion pilotée : la part sécurisée augmente à l’approche de la retraite.' : 'Ta répartition libre, modifiable à tout moment.'}</p>
+    <div class="grid2" style="margin-top:12px"><button class="ghost" data-act="verse">Verser</button><button class="ghost" data-act="${act}">${lbl}</button></div></div>`;
+}
+let confirmReset = false;
+function histRow(h){
+  const icon = {deposit:'+', auto:'+', sell:'↘', buy:'↗', arb:'⇆', withdraw:'−', cashout:'−', open:'✓'}[h.kind] || '•';
+  const neutral = h.kind === 'arb';
+  return `<div class="row"><span class="av ${neutral ? 't-grey' : h.amount >= 0 ? 't-green' : 't-blue'}">${icon}</span>
+    <span class="mid-col"><b>${esc(h.label)}</b><span>${esc(h.detail)}</span><span>${dShort(new Date(h.t))}</span></span>
+    <span class="right num"><b class="${!neutral && h.amount >= 0 ? 'up' : ''}" style="font-size:14px">${neutral ? '' : sgn(h.amount)}${eur(Math.abs(h.amount))}</b></span></div>`;
+}
+function renderWallet(){
+  const g = gain();
+  const hist = S.history.slice().sort((a,b) => b.t - a.t).slice(0, 12);
+  $('#v-wallet').innerHTML = `
+  <h1 class="ptitle pad">${isShares() ? 'Mon portefeuille' : esc(P().name)}</h1>
+  <div class="pad stack">
+    <div class="navy-card"><div class="k">Valeur totale</div><div class="v num">${eur(total())}</div>
+      <div class="s num">${tri(g)} ${sgn(g)}${eur(Math.abs(g))} (${pct(ratio(g, S.deposits))}) depuis l’ouverture</div>
+      <div class="xs num">${isShares() ? `Placé : ${eur(invested())} · Liquidités : ${eur(S.cash)}` : `Versé : ${eur0(S.deposits)} · ouvert le ${dNum(openDate())}`}</div></div>
+    <div class="card"><p class="strong" style="margin:0 0 12px">Répartition</p>${donut()}</div>
+    <h2 class="sec">${isShares() ? 'Mes placements' : 'Mes supports'}</h2>
+    <div class="card list">${S.positions.filter(held).map(posRow).join('') || '<p class="empty-note">Aucun placement pour l’instant.</p>'}</div>
+    ${isShares() ? exploreCta() + `<h2 class="sec">Liquidités</h2>
+    <div class="card"><div class="row" style="padding:0"><span class="av t-grey">€</span><span class="mid-col"><b class="num">${eur(S.cash)}</b><span>Disponibles pour acheter des parts</span></span></div>
+      <div class="grid3" style="margin-top:14px"><button class="ghost" data-act="deposit">Verser</button><button class="ghost" data-act="buy" ${S.cash<1?'disabled':''}>Placer</button><button class="ghost" data-act="cashout">Retirer</button></div>
+      <p class="sub" style="margin-top:10px">${Engine.cashoutOpen(G, G.active) ? 'Tu peux retirer tes liquidités vers ton compte courant quand tu veux.' : `Avant 5 ans, un retrait ferme ${P().ton}.`}</p></div>` : contractCard()}
+    <h2 class="sec">Historique</h2>
+    <div class="card list">${hist.length ? hist.map(histRow).join('') : '<p class="empty-note">Aucune opération.</p>'}</div>
+    ${confirmReset ? `<div class="confirm">Remettre la démo à zéro ? Les opérations et réglages de tous tes comptes seront effacés.<div><button style="background:var(--red);color:#fff" data-act="reset-yes">Réinitialiser</button><button style="background:#fff" data-act="reset-no">Annuler</button></div></div>`
+      : `<button class="danger-link" data-act="reset" style="align-self:center;margin:6px 0">Réinitialiser la démo</button>`}
+  </div>`;
+}
+
+/* ---------- PERKS ---------- */
+function renderPerks(){
+  const f = fiscal(), id = G.active;
+  const step = (n, tone, t, s) => `<div class="card step"><span class="n t-${tone}">${n}</span><div><b>${t}</b><span>${s}</span></div></div>`;
+  const tl3 = (a, b, c) => `<div class="tl"><div>${a[0]}<b>${a[1]}</b></div><div>${b[0]}<b>${b[1]}</b></div><div>${c[0]}<b>${c[1]}</b></div></div>`;
+  const verseBtn = `<button class="link-btn" data-act="${isShares() ? 'deposit' : 'verse'}">Verser de l’argent →</button>`;
+  const versed = txt => `<div class="card"><p class="strong" style="margin:0">Ce que tu as versé</p><p class="mid num" style="font-size:28px;margin:8px 0 6px">${eur0(S.deposits)}</p><p class="sub">${txt}</p>${verseBtn}</div>`;
+  const estim = (h, p) => `<div class="card"><span class="tag">${I.spark} Ton estimation</span><h3>${h}</h3><p class="sub">${p}</p></div>`;
+  const counter5 = () => ({k:'Compteur 5 ans', h: f.done ? 'C’est bon, tes 5 ans sont passés' : 'Plus que ' + f.leftTxt,
+    d: f.done ? 'Tes gains ne paient plus d’impôt sur le revenu.' : 'avant de ne plus payer d’impôt sur le revenu sur tes gains',
+    tl: tl3(['Ouvert', dNum(f.open)], ['Aujourd’hui', f.elapsedTxt], ['Objectif', dNum(f.goal)])});
+  const counter8 = () => ({k:'Compteur 8 ans', h: f.done ? 'C’est bon, tes 8 ans sont passés' : 'Plus que ' + f.leftTxt,
+    d: f.done ? 'Abattement annuel sur les gains que tu retires.' : 'avant l’abattement annuel sur les gains que tu retires',
+    tl: tl3(['Ouvert', my(f.open)], ['Aujourd’hui', f.elapsedTxt], ['Objectif', my(f.goal)])});
+  let hero, cards, bar = f.p;
+  if (id === 'pea'){
+    const g = Math.max(0, gain());
+    hero = Object.assign({t:'Mes avantages PEA'}, counter5());
+    cards = `<div class="card"><p class="strong" style="margin:0">Ce que tu as versé</p><p class="mid num" style="font-size:28px;margin:8px 0 10px">${eur0(S.deposits)}</p>
+      <div class="bar"><i style="width:${Math.max(3,S.deposits/PEA_CAP*100)}%"></i></div>
+      <p class="sub" style="margin-top:10px">Encore <b style="color:var(--ink)">${eur0(PEA_CAP - S.deposits)}</b> possibles sur 150 000 €</p>${verseBtn}</div>
+      ${step(1,'blue','Jusqu’à 150 000 € de versements','Tes gains et dividendes restent dans le PEA sans être taxés tant que tu ne retires rien.')}
+      ${step(2,'green','Après 5 ans, pas d’impôt sur le revenu','Seuls les prélèvements sociaux restent dus quand tu retires.')}
+      ${step(3,'orange','Avant 5 ans, attention au retrait','Retirer avant 5 ans ferme ton PEA (sauf cas particuliers).')}
+      ${estim(`Environ ${eur0(g*0.128)} d’impôt évités`, `Sur tes ${eur0(g)} de gains actuels, au taux de 12,8 % de l’impôt sur le revenu. Estimation indicative.`)}`;
+  } else if (id === 'pme'){
+    const c = common();
+    hero = Object.assign({t:'Mes avantages PEA-PME'}, counter5());
+    cards = `<div class="card"><p class="strong" style="margin:0">Plafond commun PEA + PEA-PME</p><p class="mid num" style="font-size:28px;margin:8px 0 10px">${eur0(c)}</p>
+      <div class="bar"><i style="width:${Math.max(3, c/COMMON_CAP*100)}%"></i></div>
+      <p class="sub" style="margin-top:10px">Encore ${eur0(COMMON_CAP - c)} possibles sur 225 000 €.</p>${verseBtn}</div>
+      ${step(2,'green','Réservé aux PME et ETI','Actions et fonds d’entreprises européennes de taille petite et moyenne.')}
+      ${step(3,'orange','Avant 5 ans, attention au retrait','Retirer avant 5 ans ferme ton plan (sauf cas particuliers).')}`;
+  } else if (id === 'ct'){
+    const net = Math.max(0, S.realized - S.losses), tax = net*0.314;
+    bar = S.realized ? net/S.realized : 0;
+    hero = {t:'Ma fiscalité', k:'Estimation ' + new Date().getFullYear(), h:`≈ ${eur0(tax)} d’impôt`, d:`sur ${eur0(net)} de gains nets, avec la flat tax à 31,4 %`,
+      tl: tl3(['Gains', eur0(S.realized)], ['Pertes', '−' + eur0(S.losses)], ['Net imposable', eur0(net)])};
+    cards = versed('Pas de plafond, pas de durée minimale, retraits libres.')
+      + step(2,'green','Moins-values reportables','Une perte peut réduire l’impôt sur tes gains pendant 10 ans.')
+      + step(3,'orange','Tu paies à la sortie','Sur tes gains quand tu vends, et sur les dividendes reçus.');
+  } else if (id === 'av'){
+    hero = Object.assign({t:'Mes avantages'}, counter8());
+    cards = versed('Pas de plafond de versements sur l’assurance vie.')
+      + step(2,'green','Ton argent reste disponible','Tu peux retirer à tout moment, ton contrat reste ouvert.')
+      + step(3,'orange','Transmission','Un cadre fiscal avantageux pour les bénéficiaires que tu choisis.')
+      + estim('4 600 € de gains sans impôt sur le revenu, chaque année', 'Après 8 ans, c’est l’abattement annuel sur les gains que tu retires (9 200 € pour un couple). Les prélèvements sociaux restent dus.');
+  } else if (id === 'cc'){
+    hero = Object.assign({t:'Transmission & fiscalité'}, counter8());
+    cards = versed('Pas de plafond de versements.')
+      + step(2,'green','Donation de ton vivant','Tu peux donner ton contrat sans perdre son ancienneté fiscale.')
+      + step(3,'orange','Pas de clause bénéficiaire','Au décès, le contrat continue et passe à tes héritiers via la succession.');
+  } else {
+    const yrs = f.goal.getFullYear() - f.now.getFullYear(), proj = total()*Math.pow(1.05, yrs);
+    hero = {t:'Ma retraite', k:'Horizon', h:`Plus que ${f.leftYears} ans`, d:'avant de récupérer ton épargne, en capital ou en rente',
+      tl: tl3(['Ouvert', my(f.open)], ['Aujourd’hui', String(f.now.getFullYear())], ['Retraite', String(f.goal.getFullYear())])};
+    cards = versed('Tes versements se déduisent de ton revenu imposable, dans la limite de ton plafond.')
+      + step(2,'green','Sortie anticipée possible','Pour l’achat de ta résidence principale, et certains accidents de la vie.')
+      + step(3,'orange','À la retraite, tu choisis','Capital, rente, ou un mélange des deux.')
+      + estim(`Environ ${eur0(proj)} en ${f.goal.getFullYear()}`, `Si tes ${eur0(total())} progressent de 5 % par an, sans nouveau versement. Simulation indicative, non garantie.`);
+  }
+  $('#v-perks').innerHTML = `
+  <header class="hero perk-hero"><div class="pad">
+    <h1>${hero.t}</h1>
+    <div class="k">${hero.k}</div>
+    <div class="h">${hero.h}</div>
+    <div class="d">${hero.d}</div>
+    <div class="wbar"><i id="perkBar" style="width:0%"></i></div>
+    ${hero.tl}
+  </div></header>
+  <div class="content pad stack">${cards}</div>`;
+  requestAnimationFrame(() => requestAnimationFrame(() => { const b = $('#perkBar'); if (b) b.style.width = (bar*100).toFixed(1) + '%'; }));
+}
+
+/* ---------- AUTO ---------- */
+const AMOUNTS = [25,50,100,200];
+const fv = (m, years, rate) => { const r = rate/12, n = years*12; return m*((Math.pow(1+r,n)-1)/r); };
+let autoShown = null, otherOpen = false;
+function renderAuto(){
+  const d = S.draft, sh = isShares();
+  const same = S.plan && S.plan.amount === d.amount && S.plan.asset === d.asset && S.plan.roundups === d.roundups;
+  const next = nextDebit(), verb = sh ? 'Lancer ' : 'Verser ';
+  let line;
+  if (sh){
+    const a = info(d.asset);
+    line = `<button class="asset-line" data-act="pick-auto">${avatar(a)}<span style="flex:1;min-width:0"><b>${esc(a.name)}</b><span>Le 5 du mois · depuis ton compte</span></span><span style="color:var(--faint)">${I.chev}</span></button>`;
+  } else {
+    line = `<div class="asset-line">${avatar({id:P().ab, tone:P().tone})}<span style="flex:1;min-width:0"><b>${esc(P().name)}</b><span>Le 5 du mois · ${G.active === 'per' ? 'déductible' : 'réparti ' + allocShort()}</span></span></div>`;
+  }
+  const planName = S.plan ? (sh ? info(S.plan.asset).name : P().name) : '';
+  $('#v-auto').innerHTML = `
+  <h1 class="ptitle pad">${sh ? 'Investir en automatique' : 'Versements programmés'}</h1>
+  <div class="pad stack">
+    <div class="navy-card"><div class="k">Dans 10 ans, tu auras versé</div><div class="v num" id="autoTot">${eur0(autoShown ?? d.amount*120)}</div>
+      <div class="s num">Exemple à 5 %/an : environ <b id="autoFv">${eur0(fv(d.amount,10,.05))}</b></div><div class="xs">Simulation indicative, non garantie.</div></div>
+    <div class="card"><p class="strong" style="margin:0">Combien chaque mois ?</p>
+      <div class="chips chips5">${AMOUNTS.map(v => `<button data-act="amt" data-v="${v}" class="${v===d.amount?'on':''}" aria-pressed="${v===d.amount}">${v} €</button>`).join('')}<button data-act="amt-other" class="${AMOUNTS.includes(d.amount)?'':'on'}" aria-pressed="${!AMOUNTS.includes(d.amount)}">${AMOUNTS.includes(d.amount) ? 'Autre' : F0.format(d.amount) + ' €'}</button></div>
+      ${otherOpen ? `<form class="custom-amt" id="amtForm" novalidate><label for="autoAmt">Montant par mois</label><div><input id="autoAmt" type="number" inputmode="numeric" min="${Engine.PLAN_MIN}" max="${Engine.PLAN_MAX}" step="1" value="${AMOUNTS.includes(d.amount) ? '' : d.amount}" placeholder="Ex. 350"><span>€</span><button class="primary" type="submit">OK</button></div><p class="auth-err" id="amtErr"></p></form>` : ''}
+      ${line}</div>
+    <div class="card toggle-row"><div><p class="strong" style="margin:0">Les arrondis</p><p class="sub">Un café à 2,60 € ? 0,40 € part sur ${sh ? P().ton : 'ton épargne'}.</p></div>
+      <button class="switch" role="switch" aria-checked="${d.roundups}" aria-label="Activer les arrondis" data-act="roundups"></button></div>
+    ${S.plan ? `<div class="card toggle-row"><span class="av t-green">✓</span><div><b>Plan actif : ${eur0(S.plan.amount)} par mois</b><p class="sub">${esc(planName)} · prochain versement le ${dShort(next)}${S.plan.roundups?' · arrondis activés':''}${S.plan.pending ? ' · ' + eur(S.plan.pending) + ' mis de côté pour la prochaine part' : ''}</p></div></div>` : ''}
+    <button class="primary" data-act="launch" ${same?'disabled':''}>${same ? 'Ton plan est en place' : (S.plan ? 'Passer à ' + d.amount + ' € par mois' : verb + d.amount + ' € par mois')}</button>
+    ${S.plan ? '<button class="danger-link" data-act="stop-plan" style="align-self:center">Arrêter le plan</button>' : ''}
+  </div>`;
+}
+function nextDebit(){ const n = new Date(); const d = new Date(n.getFullYear(), n.getMonth(), 5); if (d <= n) d.setMonth(d.getMonth()+1); return d; }
+
+/* ---------- animation helper ---------- */
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function countUp(el, from, to, ms, f, done){
+  if (!el) return;
+  if (reduce){ el.textContent = f(to); done && done(); return; }
+  const t0 = performance.now();
+  const step = now => { const k = Math.min(1, (now - t0)/ms), e = 1 - Math.pow(1-k, 3); el.textContent = f(from + (to-from)*e); if (k < 1) requestAnimationFrame(step); else done && done(); };
+  requestAnimationFrame(step);
+}
+
+/* ---------- navigation ---------- */
+function render(){
+  ({hub:renderHub, home:renderHome, wallet:renderWallet, perks:renderPerks, auto:renderAuto, explore:renderExplore})[view]();
+}
+function setNav(){ $('#navWallet').textContent = P().nav[0]; $('#navPerks').textContent = P().nav[1]; }
+function go(v){
+  if (v !== 'wallet') confirmReset = false;
+  view = v;
+  document.querySelectorAll('.screen').forEach(s => s.hidden = s.dataset.view !== v);
+  $('#nav').hidden = v === 'hub';
+  document.querySelectorAll('.nav [data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  $('#v-' + v).scrollTop = 0;
+  caption(v); render();
+}
+function switchAccount(k, stay){
+  closePicker();
+  if (!G.accounts[k].opened){ openAccountSheet(k); return; }
+  if (k === G.active){ if (!stay) go('home'); return; }
+  op({type:'switch', account:k}, true);
+  range = '1A'; firstPaint = true; setNav();
+  if (!stay) go('home'); else render();
+}
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg){ $('#toastTxt').textContent = msg; const t = $('#toast'); t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2800); }
+
+/* ---------- ORDER SHEET ---------- */
+const O = {mode:'buy', asset:'MO', to:null, input:'', done:null};
+function defaultArb(){
+  const list = S.positions.slice().sort((a,b) => val(b) - val(a));
+  O.asset = list[0].id; O.to = (list.find(p => p.id !== O.asset) || list[0]).id;
+}
+function openOrder(mode, asset, preset){
+  O.mode = mode; O.input = preset ? String(preset).replace('.', ',') : ''; O.done = null;
+  if (isShares()){
+    O.asset = asset || (pos(O.asset) ? O.asset : S.draft.asset);
+    if (mode === 'sell' && !held(pos(O.asset))){ const p = S.positions.find(held); if (!p){ toast('Tu n’as rien à vendre sur ce compte.'); return; } O.asset = p.id; }
+  } else if (mode === 'arb'){ defaultArb(); if (asset && pos(asset)){ O.asset = asset; if (O.to === asset) O.to = S.positions.find(p => p.id !== asset).id; } }
+  renderOrder(); $('#sheet').classList.add('open'); caption('order');
+}
+function setMode(m){
+  O.mode = m; O.input = '';
+  if (m === 'arb') defaultArb();
+  if (m === 'sell' && !held(pos(O.asset))){ const p = S.positions.find(held); if (!p){ O.mode = 'buy'; toast('Tu n’as rien à vendre sur ce compte.'); } else O.asset = p.id; }
+  renderOrder();
+}
+function closeSheet(){ $('#sheet').classList.remove('open'); closePicker(); caption(view); if (assetOpen()) renderAsset(); }
+function amount(){ const n = parseFloat(O.input.replace(',', '.')); return isNaN(n) ? 0 : n; }
+function quote(){ return Engine.quote(G, G.active, {mode:O.mode, asset:O.asset, to:O.to, x:amount()}); }
+function renderOrder(){
+  const body = $('#sheetBody');
+  if (O.mode === 'open' && !O.done) return renderOpen();
+  if (O.mode === 'close' && !O.done) return renderClose();
+  if (O.done){
+    body.innerHTML = `<div class="sheet-top"><span class="spacer"></span></div>
+      <div class="done"><div class="tick">${I.check}</div><h2>C’est fait !</h2><p class="b num">${O.done.line1}</p><p class="m num">${O.done.line2}</p></div>
+      <button class="primary" data-act="back-home">${O.done.hub ? 'Retour à l’accueil' : O.done.enter ? 'Découvrir ' + esc(P().ton) : 'Retour à ' + esc(lower(P().name))}</button>`;
+    return;
+  }
+  const q = quote(), sh = isShares(), close = `<button class="close" data-act="close" aria-label="Fermer">${I.x}</button>`;
+  const tabs = sh ? [['buy','Acheter'],['sell','Vendre']] : [['verse','Verser'], P().op2];
+  let top;
+  const bank = Engine.bankOf(G), bankCard = `<div class="asset-card"><span class="av t-grey">${I.bank}</span><span style="min-width:0"><b>${esc(bank.name)} de ${esc(G.firstName)}</b><span>${esc(bank.bank)} · ${Engine.maskIban(bank.iban)}</span></span></div>`;
+  if (O.mode === 'deposit') top = `<div class="sheet-top">${close}<span class="sheet-title">Verser sur ${esc(lower(P().name))}</span></div>`;
+  else if (O.mode === 'cashout') top = `<div class="sheet-top">${close}<span class="sheet-title">Retirer mes liquidités</span></div>${bankCard}`;
+  else {
+    top = `<div class="sheet-top">${close}<div class="seg" role="tablist">${tabs.map(([m,l]) => `<button role="tab" data-act="mode" data-m="${m}" class="${O.mode===m?'on':''}">${l}</button>`).join('')}</div></div>`;
+    if (sh){
+      const a = q.a;
+      top += `<button class="asset-card" data-act="pick-order">${avatar(a)}<span style="min-width:0"><b>${esc(a.name)}</b><span class="num">${eur(a.price)} la part · <span class="${a.day>=0?'up':'down'}">${tri(a.day)} ${pct(a.day)}</span></span></span><span class="chev">${I.chev}</span></button>`;
+    } else if (O.mode === 'arb'){
+      top += `<button class="asset-card" data-act="pick-from">${avatar(q.from)}<span style="min-width:0"><span>De</span><b>${esc(q.from.name)}</b><span class="num">${eur(val(q.from))} disponibles</span></span><span class="chev">${I.chev}</span></button>
+        <button class="asset-card" data-act="pick-to" style="margin-top:8px">${avatar(q.to)}<span style="min-width:0"><span>Vers</span><b>${esc(q.to.name)}</b><span class="num">${esc(q.to.sub)}</span></span><span class="chev">${I.chev}</span></button>`;
+    } else {
+      const sub = O.mode === 'withdraw' ? 'Retrait partiel · vers ton compte courant' : O.mode === 'simulate' ? 'Simulation d’économie d’impôt' : P().sub;
+      top += `<div class="asset-card">${avatar({id:P().ab, tone:P().tone})}<span style="min-width:0"><b>${esc(P().name)}</b><span>${sub}</span></span></div>`;
+    }
+  }
+  let info;
+  const row = (l, v) => `<div class="l"><span>${l}</span><b class="num">${v}</b></div>`;
+  switch (O.mode){
+    case 'cashout': info = row('Liquidités disponibles', eur(S.cash)) + row('Arrivée', '1 à 2 jours ouvrés')
+      + `<p>${G.active === 'ct' ? 'Les liquidités ne sont pas imposées : tes plus-values l’ont déjà été au moment de la vente.' : 'Après 5 ans, pas d’impôt sur le revenu : seuls les prélèvements sociaux s’appliquent sur la part de gains.'} Pour retirer davantage, vends d’abord des placements.</p>`; break;
+    case 'deposit': info = row('Depuis', 'Ton compte courant') + row('Plafond restant', q.room === Infinity ? 'Aucun plafond' : eur(q.room)) + `<p>L’argent arrive en liquidités sur ${P().ton}. Tu choisis ensuite où le placer.</p>`; break;
+    case 'buy': info = row('Disponible', eur(S.cash)) + row('Type d’ordre', 'Au prix du marché') + `<p>${G.active === 'pea' ? 'Sur un PEA' : 'Sur ce compte'}, on achète des parts entières. ${q.n > 0 && q.rest > 0 ? 'Les ' + eur(q.rest) + ' restants restent dispo.' : 'Le reste reste dispo.'}</p>`; break;
+    case 'sell': info = row('Tu détiens', `${q.a.parts} parts · ${eur(val(q.a))}`) + row('Type d’ordre', 'Au prix du marché')
+      + `<p>${G.active === 'ct' ? 'L’argent de la vente reste sur ton compte-titres, en liquidités. Ta plus-value est imposée à 31,4 %.' : `L’argent de la vente reste sur ${P().ton}, en liquidités. Le retirer avant 5 ans fermerait ${P().ton}.`}</p>`; break;
+    case 'verse':
+      if (G.active === 'per') info = row('Depuis', 'Compte courant') + row('Ta tranche (TMI)', S.tmi + ' %') + `<p>Estimation pour une tranche à ${S.tmi} %. Ton plafond figure sur ton avis d’impôt.</p>`;
+      else if (G.active === 'av') info = row('Depuis', 'Compte courant') + row('Répartition', allocShort() + ' (ton profil)') + '<p>Tu peux changer ta répartition à tout moment.</p>';
+      else info = row('Depuis', 'Compte courant') + row('Ta répartition', allocShort()) + '<p>Ta répartition libre, modifiable à tout moment.</p>';
+      break;
+    case 'simulate': {
+      const f = fiscal(), yrs = f.goal.getFullYear() - f.now.getFullYear();
+      info = `<div class="l"><span>Ta tranche (TMI)</span></div><div class="tmi">${[0,11,30,41,45].map(t => `<button data-act="tmi" data-v="${t}" class="${S.tmi===t?'on':''}" aria-pressed="${S.tmi===t}">${t} %</button>`).join('')}</div>`
+        + row('Effort réel', eur0(Math.max(0, q.x - q.x*S.tmi/100))) + row(`En ${f.goal.getFullYear()}, à 5 %/an`, '≈ ' + eur0(q.x*Math.pow(1.05, yrs)))
+        + '<p>Simulation indicative. L’économie réelle dépend de ta tranche et de ton plafond de déduction.</p>';
+      break;
+    }
+    case 'withdraw': {
+      const f = fiscal();
+      info = row('Disponible', eur(total())) + row('Vers', 'Ton compte courant') + `<p>${f.done ? 'Tes 8 ans sont passés : abattement de 4 600 € par an sur les gains retirés.' : `Les gains retirés sont imposés. Plus que ${f.leftTxt} avant l’abattement des 8 ans.`} Le retrait est réparti sur tes supports.</p>`;
+      break;
+    }
+    case 'arb': info = row('Disponible sur ce support', eur(val(q.from))) + row('Impôt', 'Aucun') + '<p>Un arbitrage ne sort pas de ton contrat : pas d’impôt, et ton ancienneté fiscale est conservée.</p>'; break;
+  }
+  const label = {cashout:'Combien veux-tu retirer ?', buy:'Combien veux-tu investir ?', sell:'Combien veux-tu récupérer ?', deposit:'Combien veux-tu verser ?', verse:'Combien veux-tu verser ?', simulate:'Combien veux-tu verser ?', withdraw:'Combien veux-tu retirer ?', arb:'Combien veux-tu arbitrer ?'}[O.mode];
+  const presets = O.mode === 'cashout' ? `<button class="tag" data-act="max">Tout retirer · ${eur(S.cash)}</button>`
+    : O.mode === 'buy' ? `<button class="tag" data-act="max">Tout investir · ${eur0(S.cash)}</button>`
+    : O.mode === 'sell' ? `<button class="tag" data-act="max">Tout vendre · ${q.a.parts} parts</button>`
+    : O.mode === 'arb' ? `<button class="tag" data-act="max">Tout le support · ${eur0(val(q.from))}</button>`
+    : (O.mode === 'simulate' ? [1000,3000,5000] : [100,500,1000]).map(v => `<button class="tag" data-act="preset" data-v="${v}">${F0.format(v)} €</button>`).join('');
+  body.innerHTML = `${top}
+    <p class="q">${label}</p>
+    <p class="amt num ${O.input?'':'empty'}" aria-live="polite">${O.input || '0'} €</p>
+    <span class="parts-pill ${q.warn?'warn':''}">${q.pill}</span>
+    <div class="info">${info}</div>
+    <div class="presets">${presets}</div>
+    <div class="keypad">${['1','2','3','4','5','6','7','8','9',',','0','⌫'].map(k => `<button data-act="key" data-k="${k}" aria-label="${k==='⌫'?'Effacer':k}">${k==='⌫'?I.back:k}</button>`).join('')}</div>
+    <span class="spacer"></span>
+    <button class="primary" data-act="confirm" ${q.ok?'':'disabled'}>${q.btn}</button>`;
+}
+function key(k){
+  let s = O.input;
+  if (k === '⌫') s = s.slice(0, -1);
+  else if (k === ','){ if (!s.includes(',')) s = (s || '0') + ','; }
+  else {
+    const [i, d] = s.split(',');
+    if (d !== undefined){ if (d.length < 2) s += k; }
+    else if (i.length < 6) s = (s === '0' ? '' : s) + k;
+  }
+  O.input = s; renderOrder();
+}
+let busy = false;
+async function confirmOrder(){
+  if (O.mode === 'close'){
+    if (busy) return;
+    if (!closeArmed){ closeArmed = true; renderOrder(); return; }
+    busy = true;
+    const r = await op({type:'closeAccount', account:O.acc});
+    busy = false;
+    if (r.error){ if (r.error !== 'auth') renderOrder(); return; }
+    O.done = r.done; renderOrder(); return;
+  }
+  if (O.mode === 'open'){
+    if (busy) return;
+    busy = true;
+    const r = await op({type:'openAccount', account:O.acc, amount:amount()});
+    busy = false;
+    if (r.error){ if (r.error !== 'auth') renderOrder(); return; }
+    O.done = r.done; renderOrder(); return;
+  }
+  const q = quote(); if (!q.ok || busy) return;
+  if (O.mode === 'simulate'){ O.mode = 'verse'; renderOrder(); return; }
+  busy = true;
+  const btn = $('#sheet [data-act="confirm"]'); if (btn){ btn.disabled = true; btn.textContent = 'Un instant…'; }
+  const before = isShares() ? {cash:S.cash, inv:invested()} : null;
+  const r = await op({type:'order', account:G.active, mode:O.mode, asset:O.asset, to:O.to, amount:amount()});
+  busy = false;
+  if (r.error){ if (r.error !== 'auth') renderOrder(); return; }
+  O.done = Object.assign({before}, r.done);
+  renderOrder(); render(); if (assetOpen()) renderAsset();
+}
+
+/* ---------- pickers (asset, notifications, accounts, supports) ---------- */
+let pickTarget = null;
+function openPicker(html){ $('#pickerBody').innerHTML = html; $('#picker').classList.add('open'); }
+function closePicker(){ $('#picker').classList.remove('open'); }
+function assetPicker(target){
+  pickTarget = target;
+  let ids, cur;
+  if (target === 'from' || target === 'to'){
+    cur = target === 'from' ? O.asset : O.to;
+    ids = S.positions.map(p => p.id);
+  } else {
+    cur = target === 'auto' ? S.draft.asset : O.asset;
+    const hs = S.positions.filter(held).map(p => p.id);
+    ids = target === 'auto' ? MARKET.filter(a => a.type === 'etf' && elig(a, G.active)).map(a => a.id)
+      : O.mode === 'buy' ? [...new Set(hs.concat(G.favs.filter(id => mk(id) && elig(mk(id), G.active))))] : hs;
+  }
+  const title = target === 'from' ? 'Depuis quel support ?' : target === 'to' ? 'Vers quel support ?' : 'Choisis ton placement';
+  openPicker(`<h4>${title}</h4><div style="max-height:52vh;overflow-y:auto">${ids.map(id => { const p = info(id); return `<button class="row" data-act="pick" data-id="${p.id}">${avatar(p)}<span class="mid-col"><b>${esc(p.name)}</b><span class="num">${esc(p.sub)} · ${p.value != null ? eur(val(p)) : fmtPrice(p)}${O.mode==='sell'&&target==='order'?' · '+p.parts+' parts':''}</span></span>${p.id===cur?'<span class="up">✓</span>':''}</button>`; }).join('')}</div>
+    ${target === 'order' && O.mode === 'buy' ? `<button class="ghost" data-act="explore-from-order" style="margin-top:10px">Chercher dans tout le marché</button>` : ''}`);
+}
+function notifPanel(){
+  const list = S.notifs.slice().sort((a,b) => b.t - a.t);
+  openPicker(`<div class="sheet-top" style="margin-bottom:6px"><span class="sheet-title">Notifications</span><button class="close" data-act="close-picker" aria-label="Fermer">${I.x}</button></div>
+    ${list.length ? list.map(n => `<div class="row"><span class="av ${n.read?'t-grey':'t-blue'}">${I.bell}</span><span class="mid-col"><b>${esc(n.title)}</b><span style="white-space:normal">${esc(n.body)}</span><span>${dShort(new Date(n.t))}</span></span></div>`).join('') : '<p class="empty-note">Rien de nouveau.</p>'}`);
+  if (S.notifs.some(n => !n.read)) op({type:'readNotifs'}, true);
+  const d = document.querySelector('#v-home .dot'); if (d) d.hidden = true;
+}
+const productName = k => { const n = PR[k].name.replace(/^Mon /, ''); return n.charAt(0).toUpperCase() + n.slice(1); };
+function renderHub(){
+  const owned = ORDER.filter(k => G.accounts[k].opened), others = ORDER.filter(k => !G.accounts[k].opened);
+  const tot = k => totOf(G.accounts[k]);
+  const all = owned.reduce((a,k) => a + tot(k), 0), dep = owned.reduce((a,k) => a + G.accounts[k].deposits, 0), g = r2(all - dep);
+  const unread = k => G.accounts[k].notifs.filter(n => !n.read).length;
+  const row = k => {
+    const a = G.accounts[k], t = tot(k), gk = t - a.deposits, n = unread(k);
+    return `<button class="row" data-act="enter" data-k="${k}">${avatar({id:PR[k].ab, tone:PR[k].tone})}
+      <span class="mid-col"><b>${esc(productName(k))}${n ? ` <i class="badge">${n}</i>` : ''}</b><span>${esc(PR[k].label)}</span></span>
+      <span class="right num"><b>${eur(t)}</b><span class="${gk>=0?'up':'down'}">${tri(gk)} ${pct(ratio(gk, a.deposits))}</span></span></button>`;
+  };
+  const toOpen = k => `<div class="row">${avatar({id:PR[k].ab, tone:'grey'})}
+      <span class="mid-col"><b>${esc(productName(k))}</b><span>${esc(PR[k].label)}</span></span>
+      <button class="open-btn" data-act="open-acc" data-k="${k}">Ouvrir</button></div>`;
+  const now = new Date();
+  $('#v-hub').innerHTML = `
+  <header class="hub-top"><div class="pad">
+    <div class="hub-brand">${brandLogo('lg')}<div><b>${esc(BRAND.name)}</b><span>${esc(BRAND.sub)}</span></div></div>
+    <p class="hub-hello">Bonjour ${esc(G.firstName)}<span>${now.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'})}</span></p>
+    <div class="hub-total">
+      <small>Ton patrimoine · ${owned.length} ${owned.length > 1 ? 'comptes' : 'compte'}</small>
+      <b class="num">${eur(all)}</b>
+      <div class="gainrow"><span class="pill-gain num ${g<0?'neg':''}">${tri(g)} ${sgn(g)}${eur(Math.abs(g))}</span><span class="num">${pct(ratio(g, dep))} depuis l’ouverture</span></div>
+    </div>
+    <div class="hub-bar" aria-hidden="true">${owned.map(k => `<i style="width:${all ? tot(k)/all*100 : 0}%;background:${PR[k].tone === 'blue' ? '#8fb0f0' : TONE_COL[PR[k].tone]}"></i>`).join('')}</div>
+  </div></header>
+  <div class="content pad stack">
+    <h2 class="sec">Mes comptes</h2>
+    <div class="card list">${owned.map(row).join('') || '<p class="empty-note">Tu n’as pas encore de compte. Ouvre ton premier ci-dessous.</p>'}</div>
+    <div class="card bank-card"><span class="av t-grey">${I.bank}</span><span class="mid-col"><b>${esc(Engine.bankOf(G).name)} de ${esc(G.firstName)}</b><span>${esc(Engine.bankOf(G).bank)} · ${Engine.maskIban(Engine.bankOf(G).iban)}</span><span>Sert à tes versements et à tes retraits.</span></span></div>
+    ${others.length ? `<h2 class="sec">À ouvrir</h2><div class="card list">${others.map(toOpen).join('')}</div>` : ''}
+    ${exploreCta()}
+    ${MODE === 'server' && USER ? `<div class="acc-user"><span>Connexion : <b>${esc(USER.email)}</b></span><button class="ghost" data-act="logout">Se déconnecter</button></div>`
+      : '<p class="m-note">Mode démo : tes données restent dans ce navigateur. Cours et montants fictifs.</p>'}
+  </div>`;
+}
+let closeArmed = false;
+function openCloseSheet(){
+  O.mode = 'close'; O.acc = G.active; O.input = ''; O.done = null; closeArmed = false;
+  renderOrder(); $('#sheet').classList.add('open'); caption('order');
+}
+function renderClose(){
+  const k = O.acc, pr = PR[k], c = Engine.closingOf(G, k), f = fiscal(), bank = Engine.bankOf(G);
+  const row = (l, v) => `<div class="l"><span>${l}</span><b class="num">${v}</b></div>`;
+  $('#sheetBody').innerHTML = `
+    <div class="sheet-top"><button class="close" data-act="close" aria-label="Fermer">${I.x}</button><span class="sheet-title">Retirer mes liquidités</span></div>
+    <div class="notice" style="margin-top:14px"><b>Avant 5 ans, un retrait ferme ${esc(pr.ton)}.</b><br>
+      Tes placements sont vendus au prix du marché et tout l’argent est viré sur ton compte courant. ${pr.ton.charAt(0).toUpperCase() + pr.ton.slice(1)} perd son ancienneté (plus que ${esc(f.leftTxt)} avant les 5 ans) et tes gains sont imposés.</div>
+    <div class="info">${row('Placements vendus', eur(c.sold))}${row('Liquidités', eur(c.cash))}${row('Gains imposables', eur(c.gains))}
+      <div class="l" style="border-top:1px solid var(--line);margin-top:6px;padding-top:8px"><span><b>Total viré</b></span><b class="num">${eur(c.total)}</b></div></div>
+    <div class="asset-card"><span class="av t-grey">${I.bank}</span><span style="min-width:0"><b>${esc(bank.name)} de ${esc(G.firstName)}</b><span>${esc(bank.bank)} · ${Engine.maskIban(bank.iban)}</span></span></div>
+    <p class="sub" style="margin-top:12px">Pour garder ${esc(pr.ton)}, tu peux plutôt attendre tes 5 ans, ou placer tes liquidités.</p>
+    <span class="spacer"></span>
+    <button class="primary ${closeArmed ? 'danger' : ''}" data-act="confirm">${closeArmed ? 'Confirmer la clôture' : 'Clôturer et virer ' + eur(c.total)}</button>
+    <button class="ghost" data-act="close" style="margin-top:8px">Garder ${esc(pr.ton)}</button>`;
+}
+function openAccountSheet(k){
+  closePicker();
+  O.mode = 'open'; O.acc = k; O.input = ''; O.done = null;
+  renderOrder(); $('#sheet').classList.add('open'); caption('order');
+}
+function renderOpen(){
+  const k = O.acc, pr = PR[k], x = amount();
+  const room = pr.kind === 'shares' ? Engine.depositRoom(G, k) : Infinity, over = x > room;
+  const pill = over ? 'Au-delà du plafond de versements' : x > 0 ? (pr.kind === 'shares' ? 'Arrive en liquidités, prêt à investir' : 'Réparti ' + Engine.allocShort(G.accounts[k], k)) : 'Tu pourras verser plus tard';
+  $('#sheetBody').innerHTML = `
+    <div class="sheet-top"><button class="close" data-act="close" aria-label="Fermer">${I.x}</button><span class="sheet-title">Ouvrir ${esc(pr.ton)}</span></div>
+    <div class="asset-card">${avatar({id:pr.ab, tone:pr.tone})}<span style="min-width:0"><b>${esc(productName(k))}</b><span>${esc(pr.label)}</span></span></div>
+    <ul class="points">${pr.points.map(t => `<li><span>${I.tick}</span>${esc(t)}</li>`).join('')}</ul>
+    <p class="q">Premier versement (facultatif)</p>
+    <p class="amt num ${O.input?'':'empty'}" aria-live="polite">${O.input || '0'} €</p>
+    <span class="parts-pill ${over?'warn':''}">${pill}</span>
+    <div class="presets">${[100,500,1000].map(v => `<button class="tag" data-act="preset" data-v="${v}">${F0.format(v)} €</button>`).join('')}</div>
+    <div class="keypad">${['1','2','3','4','5','6','7','8','9',',','0','⌫'].map(c => `<button data-act="key" data-k="${c}" aria-label="${c==='⌫'?'Effacer':c}">${c==='⌫'?I.back:c}</button>`).join('')}</div>
+    <span class="spacer"></span>
+    <button class="primary" data-act="confirm" ${over?'disabled':''}>${x > 0 ? 'Ouvrir et verser ' + money(x) : 'Ouvrir ' + esc(pr.ton)}</button>`;
+}
+function supportDetail(id){
+  const p = pos(id), perf = p.cost ? (val(p)/p.cost - 1)*100 : 0, pts = p.units != null ? Engine.navSeries(id, p.units, Engine.dayIndex() - 365, Engine.dayIndex(), 90) : series('1A');
+  const {line, area} = pathFor(pts, 300, 80, 6), share = Math.round(val(p)/total()*100);
+  const cc = G.active === 'cc', m = mk(id);
+  openPicker(`<div class="sheet-top">${avatar(p)}<span class="sheet-title">${esc(p.name)}<br><span style="font-size:12px;font-weight:500;color:var(--muted)">${esc(p.sub)}</span></span><button class="close" data-act="close-picker" aria-label="Fermer">${I.x}</button></div>
+    <p class="mid num" style="margin:14px 0 0">${eur(val(p))} <span class="${perf>=0?'up':'down'}">${tri(perf)} ${pct(perf)}</span></p>
+    <svg viewBox="0 0 300 80" preserveAspectRatio="none" style="width:100%;height:80px;display:block;margin-top:8px" aria-label="Valeur sur 1 an" role="img"><path d="${area}" fill="var(--chip)"/><path d="${line}" fill="none" stroke="var(--navy)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
+    <div class="stats num"><div><span>Part du contrat</span><b>${share} %</b></div><div><span>Répartition des versements</span><b>${S.alloc[id] != null ? S.alloc[id] + ' %' : '—'}</b></div>
+      <div><span>Versé sur ce support</span><b>${eur(p.cost)}</b></div><div><span>Plus-value latente</span><b class="${perf>=0?'up':'down'}" style="font-size:15px">${sgn(val(p)-p.cost)}${eur(Math.abs(val(p)-p.cost))}</b></div></div>
+    <p class="sub" style="margin-top:12px">${SUPPORT_TXT[id] || ''}</p>
+    <div class="grid2" style="margin-top:14px">${cc ? `<button class="primary" data-act="arb-from" data-id="${id}">Arbitrer</button>` : `<button class="primary" data-act="verse">Verser</button>`}${m ? `<button class="ghost" data-act="asset" data-id="${id}">Voir la fiche</button>` : `<button class="ghost" data-act="close-picker">Fermer</button>`}</div>`);
+}
+
+/* ---------- MARKET (catalogue, cours fictifs) ---------- */
+const hash = Engine.hash, rng = Engine.rng;
+const INDICES = [
+  {id:'IX1',name:'CAC 40',price:7842.15,day:0.4,p1a:4,p5a:30,type:'action'},
+  {id:'IX2',name:'Euro Stoxx 50',price:5412.80,day:0.3,p1a:9,p5a:42,type:'action'},
+  {id:'IX3',name:'S&P 500',price:6912.40,day:0.6,p1a:17,p5a:80,type:'action'},
+  {id:'IX4',name:'Nasdaq',price:24118.30,day:1.1,p1a:23,p5a:110,type:'action'},
+  {id:'IX5',name:'MSCI World',price:4280.55,day:0.5,p1a:13,p5a:60,type:'action'}
+];
+INDICES.forEach(ix => Engine.refreshSpec(ix, Engine.dayIndex()));
+const info = id => pos(id) || mk(id);
+const TYPE_LBL = {etf:'ETF', action:'Action', oblig:'Obligation'};
+const fmtPrice = (a, v) => a.type === 'oblig' ? F2.format(v ?? a.price) + ' %' : eur(v ?? a.price);
+const avatar = a => { const t = a.ab || a.id; return `<span class="av t-${a.tone}${t.length > 3 ? ' sm' : ''}">${t}</span>`; };
+const ELIG_LBL = {pea:'PEA', pme:'PEA-PME', ct:'compte-titres'};
+const big = mds => mds >= 1 ? F1.format(mds).replace(/,0$/,'') + ' Md€' : F0.format(mds*1000) + ' M€';
+
+/* price history: seeded random walk pinned to the displayed variations */
+const AR = {'1J':{n:78,amp:.02,days:0}, '1S':{n:40,amp:.04,days:7}, '1M':{n:44,amp:.08,days:30}, '1A':{n:60,amp:.25,days:365}, '5A':{n:60,amp:.4,days:1826}};
+const TYPE_VOL = {etf:.6, action:1, oblig:.15};
+const serCache = {};
+function assetSeries(a, k){
+  const d = Engine.dayIndex(), ck = a.id + k + d;
+  if (serCache[ck]) return serCache[ck];
+  let pts;
+  if (k !== '1J') pts = Engine.specSeries(a, d - SPAN[k], d, 90);
+  else {
+    // Intraday: from yesterday's close to today's price, with a little noise.
+    const R = AR['1J'], rand = rng(hash(ck)), end = a.price, start = end / (1 + a.day/100);
+    const now = new Date(), t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0).getTime(), t1 = t0 + 8.5*3600000;
+    const w = [0]; for (let i = 1; i < R.n; i++) w.push(w[i-1] + (rand() - .5));
+    const sc = R.amp * TYPE_VOL[a.type] * end / Math.sqrt(R.n) * 2;
+    pts = [];
+    for (let i = 0; i < R.n; i++){
+      const t = i/(R.n-1), noise = w[i] - (w[0] + (w[R.n-1]-w[0])*t);
+      pts.push({t: t0 + (t1-t0)*t, v: Math.max(end*.05, start + (end-start)*t + noise*sc)});
+    }
+    pts[R.n-1].v = end;
+  }
+  serCache[ck] = pts;
+  return pts;
+}
+function spark(a, w, h){
+  w = w || 64; h = h || 28;
+  const {line} = pathFor(assetSeries(a, '1J'), w, h, 3);
+  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${line}" fill="none" stroke="${a.day >= 0 ? 'var(--green)' : 'var(--red)'}" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+}
+const chgSpan = v => `<span class="${v >= 0 ? 'up' : 'down'}">${tri(v)} ${pct(v)}</span>`;
+function mRow(a){
+  return `<button class="row" data-act="asset" data-id="${a.id}">${avatar(a)}
+    <span class="mid-col"><b>${esc(a.name)}</b><span>${esc(a.sub)}${a.country ? ' · ' + a.country : ''}</span></span>
+    ${spark(a)}<span class="right num" style="min-width:74px"><b>${fmtPrice(a)}</b>${chgSpan(a.day)}</span></button>`;
+}
+
+/* ---------- EXPLORE ---------- */
+const EX = {q:'', type:'all', sort:'pop'};
+const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+function renderExplore(){
+  $('#v-explore').innerHTML = `
+  <h1 class="ptitle pad">Explorer le marché</h1>
+  <div class="pad stack">
+    <label class="search" for="exq">${I.search}<input id="exq" type="search" placeholder="Rechercher un ETF, une action…" value="${esc(EX.q)}" autocomplete="off" aria-label="Rechercher"></label>
+    <div class="hscroll">${INDICES.map(ix => `<div class="idx"><span>${ix.name}</span><b class="num">${F2.format(ix.price)}</b>${spark(ix, 106, 26)}${chgSpan(ix.day)}</div>`).join('')}</div>
+    <div class="filters" role="tablist">${[['all','Tout'],['etf','ETF'],['action','Actions'],['oblig','Obligations'],['fav','★ Favoris']].map(([k,l]) => `<button role="tab" aria-selected="${EX.type===k}" data-act="ex-type" data-t="${k}" class="${EX.type===k?'on':''}">${l}</button>`).join('')}</div>
+    <div id="exBody" class="stack"></div>
+  </div>`;
+  renderExploreList();
+}
+function renderExploreList(){
+  const q = norm(EX.q.trim());
+  let list = MARKET.filter(a => (EX.type === 'all' || (EX.type === 'fav' ? G.favs.includes(a.id) : a.type === EX.type))
+    && (!q || norm(a.name + ' ' + a.id + ' ' + (a.ab || '') + ' ' + a.sub + ' ' + (a.country || '')).includes(q)));
+  const sorters = {up:(x,y) => y.day-x.day, down:(x,y) => x.day-y.day, y1:(x,y) => y.p1a-x.p1a, az:(x,y) => x.name.localeCompare(y.name, 'fr')};
+  if (sorters[EX.sort]) list = list.slice().sort(sorters[EX.sort]);
+  const movers = MARKET.filter(a => a.eligible).sort((x,y) => y.day - x.day);
+  const trends = movers.slice(0, 3).concat(movers.slice(-3).reverse());
+  const showTrends = !q && EX.type === 'all';
+  $('#exBody').innerHTML = `
+    ${showTrends ? `<h2 class="sec">Tendances du jour</h2><div class="hscroll">${trends.map(a => `<button class="trend" data-act="asset" data-id="${a.id}">${avatar(a)}<b>${esc(a.name)}</b>${spark(a, 124, 34)}${chgSpan(a.day)}</button>`).join('')}</div>` : ''}
+    ${EX.type === 'oblig' ? '<div class="notice">Les obligations ne sont pas éligibles au PEA. Tu peux les acheter sur ton compte-titres, ou en détenir via une assurance vie.</div>' : ''}
+    <div class="listhead"><h2 class="sec" style="margin:0">${list.length} ${list.length > 1 ? 'résultats' : 'résultat'}</h2>
+      <label class="sortlbl" for="exSort">Trier<select id="exSort" class="sort">${[['pop','Populaires'],['up','Hausse du jour'],['down','Baisse du jour'],['y1','Perf. 1 an'],['az','De A à Z']].map(([k,l]) => `<option value="${k}" ${EX.sort===k?'selected':''}>${l}</option>`).join('')}</select></label></div>
+    <div class="card list">${list.map(mRow).join('') || `<p class="empty-note">${EX.type === 'fav' ? 'Pas encore de favoris. Touche ☆ sur une fiche pour l’ajouter.' : 'Aucun résultat pour « ' + esc(EX.q) + ' ».'}</p>`}</div>
+    <p class="m-note">Cours et graphiques fictifs, pour la démo.</p>`;
+}
+
+/* ---------- ASSET SHEET ---------- */
+const AS = {id:null, range:'1A'};
+const RLBL = {'1J':'aujourd’hui', '1S':'sur 1 semaine', '1M':'sur 1 mois', '1A':'sur 1 an', '5A':'sur 5 ans'};
+function openAsset(id){ AS.id = id; AS.range = '1A'; renderAsset(); $('#assetSheet').classList.add('open'); $('#assetBody').scrollTop = 0; }
+function closeAsset(){ $('#assetSheet').classList.remove('open'); }
+const assetOpen = () => $('#assetSheet').classList.contains('open');
+function renderAsset(){
+  const a = mk(AS.id) || pos(AS.id), p = isShares() ? pos(a.id) : null, held = !!(p && p.parts > 0);
+  const ek = isShares() ? G.active : 'pea', ok = elig(a, ek);
+  const pts = assetSeries(a, AS.range), first = pts[0].v, chg = (a.price/first - 1)*100;
+  const y = assetSeries(a, '1A').map(x => x.v), hi = Math.max(...y), lo = Math.min(...y);
+  const fav = G.favs.includes(a.id);
+  const common = [['Plus haut 1 an', fmtPrice(a, hi)], ['Plus bas 1 an', fmtPrice(a, lo)], ['Perf. 1 an', pct(a.p1a)], ['Perf. 5 ans', pct(a.p5a)]];
+  const stats = a.type === 'etf' ? [['Frais annuels', F2.format(a.ter) + ' %'], ['Encours', big(a.aum/1000)], ['Entreprises', F0.format(a.lines)], ['Dividendes', 'Réinvestis']]
+    : a.type === 'action' ? [['Capitalisation', big(a.cap)], ['PER', a.per ? F1.format(a.per) : '—'], ['Rendement', a.dy ? F1.format(a.dy) + ' %' : 'Aucun'], ['Pays', a.country]]
+    : [['Coupon', a.coupon ? F2.format(a.coupon) + ' %' : '—'], ['Échéance', a.mat], ['Rendement', F2.format(a.ytm) + ' %'], ['Notation', a.rating]];
+  const about = a.type === 'etf' ? `Un seul achat pour ${F0.format(a.lines)} entreprises de l’indice ${a.sub}. ${F2.format(a.ter)} % de frais par an, dividendes réinvestis automatiquement. ${a.eligible ? 'Éligible au PEA.' : 'Disponible sur compte-titres.'}`
+    : a.type === 'action' ? esc(a.d) + ` Entreprise cotée (${a.country}), éligible au PEA.`
+    : a.coupon ? `Obligation émise par ${/^État/.test(a.sub) ? 'l’' + a.sub : a.sub}. Elle verse ${F2.format(a.coupon)} % d’intérêts par an jusqu’au ${a.mat}. Le prix est exprimé en % de la valeur de remboursement.`
+    : `Fonds qui regroupe des centaines d’obligations d’États et d’entreprises de la zone euro. Non éligible au PEA.`;
+  const {xy, line, area} = pathFor(pts, 340, 170, 12);
+  $('#assetBody').innerHTML = `
+    <div class="sheet-top"><button class="close" data-act="close-asset" aria-label="Fermer">${I.x}</button><span class="spacer"></span>
+      <button class="close star ${fav?'on':''}" data-act="fav" aria-pressed="${fav}" aria-label="${fav?'Retirer des favoris':'Ajouter aux favoris'}">${fav?'★':'☆'}</button></div>
+    <div class="a-head">${avatar(a)}<div style="min-width:0"><b>${esc(a.name)}</b><span>${esc(a.sub)}${a.country ? ' · ' + a.country : ''}</span></div></div>
+    <div class="tags"><span class="tag">${TYPE_LBL[a.type]}</span><span class="tag ${ok?'ok':'no'}">${ok ? 'Éligible ' : 'Hors '}${ELIG_LBL[ek]}</span></div>
+    <p class="a-price num" id="aPrice">${fmtPrice(a)}</p>
+    <p class="a-chg num" id="aChg">${chgSpan(chg)} <span class="muted">${RLBL[AS.range]}</span></p>
+    <svg class="achart" id="achart" data-scrub viewBox="0 0 340 170" preserveAspectRatio="none" role="img" aria-label="Cours ${RLBL[AS.range]}">
+      <defs><linearGradient id="gb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${chg>=0?'#17804a':'#c2410c'}" stop-opacity=".18"/><stop offset="1" stop-color="${chg>=0?'#17804a':'#c2410c'}" stop-opacity="0"/></linearGradient></defs>
+      <line x1="0" x2="340" y1="${xy[0][1].toFixed(1)}" y2="${xy[0][1].toFixed(1)}" stroke="var(--faint)" stroke-dasharray="3 4" stroke-width="1" vector-effect="non-scaling-stroke"/>
+      <path d="${area}" fill="url(#gb)"/><path d="${line}" fill="none" stroke="${chg>=0?'var(--green)':'var(--red)'}" stroke-width="2.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+      <line class="scrubL" x1="0" x2="0" y1="0" y2="170" stroke="var(--ink)" stroke-opacity=".35" stroke-width="1" vector-effect="non-scaling-stroke" visibility="hidden"/></svg>
+    <div class="ranges lranges" role="tablist">${Object.keys(AR).map(k => `<button role="tab" aria-selected="${k===AS.range}" data-act="a-range" data-r="${k}" class="${k===AS.range?'on':''}">${k}</button>`).join('')}</div>
+    ${held ? `<div class="card mypos"><p class="strong" style="margin:0 0 8px">Ma position</p><div class="stats num" style="margin:0"><div><span>Parts</span><b>${p.parts}</b></div><div><span>Valeur</span><b>${eur(val(p))}</b></div><div><span>Prix moyen d’achat</span><b>${eur(p.cost/p.parts)}</b></div><div><span>Plus-value</span><b>${chgSpan((val(p)/p.cost - 1)*100)}</b></div></div></div>` : ''}
+    <h2 class="sec">Chiffres clés</h2>
+    <div class="stats num" style="margin-top:0">${stats.concat(common).map(([l,v]) => `<div><span>${l}</span><b>${esc(v)}</b></div>`).join('')}</div>
+    <h2 class="sec">À propos</h2><p class="sub" style="margin:0">${about}</p>
+    <p class="m-note" style="margin-top:6px">Cours fictifs, pour la démo.</p>`;
+  const target = elig(a, 'pea') ? 'pea' : 'ct';
+  $('#assetFoot').innerHTML = isShares() && ok
+    ? `<button class="primary" data-act="a-buy">Acheter</button><button class="ghost" data-act="a-sell" ${held?'':'disabled'}>Vendre</button>`
+    : `<button class="primary" data-act="buy-on" data-k="${target}" style="grid-column:1/-1">Acheter sur ${lower(PR[target].name)}</button>`;
+  charts.achart = {pts, W:340,
+    move: q => { $('#aPrice').textContent = fmtPrice(a, q.v); $('#aChg').innerHTML = chgSpan((q.v/first - 1)*100) + ` <span class="muted">${AS.range === '1J' ? 'à ' + new Date(q.t).toTimeString().slice(0,5) : 'le ' + dShort(new Date(q.t))}</span>`; },
+    leave: () => { if (!$('#aPrice')) return; $('#aPrice').textContent = fmtPrice(a); $('#aChg').innerHTML = chgSpan(chg) + ` <span class="muted">${RLBL[AS.range]}</span>`; }};
+}
+
+/* ---------- chart scrubbing (home + asset) ---------- */
+const charts = {};
+function chartMove(e){
+  const svg = e.target.closest && e.target.closest('svg[data-scrub]'); if (!svg) return;
+  const c = charts[svg.id]; if (!c || !c.pts.length) return;
+  const b = svg.getBoundingClientRect(), x = Math.min(1, Math.max(0, (e.clientX - b.left)/b.width));
+  c.move(c.pts[Math.round(x*(c.pts.length-1))]);
+  const l = svg.querySelector('.scrubL'); if (l){ l.setAttribute('x1', x*c.W); l.setAttribute('x2', x*c.W); l.setAttribute('visibility', 'visible'); }
+}
+function chartLeave(svg){
+  const c = charts[svg.id]; if (c) c.leave();
+  const l = svg.querySelector('.scrubL'); if (l) l.setAttribute('visibility', 'hidden');
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b){ if (e.target.id === 'picker') closePicker(); return; }
+  if (b.disabled) return;
+  const act = b.dataset.act;
+  switch (act){
+    case 'go': go(b.dataset.v); break;
+    case 'go-auto': go('auto'); break;
+    case 'go-perks': go('perks'); break;
+    case 'go-wallet': go('wallet'); break;
+    case 'range': range = b.dataset.r; document.querySelectorAll('.ranges button').forEach(x => { x.classList.toggle('on', x.dataset.r === range); x.setAttribute('aria-selected', x.dataset.r === range); }); drawChart(); break;
+    case 'hub': go('hub'); break;
+    case 'enter': switchAccount(b.dataset.k); break;
+    case 'open-acc': openAccountSheet(b.dataset.k); break;
+    case 'switch': switchAccount(b.dataset.k); break;
+    case 'buy': openOrder('buy'); break;
+    case 'sell': openOrder('sell'); break;
+    case 'deposit': openOrder('deposit'); break;
+    case 'cashout': if (Engine.cashoutOpen(G, G.active)) openOrder('cashout'); else openCloseSheet(); break;
+    case 'verse': closePicker(); openOrder('verse'); break;
+    case 'withdraw': openOrder('withdraw'); break;
+    case 'arb': openOrder('arb'); break;
+    case 'arb-from': closePicker(); openOrder('arb', b.dataset.id); break;
+    case 'simulate': openOrder('simulate'); break;
+    case 'advice-buy': openOrder('buy', 'MO', Math.floor(S.cash)); break;
+    case 'notifs': notifPanel(); break;
+    case 'support': supportDetail(b.dataset.id); break;
+    case 'profile': {
+      const r = op({type:'profile', profile:b.dataset.p}, true); renderWallet();
+      r.then(x => { if (x.done) toast(x.done.toast); if (view === 'wallet') renderWallet(); }); break;
+    }
+    case 'tmi': op({type:'tmi', value:+b.dataset.v}, true); renderOrder(); break;
+    case 'asset': closePicker(); openAsset(b.dataset.id); break;
+    case 'close-asset': closeAsset(); break;
+    case 'a-range': AS.range = b.dataset.r; renderAsset(); break;
+    case 'a-buy': openOrder('buy', AS.id); break;
+    case 'a-sell': openOrder('sell', AS.id); break;
+    case 'buy-on': if (!G.accounts[b.dataset.k].opened){ openAccountSheet(b.dataset.k); break; } switchAccount(b.dataset.k, true); renderAsset(); openOrder('buy', AS.id); break;
+    case 'fav': { const added = !G.favs.includes(AS.id); op({type:'fav', id:AS.id}, true); if (added) toast(info(AS.id).name + ' ajouté aux favoris'); renderAsset(); if (view === 'explore') renderExploreList(); break; }
+    case 'ex-type': EX.type = b.dataset.t; document.querySelectorAll('.filters button').forEach(x => { x.classList.toggle('on', x.dataset.t === EX.type); x.setAttribute('aria-selected', x.dataset.t === EX.type); }); renderExploreList(); break;
+    case 'explore-from-order': closePicker(); closeSheet(); closeAsset(); go('explore'); break;
+    case 'close': closeSheet(); break;
+    case 'close-picker': closePicker(); break;
+    case 'mode': setMode(b.dataset.m); break;
+    case 'key': key(b.dataset.k); break;
+    case 'max': {
+      const x = O.mode === 'buy' || O.mode === 'cashout' ? Math.floor(S.cash*100)/100 : O.mode === 'arb' ? val(pos(O.asset)) : val(pos(O.asset));
+      O.input = F2.format(x).replace(/[\s  ]/g,'').replace(/,00$/,''); renderOrder(); break;
+    }
+    case 'preset': O.input = b.dataset.v; renderOrder(); break;
+    case 'confirm': confirmOrder(); break;
+    case 'back-home': {
+      const t = O.done && O.done.toast, before = O.done && O.done.before;
+      if (O.done && O.done.hub){ sync(); setNav(); closeAsset(); closeSheet(); go('hub'); if (t) setTimeout(() => toast(t), 250); break; }
+      if (O.done && O.done.enter){ sync(); range = '1A'; firstPaint = true; setNav(); }
+      closeAsset(); closeSheet(); go('home');
+      if (before && isShares()){
+        const pairs = [['#hCash', before.cash, S.cash], ['#hInv', before.inv, invested()]];
+        pairs.forEach(([sel, from, to]) => { const el = $(sel); if (!el || Math.abs(from - to) < .01) return; el.parentNode.classList.add('flash'); countUp(el, from, to, 900, eur, () => setTimeout(() => el.parentNode.classList.remove('flash'), 700)); });
+      }
+      if (t) setTimeout(() => toast(t), 250);
+      break;
+    }
+    case 'pick-order': assetPicker('order'); break;
+    case 'pick-auto': assetPicker('auto'); break;
+    case 'pick-from': assetPicker('from'); break;
+    case 'pick-to': assetPicker('to'); break;
+    case 'pick': {
+      const id = b.dataset.id;
+      if (pickTarget === 'auto'){ op({type:'draft', asset:id}, true); closePicker(); renderAuto(); }
+      else if (pickTarget === 'from'){ O.asset = id; if (O.to === id) O.to = S.positions.find(p => p.id !== id).id; closePicker(); renderOrder(); }
+      else if (pickTarget === 'to'){ O.to = id; closePicker(); renderOrder(); }
+      else { O.asset = id; closePicker(); renderOrder(); }
+      break;
+    }
+    case 'amt': {
+      const from = S.draft.amount*120; otherOpen = false; op({type:'draft', amount:+b.dataset.v}, true); autoShown = from; renderAuto(); autoShown = null;
+      countUp($('#autoTot'), from, S.draft.amount*120, 700, eur0); break;
+    }
+    case 'amt-other': otherOpen = !otherOpen; renderAuto(); if (otherOpen) setTimeout(() => { const i = $('#autoAmt'); if (i) i.focus(); }, 50); break;
+    case 'roundups': op({type:'draft', roundups:!S.draft.roundups}, true); renderAuto(); break;
+    case 'launch': op({type:'plan', action:'start'}).then(r => { renderAuto(); if (r.done) toast(r.done.toast); }); break;
+    case 'stop-plan': op({type:'plan', action:'stop'}).then(r => { renderAuto(); if (r.done) toast(r.done.toast); }); break;
+    case 'reset': confirmReset = true; renderWallet(); break;
+    case 'reset-no': confirmReset = false; renderWallet(); break;
+    case 'reset-yes': op({type:'reset'}).then(r => { if (r.error) return; confirmReset = false; firstPaint = true; setNav(); go('home'); toast('Démo réinitialisée'); }); break;
+    case 'logout': api('/api/logout', {}).then(() => { USER = null; G = null; closePicker(); showAuth(); }); break;
+    case 'auth-tab': setAuthTab(b.dataset.t); break;
+  }
+});
+document.addEventListener('submit', e => {
+  if (e.target.id !== 'amtForm') return;
+  e.preventDefault();
+  const v = Math.round(parseFloat(String($('#autoAmt').value).replace(',', '.')));
+  if (!(v >= Engine.PLAN_MIN && v <= Engine.PLAN_MAX)){ $('#amtErr').textContent = `Choisis un montant entre ${Engine.PLAN_MIN} et ${F0.format(Engine.PLAN_MAX)} €.`; return; }
+  const from = S.draft.amount*120; otherOpen = false;
+  op({type:'draft', amount:v}, true); autoShown = from; renderAuto(); autoShown = null;
+  countUp($('#autoTot'), from, v*120, 700, eur0);
+});
+document.addEventListener('pointermove', chartMove);
+document.addEventListener('pointerout', e => { const svg = e.target.closest && e.target.closest('svg[data-scrub]'); if (svg && !(e.relatedTarget && svg.contains(e.relatedTarget))) chartLeave(svg); });
+document.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') document.querySelectorAll('svg[data-scrub]').forEach(chartLeave); });
+document.addEventListener('input', e => { if (e.target.id === 'exq'){ EX.q = e.target.value; renderExploreList(); } });
+document.addEventListener('change', e => { if (e.target.id === 'exSort'){ EX.sort = e.target.value; renderExploreList(); } });
+document.addEventListener('keydown', e => {
+  if (!$('#sheet').classList.contains('open') || O.done){
+    if (e.key === 'Escape'){ if ($('#picker').classList.contains('open')) closePicker(); else if (assetOpen() && !$('#sheet').classList.contains('open')) closeAsset(); else closeSheet(); }
+    return;
+  }
+  if (e.target.tagName === 'INPUT') return;
+  if (/^[0-9]$/.test(e.key)) key(e.key);
+  else if (e.key === ',' || e.key === '.') key(',');
+  else if (e.key === 'Backspace') key('⌫');
+  else if (e.key === 'Enter') confirmOrder();
+  else if (e.key === 'Escape'){ if ($('#picker').classList.contains('open')) closePicker(); else closeSheet(); }
+});
+
+/* ---------- auth & boot ---------- */
+let authTab = 'login';
+function setAuthTab(t){
+  authTab = t;
+  document.querySelectorAll('#auth .seg button').forEach(x => { x.classList.toggle('on', x.dataset.t === t); x.setAttribute('aria-selected', x.dataset.t === t); });
+  $('#fldName').hidden = t !== 'register';
+  $('#aPass').autocomplete = t === 'register' ? 'new-password' : 'current-password';
+  $('#authBtn').textContent = t === 'register' ? 'Créer mon compte' : 'Se connecter';
+  $('#authErr').textContent = '';
+}
+function showAuth(msg){
+  closeSheet(); closeAsset(); closePicker();
+  $('#auth').hidden = false; $('#authErr').textContent = msg || '';
+  caption('auth');
+}
+function start(){
+  $('#auth').hidden = true;
+  $('#authBrand').textContent = BRAND.name;
+  firstPaint = true; range = '1A'; setNav(); go('hub');
+}
+$('#authForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = $('#aEmail').value.trim(), password = $('#aPass').value, firstName = $('#aName').value.trim();
+  if (!email || !password){ $('#authErr').textContent = 'Indique ton e-mail et ton mot de passe.'; return; }
+  if (authTab === 'register' && !firstName){ $('#authErr').textContent = 'Indique ton prénom.'; return; }
+  const btn = $('#authBtn'); btn.disabled = true; const label = btn.textContent; btn.textContent = 'Un instant…';
+  const r = await api(authTab === 'register' ? '/api/register' : '/api/login', authTab === 'register' ? {email, password, firstName} : {email, password});
+  btn.disabled = false; btn.textContent = label;
+  if (r.ok && r.data && r.data.state){ USER = r.data.user; G = r.data.state; sync(); $('#aPass').value = ''; start(); return; }
+  $('#authErr').textContent = (r.data && r.data.error) || 'Connexion impossible. Vérifie ton réseau et réessaie.';
+});
+async function boot(){
+  $('#authBrand').textContent = BRAND.name;
+  if (BRAND.logo) $('#authLogo').outerHTML = brandLogo();
+  const timeout = new Promise(res => setTimeout(() => res({ok:false, status:0, data:null}), 4000));
+  const r = location.protocol === 'file:' ? {ok:false, status:0, data:null} : await Promise.race([api('/api/me'), timeout]);
+  if (r.data && (r.data.state || (r.status === 401 && r.data.error))){
+    MODE = 'server';
+    if (r.ok){ USER = r.data.user; G = r.data.state; sync(); start(); } else showAuth();
+  } else {
+    MODE = 'demo'; G = loadLocal(); if (Engine.refresh(G)) saveLocal(); sync(); start();
+  }
+}
+/* A new day brings new prices and maybe a monthly payment: refresh without a reload. */
+setInterval(async () => {
+  const d = Engine.dayIndex();
+  if (d === curDay || !G) return;
+  curDay = d;
+  INDICES.forEach(ix => Engine.refreshSpec(ix, d));
+  if (MODE === 'demo'){ Engine.refresh(G); saveLocal(); sync(); render(); }
+  else await refresh();
+  if (assetOpen()) renderAsset();
+}, 60000);
+boot();
+})();
+</script>
+</body>
+</html>
