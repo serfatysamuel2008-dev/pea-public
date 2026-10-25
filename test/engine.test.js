@@ -3,6 +3,8 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const E = require('../public/engine.js');
 const DAY = E.DAY, noon = d => E.ANCHOR + d*DAY + 10*3600000;
+// Tests run on the reference day, whatever today's date is.
+E.setClock(() => noon(0));
 
 test('le jour de référence, les montants sont ceux des maquettes', () => {
   const G = E.defaults('Léa'); E.refresh(G, noon(0));
