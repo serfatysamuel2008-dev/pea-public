@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, ShoppingBag, Trash2, X } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { PRODUCTS } from '../../data/products.ts';
 import { SHIPPING_METHODS } from '../../data/shop.ts';
 import { formatPrice } from '../../lib/format.ts';
 import { lineKey } from '../../lib/pricing.ts';
@@ -84,7 +85,7 @@ export function CartDrawer() {
                   <ShoppingBag size={30} />
                 </motion.div>
                 <p className="display mt-6 text-4xl">Ton panier est vide.</p>
-                <p className="mt-2 text-black/60">14 modèles, un seul prix. Trouve ta paire.</p>
+                <p className="mt-2 text-black/60">{PRODUCTS.length} coloris, un seul prix. Trouve ta paire.</p>
                 <button
                   type="button"
                   className="btn-ink mt-8"

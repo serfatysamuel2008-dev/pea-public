@@ -7,7 +7,7 @@ import { usePaymentConfig } from '../../lib/usePaymentConfig.ts';
 export function TrustStrip() {
   const payment = usePaymentConfig();
   const items = [
-    { icon: Tag, title: 'Prix unique', body: '29,90 € la paire, quel que soit le modèle.', to: '/collection' },
+    { icon: Tag, title: 'Prix unique', body: '29,90 € la paire, quel que soit le coloris.', to: '/collection' },
     { icon: Package, title: 'Livraison', body: 'En point relais ou à domicile.', to: '/livraison-retours' },
     { icon: RotateCcw, title: `${RETURN_DAYS} jours pour changer d’avis`, body: 'Droit de rétractation sur chaque commande.', to: '/livraison-retours' },
     {

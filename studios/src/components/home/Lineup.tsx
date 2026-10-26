@@ -8,7 +8,7 @@ import { ProductImage } from '../ui/ProductImage.tsx';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const LINEUP = ['afterhours', 'chrome', 'neon', 'havana', 'volt', 'glasshouse'].map((s) => getProduct(s)!);
+const LINEUP = ['shadow', 'champagne', 'cherry', 'ocean', 'marble', 'amber'].map((s) => getProduct(s)!);
 const BG = ['#080808', '#315BFF', '#FF3CAC', '#8B5CF6', '#080808', '#C6FF00'];
 const FG = ['#FFFFFF', '#FFFFFF', '#080808', '#FFFFFF', '#C6FF00', '#080808'];
 
@@ -44,10 +44,10 @@ export function Lineup() {
       el.querySelectorAll<HTMLElement>('[data-spin]').forEach((img) => {
         gsap.fromTo(
           img,
-          { rotateY: -55, rotateZ: -8, scale: 0.75 },
+          { rotateY: -28, rotateZ: -6, scale: 0.8 },
           {
-            rotateY: 35,
-            rotateZ: 6,
+            rotateY: 22,
+            rotateZ: 4,
             scale: 1.05,
             ease: 'none',
             scrollTrigger: { trigger: img, containerAnimation: tween, start: 'left right', end: 'right left', scrub: true },
@@ -83,7 +83,7 @@ export function Lineup() {
             </span>
             <div className="relative my-4 [perspective:1200px] md:my-0">
               <div data-spin className="mx-auto w-full max-w-[880px] [transform-style:preserve-3d]">
-                <ProductImage product={p} view="three-quarter" sizes="(min-width: 768px) 60vw, 84vw" className="w-full drop-shadow-[0_40px_50px_rgba(0,0,0,.45)]" />
+                <ProductImage product={p} view="studio" sizes="(min-width: 768px) 60vw, 84vw" className="w-full drop-shadow-[0_40px_50px_rgba(0,0,0,.45)]" />
               </div>
             </div>
             <div className="flex flex-wrap items-end gap-x-8 gap-y-4">

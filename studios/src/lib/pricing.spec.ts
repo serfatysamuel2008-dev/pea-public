@@ -24,8 +24,8 @@ describe('prix', () => {
   it('calcule sous-total, livraison et total', () => {
     const t = cartTotals(
       [
-        { productId: 'chrome', qty: 2 },
-        { productId: 'neon', qty: 1 },
+        { productId: 'deep-blue', qty: 2 },
+        { productId: 'havana', qty: 1 },
       ],
       SHIPPING_METHODS[0].id,
     );
@@ -35,7 +35,7 @@ describe('prix', () => {
     expect(t.totalCents).toBe(3 * 2990 + SHIPPING_METHODS[0].priceCents);
   });
   it('ne compte pas de livraison sans mode choisi ni sur un panier vide', () => {
-    expect(cartTotals([{ productId: 'chrome', qty: 1 }]).shippingCents).toBeNull();
+    expect(cartTotals([{ productId: 'deep-blue', qty: 1 }]).shippingCents).toBeNull();
     expect(cartTotals([], SHIPPING_METHODS[0].id).shippingCents).toBeNull();
   });
 });
@@ -51,27 +51,27 @@ describe('panier', () => {
     expect(sanitizeCart('nimporte quoi')).toEqual([]);
     expect(
       sanitizeCart([
-        { productId: 'chrome', qty: 2 },
-        { productId: 'chrome', qty: 3 },
+        { productId: 'deep-blue', qty: 2 },
+        { productId: 'deep-blue', qty: 3 },
         { productId: 'inconnu', qty: 1 },
-        { productId: 'neon', qty: -4 },
+        { productId: 'havana', qty: -4 },
         null,
-        { productId: 'volt', qty: 1, variantId: 'pas-une-variante' },
+        { productId: 'ocean', qty: 1, variantId: 'pas-une-variante' },
       ]),
     ).toEqual([
-      { productId: 'chrome', variantId: undefined, qty: 5 },
-      { productId: 'neon', variantId: undefined, qty: 1 },
+      { productId: 'deep-blue', variantId: undefined, qty: 5 },
+      { productId: 'havana', variantId: undefined, qty: 1 },
     ]);
   });
   it('ajoute, modifie et supprime des lignes', () => {
-    let s = cartReducer([], { type: 'add', line: { productId: 'retro', qty: 1 } });
-    s = cartReducer(s, { type: 'add', line: { productId: 'retro', qty: 2 } });
-    expect(s).toEqual([{ productId: 'retro', qty: 3 }]);
-    s = cartReducer(s, { type: 'setQty', key: 'retro', qty: 50 });
+    let s = cartReducer([], { type: 'add', line: { productId: 'fade', qty: 1 } });
+    s = cartReducer(s, { type: 'add', line: { productId: 'fade', qty: 2 } });
+    expect(s).toEqual([{ productId: 'fade', qty: 3 }]);
+    s = cartReducer(s, { type: 'setQty', key: 'fade', qty: 50 });
     expect(s[0].qty).toBe(10);
-    s = cartReducer(s, { type: 'add', line: { productId: 'pebble', qty: 1 } });
-    s = cartReducer(s, { type: 'remove', key: 'retro' });
-    expect(s.map((l) => l.productId)).toEqual(['pebble']);
+    s = cartReducer(s, { type: 'add', line: { productId: 'marble', qty: 1 } });
+    s = cartReducer(s, { type: 'remove', key: 'fade' });
+    expect(s.map((l) => l.productId)).toEqual(['marble']);
     expect(cartReducer(s, { type: 'clear' })).toEqual([]);
   });
 });

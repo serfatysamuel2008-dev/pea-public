@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, Check, ChevronDown, ShoppingBag } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { COLORS, getProduct, productImage, PRODUCTS, SHAPES, STYLES } from '../data/products.ts';
+import { FINISHES, getProduct, productImage, PRODUCTS, SHAPE_LABEL } from '../data/products.ts';
 import { BRAND, CURRENCY, RETURN_DAYS, SHIPPING_METHODS, SHIPPING_RATES_CONFIRMED } from '../data/shop.ts';
 import { similarProducts } from '../lib/catalog.ts';
 import { formatPrice } from '../lib/format.ts';
@@ -68,7 +68,7 @@ export default function ProductPage() {
         '@type': 'Product',
         name: `${BRAND.name} ${product.name}`,
         description: product.description,
-        image: [productImage(product, 'front'), productImage(product, 'three-quarter')].map((p) => new URL(p, window.location.href).href),
+        image: [productImage(product, 'studio'), productImage(product, 'photo')].map((p) => new URL(p, window.location.href).href),
         brand: { '@type': 'Brand', name: BRAND.name },
         color: product.frameLabel,
         offers: {
@@ -82,9 +82,9 @@ export default function ProductPage() {
   );
 
   useSeo({
-    title: product ? `${product.name} — Lunettes de soleil ${SHAPES[product.shape].toLowerCase()}` : 'Modèle introuvable',
+    title: product ? `${product.name} — Lunettes de soleil rondes, ${product.frameLabel.toLowerCase()}` : 'Modèle introuvable',
     description: product ? `${product.name} : ${product.description} ${formatPrice(product.priceCents)}.` : 'Ce modèle n’existe pas ou plus.',
-    image: product ? productImage(product, 'front') : undefined,
+    image: product ? productImage(product, 'photo') : undefined,
     noindex: !product,
     jsonLd: jsonLd || undefined,
   });
@@ -99,17 +99,16 @@ export default function ProductPage() {
     notify({
       title: 'Dans ton panier',
       body: `${qty} × ${product.name} — ${formatPrice(product.priceCents * qty)}`,
-      image: productImage(product, 'front', 'sm'),
+      image: productImage(product, 'studio', 'sm'),
       action: { label: 'Voir', onClick: () => setOpen(true) },
     });
   };
 
   const specs: [string, string][] = [
-    ['Forme', SHAPES[product.shape]],
+    ['Forme', SHAPE_LABEL],
     ['Monture', product.frameLabel],
     ['Verres', product.lensLabel],
-    ['Couleur', COLORS[product.color].label],
-    ['Style', STYLES[product.style]],
+    ['Finition', FINISHES[product.finish]],
   ];
 
   return (
@@ -130,7 +129,7 @@ export default function ProductPage() {
 
           <div>
             <p className="eyebrow text-black/50">
-              {String(product.drop).padStart(2, '0')} — {SHAPES[product.shape]} · {STYLES[product.style]}
+              {String(product.drop).padStart(2, '0')} / {PRODUCTS.length} — {FINISHES[product.finish]} · Verres {product.lensLabel.toLowerCase()}
             </p>
             <motion.h1 key={product.id} initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} className="display mt-3 text-[20vw] sm:text-[12vw] lg:text-[7vw]">
               {product.name}
@@ -155,6 +154,27 @@ export default function ProductPage() {
                 </div>
               </fieldset>
             )}
+
+            <div className="mt-8">
+              <p className="eyebrow mb-3 text-black/50">
+                Coloris — <span className="text-ink">{product.frameLabel}</span>
+              </p>
+              <div className="flex flex-wrap gap-2" role="list" aria-label="Autres coloris de cette monture">
+                {PRODUCTS.map((p) => (
+                  <Link
+                    key={p.id}
+                    role="listitem"
+                    to={`/produit/${p.slug}`}
+                    aria-label={`${p.name}, ${p.frameLabel}`}
+                    aria-current={p.id === product.id ? 'page' : undefined}
+                    title={p.name}
+                    className={`grid h-12 w-[68px] place-items-center rounded-xl bg-black/[0.04] transition hover:bg-black/10 ${p.id === product.id ? 'ring-2 ring-ink' : ''}`}
+                  >
+                    <img src={productImage(p, 'studio', 'sm')} alt="" className="w-full px-1" loading="lazy" />
+                  </Link>
+                ))}
+              </div>
+            </div>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <QtyStepper value={qty} onChange={(n) => setQty(Math.max(1, Math.min(10, n)))} label="Quantité" />
@@ -210,7 +230,7 @@ export default function ProductPage() {
 
         <section className="mt-28" aria-labelledby="similar-title">
           <div className="mb-8 flex items-end justify-between">
-            <h2 id="similar-title" className="display text-6xl sm:text-7xl">Tu aimeras aussi</h2>
+            <h2 id="similar-title" className="display text-6xl sm:text-7xl">Dans le même esprit</h2>
             <Link to="/collection" className="hidden font-mono text-[11px] uppercase tracking-[0.2em] underline underline-offset-4 sm:block">Toute la collection</Link>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">

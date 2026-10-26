@@ -2,18 +2,20 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { COLORS, PRODUCTS, SHAPES, STYLES } from '../data/products.ts';
+import { FINISHES, FRAME_COLORS, LENS_TINTS, PRODUCTS, SHAPE_LABEL } from '../data/products.ts';
 import { facetCounts, filterProducts, paramsFromQuery, queryFromParams, type CatalogQuery, type SortKey } from '../lib/catalog.ts';
 import { useSeo } from '../lib/seo.ts';
 import { PageShell } from '../components/layout/PageShell.tsx';
 import { ProductCard } from '../components/product/ProductCard.tsx';
 
-type FacetKey = 'shapes' | 'colors' | 'styles';
+type FacetKey = 'frames' | 'lenses' | 'finishes';
 
-const FACETS: { key: FacetKey; field: 'shape' | 'color' | 'style'; label: string; labels: Record<string, string> }[] = [
-  { key: 'shapes', field: 'shape', label: 'Forme', labels: SHAPES },
-  { key: 'colors', field: 'color', label: 'Couleur', labels: Object.fromEntries(Object.entries(COLORS).map(([k, v]) => [k, v.label])) },
-  { key: 'styles', field: 'style', label: 'Style', labels: STYLES },
+const labels = (m: Record<string, { label: string }>) => Object.fromEntries(Object.entries(m).map(([k, v]) => [k, v.label]));
+
+const FACETS: { key: FacetKey; field: 'frame' | 'lens' | 'finish'; label: string; labels: Record<string, string>; swatches?: Record<string, { swatch: string }> }[] = [
+  { key: 'frames', field: 'frame', label: 'Monture', labels: labels(FRAME_COLORS), swatches: FRAME_COLORS },
+  { key: 'lenses', field: 'lens', label: 'Verres', labels: labels(LENS_TINTS), swatches: LENS_TINTS },
+  { key: 'finishes', field: 'finish', label: 'Finition', labels: FINISHES },
 ];
 
 const SORTS: { value: SortKey; label: string }[] = [
@@ -33,7 +35,7 @@ function Filters({ query, update }: { query: CatalogQuery; update: (q: Partial<C
             <div className="flex flex-wrap gap-2">
               {[...counts.keys()].map((value) => {
                 const active = query[f.key].includes(value);
-                const swatch = f.key === 'colors' ? COLORS[value]?.swatch : undefined;
+                const swatch = f.swatches?.[value]?.swatch;
                 return (
                   <button
                     key={value}
@@ -63,11 +65,11 @@ export default function Collection() {
   const [drawer, setDrawer] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const results = useMemo(() => filterProducts(PRODUCTS, query), [query]);
-  const activeCount = query.shapes.length + query.colors.length + query.styles.length;
+  const activeCount = query.frames.length + query.lenses.length + query.finishes.length;
 
   useSeo({
     title: 'Collection',
-    description: `Toutes les lunettes de soleil STUDIOS : ${PRODUCTS.length} modèles à 29,90 €. Filtre par forme, couleur et style.`,
+    description: `Toutes les lunettes de soleil STUDIOS : ${PRODUCTS.length} coloris à 29,90 €. Filtre par monture, verres et finition.`,
   });
 
   const update = (patch: Partial<CatalogQuery>) => setParams(paramsFromQuery({ ...query, ...patch }), { replace: true });
@@ -106,7 +108,7 @@ export default function Collection() {
             Find your <span className="text-electric">frame.</span>
           </h1>
           <p className="max-w-sm text-black/60">
-            {PRODUCTS.length} modèles, tous à <strong className="text-ink">29,90 €</strong>. Filtre par forme, couleur ou style, ou cherche un nom.
+            {SHAPE_LABEL}, en {PRODUCTS.length} coloris, tous à <strong className="text-ink">29,90 €</strong>. Filtre par monture, verres ou finition, ou cherche un nom.
           </p>
         </div>
 
@@ -120,7 +122,7 @@ export default function Collection() {
               type="search"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Rechercher : aviateur, rose, CHROME…"
+              placeholder="Rechercher : écaille, bleu, HAVANA…"
               className="field rounded-full py-3 pl-11"
             />
           </label>
@@ -153,12 +155,12 @@ export default function Collection() {
 
           <div>
             <p className="mb-4 font-mono text-xs text-black/50" aria-live="polite">
-              {results.length} modèle{results.length > 1 ? 's' : ''}
+              {results.length} coloris
             </p>
             {results.length === 0 ? (
               <div className="grid place-items-center rounded-[28px] bg-black/[0.04] px-6 py-24 text-center">
                 <p className="display text-5xl">Aucune paire trouvée.</p>
-                <p className="mt-3 text-black/60">Essaie une autre forme ou un autre mot-clé.</p>
+                <p className="mt-3 text-black/60">Essaie un autre coloris ou un autre mot-clé.</p>
                 <button type="button" onClick={reset} className="btn-ink mt-8">Réinitialiser</button>
               </div>
             ) : (
@@ -198,7 +200,7 @@ export default function Collection() {
               <div className="mt-8 flex gap-3">
                 <button type="button" onClick={reset} className="btn flex-1 bg-black/5">Effacer</button>
                 <button type="button" onClick={() => setDrawer(false)} className="btn-ink flex-[2]">
-                  Voir {results.length} modèle{results.length > 1 ? 's' : ''}
+                  Voir {results.length} coloris
                 </button>
               </div>
             </motion.div>

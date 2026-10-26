@@ -39,7 +39,7 @@ export function PriceSection() {
         <div className="marquee" style={{ ['--marquee-duration' as string]: '60s' }}>
           {[...PRODUCTS, ...PRODUCTS].map((p, i) => (
             <div key={i} className="mx-2 w-56 shrink-0 rounded-3xl bg-white/[0.05] p-4 ring-1 ring-white/10">
-              <ProductImage product={p} view="front" size="sm" className="aspect-[4/3] w-full object-contain" />
+              <ProductImage product={p} view="studio" size="sm" className="aspect-[4/3] w-full object-contain" />
               <div className="mt-2 flex items-baseline justify-between">
                 <span className="display text-xl">{p.name}</span>
                 <span className="font-mono text-xs text-volt">{price}</span>

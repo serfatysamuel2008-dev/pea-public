@@ -4,11 +4,11 @@ import { useSeo } from '../lib/seo.ts';
 import { PageShell } from '../components/layout/PageShell.tsx';
 import { Campaign } from '../components/home/Campaign.tsx';
 import { FindYourFrame } from '../components/home/FindYourFrame.tsx';
-import { Hero } from '../components/home/Hero.tsx';
 import { Lineup } from '../components/home/Lineup.tsx';
 import { Manifesto } from '../components/home/Manifesto.tsx';
 import { Marquee } from '../components/home/Marquee.tsx';
 import { PriceSection } from '../components/home/PriceSection.tsx';
+import { Stage } from '../components/home/Stage.tsx';
 import { TrustStrip } from '../components/home/TrustStrip.tsx';
 
 const JSON_LD = {
@@ -21,12 +21,12 @@ const JSON_LD = {
 
 export default function Home() {
   useSeo({
-    description: `${BRAND.name} : ${PRODUCTS.length} modèles de lunettes de soleil au design affirmé, tous à 29,90 €. Aviateur, rond, carré, masque, écaille, cristal… Trouve ta monture.`,
+    description: `${BRAND.name} : lunettes de soleil rondes en ${PRODUCTS.length} coloris, toutes à 29,90 €. Écaille, cristal, dégradé, translucide… Trouve ta paire.`,
     jsonLd: JSON_LD,
   });
   return (
     <PageShell>
-      <Hero />
+      <Stage />
       <Marquee tone="volt" tilt={-2} />
       <Manifesto />
       <Lineup />

@@ -4,13 +4,13 @@ import { EMPTY_QUERY, filterProducts, paramsFromQuery, queryFromParams, similarP
 
 describe('recherche et filtres', () => {
   it('cherche sans tenir compte des accents ni de la casse', () => {
-    expect(filterProducts(PRODUCTS, { ...EMPTY_QUERY, q: 'ECAILLE' }).map((p) => p.id)).toContain('havana');
-    expect(filterProducts(PRODUCTS, { ...EMPTY_QUERY, q: 'chrome' }).map((p) => p.id)).toEqual(['chrome']);
+    expect(filterProducts(PRODUCTS, { ...EMPTY_QUERY, q: 'ECAILLE' }).map((p) => p.id)).toEqual(['midnight', 'cherry', 'rosewood', 'havana']);
+    expect(filterProducts(PRODUCTS, { ...EMPTY_QUERY, q: 'champagne' }).map((p) => p.id)).toEqual(['champagne']);
   });
-  it('combine forme, couleur et style', () => {
-    const r = filterProducts(PRODUCTS, { ...EMPTY_QUERY, colors: ['noir'], styles: ['retro'] });
-    expect(r.map((p) => p.id)).toEqual(['pebble']);
-    expect(filterProducts(PRODUCTS, { ...EMPTY_QUERY, shapes: ['aviateur'] }).every((p) => p.shape === 'aviateur')).toBe(true);
+  it('combine monture, verres et finition', () => {
+    expect(filterProducts(PRODUCTS, { ...EMPTY_QUERY, frames: ['noir'], lenses: ['fume'] }).map((p) => p.id)).toEqual(['fade', 'shadow']);
+    expect(filterProducts(PRODUCTS, { ...EMPTY_QUERY, finishes: ['degrade'] }).map((p) => p.id)).toEqual(['fade', 'ocean']);
+    expect(filterProducts(PRODUCTS, { ...EMPTY_QUERY, lenses: ['bleu'] }).every((p) => p.lens === 'bleu')).toBe(true);
   });
   it('trie par nouveauté et par nom', () => {
     const byNew = filterProducts(PRODUCTS, { ...EMPTY_QUERY, sort: 'new' });
@@ -19,15 +19,15 @@ describe('recherche et filtres', () => {
     expect(byName).toEqual([...byName].sort((a, b) => a.localeCompare(b, 'fr')));
   });
   it('garde les filtres dans l’URL et ignore les valeurs inconnues', () => {
-    const q = { ...EMPTY_QUERY, q: 'rose', shapes: ['cat-eye'], sort: 'new' as const };
+    const q = { ...EMPTY_QUERY, q: 'bleu', frames: ['noir'], finishes: ['ecaille'], sort: 'new' as const };
     expect(queryFromParams(paramsFromQuery(q))).toEqual(q);
-    expect(queryFromParams(new URLSearchParams('forme=triangle,ronde&tri=prix'))).toEqual({ ...EMPTY_QUERY, shapes: ['ronde'] });
+    expect(queryFromParams(new URLSearchParams('verres=violet,ambre&tri=prix'))).toEqual({ ...EMPTY_QUERY, lenses: ['ambre'] });
   });
-  it('propose des modèles similaires sans le modèle courant', () => {
-    const current = getProduct('afterhours')!;
+  it('propose des coloris proches sans le coloris courant', () => {
+    const current = getProduct('havana')!;
     const sim = similarProducts(PRODUCTS, current, 4);
     expect(sim).toHaveLength(4);
     expect(sim.find((p) => p.id === current.id)).toBeUndefined();
-    expect(sim[0].style === current.style || sim[0].shape === current.shape).toBe(true);
+    expect(sim[0].finish).toBe(current.finish);
   });
 });

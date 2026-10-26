@@ -12,9 +12,12 @@ function alreadySeen() {
   }
 }
 
+/** Vrai si l'animation du logo va jouer à ce chargement (calculé avant tout effet). */
+export const INTRO_PLAYS = typeof window !== 'undefined' && !alreadySeen();
+
 /** Animation du logo à l'ouverture : 1,6 s maximum, une fois par session, passable d'un clic ou d'une touche. */
 export function Intro() {
-  const [show, setShow] = useState(() => !alreadySeen());
+  const [show, setShow] = useState(INTRO_PLAYS);
   useEffect(() => {
     if (!show) return;
     try {

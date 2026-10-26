@@ -61,7 +61,7 @@ export function buildSessionParams({ lines, customer }, publicUrl) {
         product_data: {
           name: `STUDIOS ${l.product.name}`,
           description: `${l.product.frameLabel} · verres ${l.product.lensLabel.toLowerCase()}`,
-          images: [`${publicUrl}/products/${l.product.slug}-front-sm.webp`],
+          images: [`${publicUrl}/products/${l.product.slug}-sm.webp`],
           metadata: { productId: l.product.id },
         },
       },

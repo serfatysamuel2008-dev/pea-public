@@ -110,6 +110,14 @@
   animation: floaty 6s ease-in-out infinite;
 }
 
+/* Poussières en suspension dans le faisceau des projecteurs. */
+@keyframes dust {
+  0% { transform: translate(0, 0); opacity: 0; }
+  15% { opacity: 0.8; }
+  85% { opacity: 0.6; }
+  100% { transform: translate(40px, -160px); opacity: 0; }
+}
+
 @keyframes shimmer {
   to { background-position: -200% 0; }
 }

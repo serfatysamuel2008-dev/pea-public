@@ -26,7 +26,7 @@ export function ProductCard({ product, index = 0, size = 'normal', tone = 'light
     notify({
       title: 'Dans ton panier',
       body: `${product.name} — 29,90 €`,
-      image: productImage(product, 'front', 'sm'),
+      image: productImage(product, 'studio', 'sm'),
       action: { label: 'Voir', onClick: () => setOpen(true) },
     });
   };
@@ -54,14 +54,14 @@ export function ProductCard({ product, index = 0, size = 'normal', tone = 'light
           <div
             className={`relative ${size === 'large' ? 'aspect-[4/3] lg:aspect-auto lg:flex-1' : size === 'wide' ? 'aspect-[4/3] lg:aspect-[16/7]' : 'aspect-[4/3]'} [transform:translateZ(40px)]`}
           >
-            {/* Vue de face, remplacée au survol par la vue trois-quarts qui pivote */}
-            <span className="absolute inset-0 transition-all duration-700 ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-90 group-hover:opacity-0">
-              <ProductImage product={product} view="front" sizes={size === 'normal' ? undefined : '(min-width: 1024px) 50vw, 50vw'} className="h-full w-full object-contain p-[6%]" />
+            {/* Paire détourée en studio, remplacée au survol par la photo en situation */}
+            <span aria-hidden className="absolute bottom-[22%] left-1/2 h-5 w-2/3 -translate-x-1/2 rounded-[50%] bg-black/30 blur-xl transition-opacity duration-500 group-hover:opacity-0" />
+            <span className="absolute inset-0 flex items-center transition-all duration-700 ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-110 group-hover:opacity-0">
+              <ProductImage product={product} view="studio" sizes={size === 'normal' ? undefined : '(min-width: 1024px) 50vw, 50vw'} className="w-full object-contain px-[7%]" />
             </span>
-            <span className="absolute inset-0 scale-110 opacity-0 transition-all duration-700 ease-[cubic-bezier(.16,1,.3,1)] [rotate:-6deg] group-hover:scale-100 group-hover:opacity-100 group-hover:[rotate:0deg]">
-              <ProductImage product={product} view="three-quarter" sizes={size === 'normal' ? undefined : '(min-width: 1024px) 50vw, 50vw'} className="h-full w-full object-contain p-[6%]" />
+            <span className="absolute inset-3 scale-95 overflow-hidden rounded-[20px] opacity-0 transition-all duration-700 ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-100 group-hover:opacity-100">
+              <ProductImage product={product} view="photo" size="sm" className="h-full w-full object-cover" />
             </span>
-            <span aria-hidden className="absolute bottom-[10%] left-1/2 h-4 w-1/2 -translate-x-1/2 rounded-[50%] bg-black/25 blur-xl" />
           </div>
           {/* Lien sur toute la carte ; les boutons restent au-dessus. */}
           <Link to={`/produit/${product.slug}`} aria-label={`${product.name}, 29,90 €, voir le modèle`} className="absolute inset-0 z-[5] rounded-[28px] outline-none" />

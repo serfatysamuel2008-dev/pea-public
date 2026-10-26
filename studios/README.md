@@ -1,8 +1,8 @@
 # STUDIOS — boutique de lunettes de soleil
 
-Site e-commerce immersif pour STUDIOS : 14 modèles, un prix unique (29,90 €), une scène 3D temps réel, un panier persistant et un paiement Stripe.
+Site e-commerce immersif pour STUDIOS : une monture ronde en 13 coloris, un prix unique (29,90 €), une page d'accueil « studio photo » où les paires défilent sous les projecteurs, un panier persistant et un paiement Stripe.
 
-React + TypeScript + Vite, Tailwind CSS, Framer Motion, GSAP ScrollTrigger, three.js / React Three Fiber, Lucide.
+React + TypeScript + Vite, Tailwind CSS, Framer Motion, GSAP ScrollTrigger, Lucide.
 
 ## Lancer le site
 
@@ -48,7 +48,7 @@ Hébergement statique seul (Netlify, Vercel, GitHub Pages) : le site fonctionne,
 | Quoi | Où |
 |---|---|
 | Prix unique, livraison, pays, délai de retour, e-mail, réseaux sociaux | `src/data/shop.ts` |
-| Modèles (nom, textes, forme, couleurs, verres) | `src/data/products.ts` |
+| Coloris (nom, textes, monture, verres, finition) | `src/data/products.ts` |
 | Textes légaux (mentions, CGV, confidentialité) | `src/pages/Legal.tsx` |
 
 Les informations à fournir avant la mise en ligne apparaissent sur le site surlignées en vert : **[À compléter : …]** (SIRET, hébergeur, adresse de retour, médiateur…). Les tarifs de livraison actuels sont des valeurs de démonstration : les remplacer puis passer `SHIPPING_RATES_CONFIRMED` à `true`.
@@ -57,18 +57,24 @@ Aucune caractéristique technique non vérifiée n'est affichée : dimensions, m
 
 ### Visuels des lunettes
 
-Les packshots (`public/products/<modèle>-<vue>.webp`, 4 vues par modèle) sont **générés** à partir d'un modèle 3D paramétrique (`src/three/buildGlasses.ts`) : forme des verres, épaisseur, finition (acétate, mat, métal, écaille, cristal), teinte et dégradé des verres, effet miroir. Le même générateur alimente la scène 3D de la page d'accueil et la vue 360° des fiches produit.
+Les visuels viennent des photos produit réelles, rangées dans `photos/originals/<coloris>.jpg`. Le script `photos/process.py` en tire, dans `public/products/` :
 
-Après avoir ajouté ou modifié un modèle :
+- `<coloris>.webp` : la paire **détourée** (fond transparent, toutes au même cadrage), mise en scène sous les projecteurs sur le site ;
+- `<coloris>-photo.webp` : la photo d'origine (« en situation ») ;
+- `<coloris>-detail.webp` : un gros plan recadré dans la photo.
+
+Le détourage utilise le modèle BiRefNet (via `rembg`). Pour ajouter un coloris :
 
 ```bash
-npm run render              # tous les modèles
-npm run render -- volt neon # seulement certains
+python3 -m venv .venv && .venv/bin/pip install "rembg[cpu]" pillow
+cp ma-photo.jpg photos/originals/nouveau-coloris.jpg
+for f in photos/originals/*.jpg; do .venv/bin/python photos/process.py "$(basename "$f" .jpg)"; done
+.venv/bin/python photos/process.py      # passe finale : cadrage commun à toutes les paires
 ```
 
-(nécessite Playwright : `npm i -D playwright && npx playwright install chromium`).
+puis ajouter l'entrée correspondante dans `src/data/products.ts`. Le premier lancement télécharge le modèle (~1 Go) ; un détourage prend environ 40 s par photo sur un processeur classique. Lancer une photo par commande évite de saturer la mémoire.
 
-Pour passer aux **vraies photos** des produits, remplacer les fichiers `.webp` en gardant les mêmes noms (format 4:3, fond transparent idéalement). La section campagne (`src/components/home/Campaign.tsx`) utilise une silhouette graphique en attendant une vraie photo de mannequin : remplacer `<Silhouette />` par une image.
+La section campagne (`src/components/home/Campaign.tsx`) met la paire en scène seule. Quand une photo portée par un mannequin existera, elle pourra la remplacer.
 
 ## Qualité
 
@@ -78,7 +84,7 @@ npm run e2e       # parcours d'achat complet dans un navigateur (avec npm run de
 npm run typecheck
 ```
 
-Accessibilité et performance : navigation au clavier (focus visible, panier piégeant le focus, Échap), textes alternatifs sur chaque visuel, réglage « réduire les animations » respecté (pas d'intro, pas de 3D, pas de défilement automatique), 3D remplacée par les packshots sur les appareils modestes ou sans WebGL, three.js chargé uniquement quand une scène 3D s'affiche, images en `srcset` et chargement différé.
+Accessibilité et performance : navigation au clavier (focus visible, panier piégeant le focus, Échap), textes alternatifs sur chaque visuel, réglage « réduire les animations » respecté (pas d'intro ni de défilement automatique), images en `srcset` et chargement différé.
 
 ## Organisation
 
@@ -87,15 +93,15 @@ src/
   data/         catalogue et réglages de la boutique (source unique, lue aussi par le serveur)
   lib/          prix, filtres, validation, appels API, SEO
   store/        panier, favoris, notifications
-  three/        générateur 3D des lunettes et scène temps réel
   components/
     layout/     Header, Footer, transitions de page
-    home/       Intro, Hero, Manifesto, Lineup, FindYourFrame, Campaign, PriceSection, Marquee…
-    product/    ProductCard, ProductMedia (galerie, zoom, 360°)
+    home/       Intro, Stage (accueil sous les projecteurs), Manifesto, Lineup, FindYourFrame, Campaign, PriceSection, Marquee…
+    product/    ProductCard, ProductMedia (galerie, zoom)
+    ui/         StudioShot (paire détourée, ombre, reflet, éclat de lumière), ProductImage…
     cart/       CartDrawer
     anim/       Reveal, Tilt, Magnetic
   pages/        Accueil, Collection, Produit, Commande, Confirmation, Favoris, FAQ, Contact, pages légales
 server/         API de paiement Stripe + service du site compilé
-scripts/render/ génération des packshots
+photos/         photos d'origine et script de détourage
 e2e/            test du parcours d'achat
 ```

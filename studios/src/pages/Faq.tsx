@@ -33,7 +33,7 @@ export default function Faq() {
   return (
     <InfoPage title="Questions fréquentes" eyebrow="FAQ" description="Prix, livraison, retours, paiement : les réponses aux questions sur STUDIOS.">
       <Item q="Pourquoi toutes les paires coûtent 29,90 € ?">
-        C’est notre signature : {PRODUCTS.length} modèles, un seul prix. Tu choisis ta paire pour son style, pas pour son étiquette.
+        C’est notre signature : {PRODUCTS.length} coloris, un seul prix. Tu choisis ta paire pour son style, pas pour son étiquette.
       </Item>
       <Item q="Dans quels pays livrez-vous ?">
         Actuellement : {SHIPPING_COUNTRIES.map((c) => c.label).join(', ')}. Les modes et tarifs de livraison sont détaillés sur la page{' '}
@@ -52,8 +52,8 @@ export default function Faq() {
         Nous publierons la catégorie de protection, les matériaux et les dimensions de chaque modèle dès qu’ils auront été vérifiés auprès de notre fabricant. Nous préférons ne rien afficher plutôt
         qu’une information non vérifiée.
       </Item>
-      <Item q="Comment choisir ma forme ?">
-        Va sur la <Link to="/collection" className="underline">collection</Link> et filtre par forme. Chaque fiche montre la paire sous quatre angles et, sur la plupart des appareils, en 3D à 360°.
+      <Item q="Toutes les paires ont-elles la même forme ?">
+        Oui : une monture ronde au pont en trou de serrure, déclinée en {PRODUCTS.length} coloris. Sur la <Link to="/collection" className="underline">collection</Link>, filtre par couleur de monture, teinte des verres ou finition. Chaque fiche montre la paire en studio, en situation et en gros plan.
       </Item>
       <Item q="Une autre question ?">
         Écris-nous depuis la page <Link to="/contact" className="underline">Contact</Link>.

@@ -20,8 +20,8 @@ const step = (name) => console.log(`✓ ${name}`);
 // 1. Ajout depuis la fiche produit, panier, quantités, persistance.
 {
   const page = await newPage();
-  await page.goto(`${BASE}/produit/chrome`);
-  await page.getByRole('heading', { level: 1, name: 'CHROME' }).waitFor();
+  await page.goto(`${BASE}/produit/deep-blue`);
+  await page.getByRole('heading', { level: 1, name: 'DEEP BLUE' }).waitFor();
   assert.ok(await page.getByText('29,90 €').first().isVisible());
   step('fiche produit affichée avec son prix');
 
@@ -30,7 +30,7 @@ const step = (name) => console.log(`✓ ${name}`);
   await page.getByRole('button', { name: /Ouvrir le panier \(2 articles\)/ }).waitFor();
   step('ajout de 2 paires, compteur du panier à jour');
 
-  await page.goto(`${BASE}/produit/neon`);
+  await page.goto(`${BASE}/produit/havana`);
   await page.getByRole('button', { name: /Ajouter au panier/ }).click();
   await page.getByRole('button', { name: /Ouvrir le panier/ }).click();
   const drawer = page.getByRole('dialog', { name: /Panier/ });
@@ -40,7 +40,7 @@ const step = (name) => console.log(`✓ ${name}`);
 
   await drawer.getByRole('button', { name: 'Ajouter une paire' }).first().click();
   assert.match(await drawer.textContent(), /119,60/);
-  await drawer.getByRole('button', { name: 'Supprimer NEON du panier' }).click();
+  await drawer.getByRole('button', { name: 'Supprimer HAVANA du panier' }).click();
   await page.waitForTimeout(400);
   assert.match(await drawer.textContent(), /89,70/);
   step('quantité modifiée et ligne supprimée, totaux recalculés');
@@ -85,9 +85,9 @@ const step = (name) => console.log(`✓ ${name}`);
   await page.route('**/api/checkout', (r) => r.fulfill({ json: { url: `${BASE}/commande/confirmation?session_id=cs_test_e2eAAAAAAAAPAID` } }));
   await page.route('**/api/order?*', (r) => {
     const paid = r.request().url().endsWith('PAID');
-    r.fulfill({ json: paid ? { paid: true, status: 'paid', email: 'lea@example.com', totalCents: 3380, reference: 'AAAAPAID', items: [{ name: 'STUDIOS VOLT', qty: 1 }] } : { paid: false, status: 'unpaid', email: null, totalCents: null, reference: 'X', items: [] } });
+    r.fulfill({ json: paid ? { paid: true, status: 'paid', email: 'lea@example.com', totalCents: 3380, reference: 'AAAAPAID', items: [{ name: 'STUDIOS OCEAN', qty: 1 }] } : { paid: false, status: 'unpaid', email: null, totalCents: null, reference: 'X', items: [] } });
   });
-  await page.goto(`${BASE}/produit/volt`);
+  await page.goto(`${BASE}/produit/ocean`);
   await page.getByRole('button', { name: /Ajouter au panier/ }).first().click();
   await page.goto(`${BASE}/commande`);
   await page.getByLabel('E-mail').fill('lea@example.com');
@@ -112,16 +112,16 @@ const step = (name) => console.log(`✓ ${name}`);
 // 4. Catalogue : recherche, filtres, menu mobile.
 {
   const page = await newPage({ width: 390, height: 844 });
-  await page.goto(`${BASE}/collection?forme=aviateur`);
-  await page.getByText('1 modèle', { exact: true }).waitFor();
+  await page.goto(`${BASE}/collection?finition=degrade`);
+  await page.getByText('2 coloris', { exact: true }).waitFor();
   await page.goto(`${BASE}/collection`);
   await page.getByRole('searchbox').fill('zzzz');
   await page.getByText('Aucune paire trouvée.').waitFor();
   await page.getByRole('button', { name: 'Réinitialiser' }).click();
-  await page.getByText('14 modèles', { exact: true }).waitFor();
+  await page.getByText('13 coloris', { exact: true }).waitFor();
   step('catalogue : filtre par URL, recherche vide, réinitialisation');
 
-  for (const path of ['/', '/collection', '/produit/neon', '/produit/volt', '/commande', '/faq', '/cgv', '/favoris', '/page-inconnue']) {
+  for (const path of ['/', '/collection', '/produit/havana', '/produit/ocean', '/commande', '/faq', '/cgv', '/favoris', '/page-inconnue']) {
     await page.goto(`${BASE}${path}`);
     await page.waitForTimeout(600);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
