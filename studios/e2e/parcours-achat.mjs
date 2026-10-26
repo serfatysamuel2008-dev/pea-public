@@ -5,6 +5,8 @@ import { createRequire } from 'node:module';
 
 const { chromium } = await import('playwright').catch(() => createRequire(import.meta.url)('playwright'));
 const BASE = process.env.E2E_URL ?? 'http://localhost:5173';
+// Rendu 3D léger : les navigateurs de test n'ont pas de carte graphique.
+const Q = '?qualite=legere';
 const browser = await chromium.launch();
 const errors = [];
 
@@ -20,7 +22,7 @@ const step = (name) => console.log(`✓ ${name}`);
 // 1. Ajout depuis la fiche produit, panier, quantités, persistance.
 {
   const page = await newPage();
-  await page.goto(`${BASE}/produit/deep-blue`);
+  await page.goto(`${BASE}/produit/deep-blue${Q}`);
   await page.getByRole('heading', { level: 1, name: 'DEEP BLUE' }).waitFor();
   assert.ok(await page.getByText('29,90 €').first().isVisible());
   step('fiche produit affichée avec son prix');
@@ -30,7 +32,7 @@ const step = (name) => console.log(`✓ ${name}`);
   await page.getByRole('button', { name: /Ouvrir le panier \(2 articles\)/ }).waitFor();
   step('ajout de 2 paires, compteur du panier à jour');
 
-  await page.goto(`${BASE}/produit/havana`);
+  await page.goto(`${BASE}/produit/havana${Q}`);
   await page.getByRole('button', { name: /Ajouter au panier/ }).click();
   await page.getByRole('button', { name: /Ouvrir le panier/ }).click();
   const drawer = page.getByRole('dialog', { name: /Panier/ });
@@ -87,7 +89,7 @@ const step = (name) => console.log(`✓ ${name}`);
     const paid = r.request().url().endsWith('PAID');
     r.fulfill({ json: paid ? { paid: true, status: 'paid', email: 'lea@example.com', totalCents: 3380, reference: 'AAAAPAID', items: [{ name: 'STUDIOS OCEAN', qty: 1 }] } : { paid: false, status: 'unpaid', email: null, totalCents: null, reference: 'X', items: [] } });
   });
-  await page.goto(`${BASE}/produit/ocean`);
+  await page.goto(`${BASE}/produit/ocean${Q}`);
   await page.getByRole('button', { name: /Ajouter au panier/ }).first().click();
   await page.goto(`${BASE}/commande`);
   await page.getByLabel('E-mail').fill('lea@example.com');
@@ -122,7 +124,7 @@ const step = (name) => console.log(`✓ ${name}`);
   step('catalogue : filtre par URL, recherche vide, réinitialisation');
 
   for (const path of ['/', '/collection', '/produit/havana', '/produit/ocean', '/commande', '/faq', '/cgv', '/favoris', '/page-inconnue']) {
-    await page.goto(`${BASE}${path}`);
+    await page.goto(`${BASE}${path}${path.startsWith('/produit') || path === '/' ? Q : ''}`);
     await page.waitForTimeout(600);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
     assert.equal(overflow, false, `défilement horizontal sur ${path}`);

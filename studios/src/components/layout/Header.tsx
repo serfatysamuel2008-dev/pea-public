@@ -9,7 +9,6 @@ import { Wordmark } from '../ui/Wordmark.tsx';
 
 const NAV = [
   { to: '/collection', label: 'Collection' },
-  { to: '/collection?tri=new', label: 'Nouveautés' },
   { to: '/faq', label: 'FAQ' },
   { to: '/contact', label: 'Contact' },
 ];
@@ -58,7 +57,7 @@ export function Header() {
 
   return (
     <>
-      <a href="#contenu" className="sr-only z-[100] rounded-full bg-volt px-4 py-2 text-ink focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
+      <a href="#contenu" className="sr-only z-[100] rounded-full bg-paper px-4 py-2 text-ink focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
         Aller au contenu
       </a>
       <header className="fixed inset-x-0 top-0 z-50 px-3 pt-[max(env(safe-area-inset-top),12px)] sm:px-5">
@@ -67,7 +66,7 @@ export function Header() {
             scrolled || menu || location.pathname !== '/' ? 'bg-ink/75 shadow-[0_10px_40px_-10px_rgba(0,0,0,.6)] ring-1 ring-white/10 backdrop-blur-xl' : 'bg-transparent'
           }`}
         >
-          <Link to="/" className="text-[26px] outline-offset-4" aria-label={`${BRAND.name}, accueil`}>
+          <Link to="/" className="text-[14px] outline-offset-4" aria-label={`${BRAND.name}, accueil`}>
             <Wordmark />
           </Link>
           <nav aria-label="Navigation principale" className="hidden items-center gap-1 md:flex">
@@ -87,11 +86,11 @@ export function Header() {
             </Link>
             <Link to="/favoris" className={icon} aria-label={`Favoris (${ids.length})`}>
               <Heart size={19} />
-              <Badge n={ids.length} tone="bg-flash text-ink" />
+              <Badge n={ids.length} tone="bg-paper text-ink" />
             </Link>
             <button type="button" onClick={() => setOpen(true)} className={icon} aria-label={`Ouvrir le panier (${count} article${count > 1 ? 's' : ''})`}>
               <ShoppingBag size={19} />
-              <Badge n={count} tone="bg-volt text-ink" />
+              <Badge n={count} tone="bg-paper text-ink" />
             </button>
             <button type="button" onClick={() => setMenu((m) => !m)} className={`${icon} md:hidden`} aria-expanded={menu} aria-controls="menu-mobile" aria-label={menu ? 'Fermer le menu' : 'Ouvrir le menu'}>
               {menu ? <X size={20} /> : <Menu size={20} />}
@@ -107,7 +106,7 @@ export function Header() {
             role="dialog"
             aria-modal="true"
             aria-label="Menu"
-            className="fixed inset-0 z-40 flex flex-col justify-between bg-volt px-6 pb-[max(env(safe-area-inset-bottom),28px)] pt-28 text-ink md:hidden"
+            className="fixed inset-0 z-40 flex flex-col justify-between bg-ink px-6 pb-[max(env(safe-area-inset-bottom),28px)] pt-28 text-paper md:hidden"
             initial={{ clipPath: 'circle(0% at calc(100% - 44px) 40px)' }}
             animate={{ clipPath: 'circle(150% at calc(100% - 44px) 40px)' }}
             exit={{ clipPath: 'circle(0% at calc(100% - 44px) 40px)' }}
@@ -116,7 +115,7 @@ export function Header() {
             <nav aria-label="Menu mobile" className="flex flex-col">
               {[{ to: '/', label: 'Accueil' }, ...NAV, { to: '/favoris', label: 'Favoris' }].map((n, i) => (
                 <motion.div key={n.label} initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.15 + i * 0.05, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}>
-                  <Link to={n.to} className="display block border-b border-ink/15 py-2 text-[15vw] leading-[0.95] active:text-electric">
+                  <Link to={n.to} className="block border-b border-white/10 py-3 text-[9vw] font-semibold tracking-tight active:text-mist">
                     {n.label}
                   </Link>
                 </motion.div>

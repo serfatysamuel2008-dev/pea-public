@@ -10,15 +10,15 @@ export default function Favorites() {
   const { ids } = useFavorites();
   const products = ids.map(getProductById).filter((p) => !!p);
   return (
-    <PageShell tone="light">
+    <PageShell >
       <div className="container-x min-h-[80svh] pb-24 pt-32 sm:pt-40">
-        <h1 className="display text-[18vw] sm:text-[9vw]">Favoris</h1>
-        <p className="mt-2 text-black/60">Enregistrés sur cet appareil.</p>
+        <h1 className="display text-5xl sm:text-7xl">Favoris</h1>
+        <p className="mt-2 text-white/60">Enregistrés sur cet appareil.</p>
         {products.length === 0 ? (
-          <div className="mt-12 rounded-[28px] bg-black/[0.04] px-6 py-20 text-center">
+          <div className="mt-12 rounded-[28px] bg-white/[0.04] px-6 py-20 text-center">
             <p className="display text-4xl">Aucun favori pour l’instant.</p>
-            <p className="mt-2 text-black/60">Touche le cœur sur une paire pour la retrouver ici.</p>
-            <Link to="/collection" className="btn-ink mt-8">Explorer la collection</Link>
+            <p className="mt-2 text-white/60">Touche le cœur sur une paire pour la retrouver ici.</p>
+            <Link to="/collection" className="btn-light mt-8">Explorer la collection</Link>
           </div>
         ) : (
           <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">

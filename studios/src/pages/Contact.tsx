@@ -21,7 +21,7 @@ export default function Contact() {
 
   return (
     <InfoPage title="Parlons-en." eyebrow="Contact" description="Contacter STUDIOS : une question sur un modèle, une commande ou un retour.">
-      <p className="text-lg text-black/70">
+      <p className="text-lg text-white/70">
         Une question sur un modèle, une commande ou un retour ? Écris-nous à{' '}
         <a href={`mailto:${BRAND.contactEmail}`} className="font-bold underline">
           {BRAND.contactEmail}
@@ -51,15 +51,15 @@ export default function Contact() {
           <textarea className="field min-h-40" value={form.message} onChange={set('message')} />
         </label>
         {error && (
-          <p role="alert" className="text-sm text-[#d4006e] sm:col-span-2">
+          <p role="alert" className="text-sm text-signal sm:col-span-2">
             {error}
           </p>
         )}
         <div className="sm:col-span-2">
-          <button type="submit" className="btn-ink">
+          <button type="submit" className="btn-light">
             <Mail size={16} /> Envoyer
           </button>
-          <p className="mt-3 text-sm text-black/50">Le message s’ouvre dans ta messagerie, prêt à être envoyé.</p>
+          <p className="mt-3 text-sm text-white/50">Le message s’ouvre dans ta messagerie, prêt à être envoyé.</p>
         </div>
       </form>
     </InfoPage>

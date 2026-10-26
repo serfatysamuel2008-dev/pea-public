@@ -1,8 +1,8 @@
 # STUDIOS — boutique de lunettes de soleil
 
-Site e-commerce immersif pour STUDIOS : une monture ronde en 13 coloris, un prix unique (29,90 €), une page d'accueil « studio photo » où les paires défilent sous les projecteurs, un panier persistant et un paiement Stripe.
+Site e-commerce immersif pour STUDIOS : une monture ronde en 13 coloris, un prix unique (29,90 €), une page d'accueil « filmée » en 3D (la caméra suit la paire, la démonte et analyse chaque pièce), un panier persistant et un paiement Stripe.
 
-React + TypeScript + Vite, Tailwind CSS, Framer Motion, GSAP ScrollTrigger, Lucide.
+React + TypeScript + Vite, Tailwind CSS, three.js, GSAP ScrollTrigger, Framer Motion, Lucide.
 
 ## Lancer le site
 
@@ -60,8 +60,9 @@ Aucune caractéristique technique non vérifiée n'est affichée : dimensions, m
 Les visuels viennent des photos produit réelles, rangées dans `photos/originals/<coloris>.jpg`. Le script `photos/process.py` en tire, dans `public/products/` :
 
 - `<coloris>.webp` : la paire **détourée** (fond transparent, toutes au même cadrage), mise en scène sous les projecteurs sur le site ;
-- `<coloris>-photo.webp` : la photo d'origine (« en situation ») ;
-- `<coloris>-detail.webp` : un gros plan recadré dans la photo.
+- `<coloris>-detail.webp` : un gros plan détouré (pont et verre).
+
+Le fond des photos d'origine n'est jamais publié.
 
 Le détourage utilise le modèle BiRefNet (via `rembg`). Pour ajouter un coloris :
 
@@ -74,7 +75,13 @@ for f in photos/originals/*.jpg; do .venv/bin/python photos/process.py "$(basena
 
 puis ajouter l'entrée correspondante dans `src/data/products.ts`. Le premier lancement télécharge le modèle (~1 Go) ; un détourage prend environ 40 s par photo sur un processeur classique. Lancer une photo par commande évite de saturer la mémoire.
 
-La section campagne (`src/components/home/Campaign.tsx`) met la paire en scène seule. Quand une photo portée par un mannequin existera, elle pourra la remplacer.
+### Modèle 3D
+
+La monture est modélisée en 3D dans `src/three/frameModel.ts`, d'après les photos : face d'un seul tenant (cercles et pont en trou de serrure dessinés par un champ de distance puis extrudés), verres, charnières et branches en pièces séparées pour la vue éclatée. L'aspect de chaque coloris (noir brillant, écaille, translucide, dégradé, marbre) est réglé dans le champ `look` de `src/data/products.ts`.
+
+Le « film » de la page d'accueil (`src/three/Film.ts`, `src/components/film/FilmSection.tsx`) est une suite de plans (`SHOTS`) : position de la caméra, éclatement de la paire, pièce analysée. Le défilement de la page fait avancer le film.
+
+Sur un appareil qui peine (plus de 45 ms par image), le rendu passe automatiquement en mode léger, sans réfraction ni ombres douces. On peut le forcer avec `?qualite=legere` dans l'adresse.
 
 ## Qualité
 
@@ -84,7 +91,7 @@ npm run e2e       # parcours d'achat complet dans un navigateur (avec npm run de
 npm run typecheck
 ```
 
-Accessibilité et performance : navigation au clavier (focus visible, panier piégeant le focus, Échap), textes alternatifs sur chaque visuel, réglage « réduire les animations » respecté (pas d'intro ni de défilement automatique), images en `srcset` et chargement différé.
+Accessibilité et performance : navigation au clavier (focus visible, panier piégeant le focus, Échap), textes alternatifs sur chaque visuel, qualité 3D adaptative, images en `srcset` et chargement différé. Sans WebGL, le film affiche la paire détourée.
 
 ## Organisation
 
@@ -93,11 +100,12 @@ src/
   data/         catalogue et réglages de la boutique (source unique, lue aussi par le serveur)
   lib/          prix, filtres, validation, appels API, SEO
   store/        panier, favoris, notifications
+  three/        modèle 3D de la monture et film de l'accueil
   components/
     layout/     Header, Footer, transitions de page
-    home/       Intro, Stage (accueil sous les projecteurs), Manifesto, Lineup, FindYourFrame, Campaign, PriceSection, Marquee…
-    product/    ProductCard, ProductMedia (galerie, zoom)
-    ui/         StudioShot (paire détourée, ombre, reflet, éclat de lumière), ProductImage…
+    film/       FilmSection (le film 3D de l'accueil)
+    product/    ProductCard, ProductMedia (modèle 3D, paire détourée, gros plan)
+    ui/         ProductImage, QtyStepper, FavoriteButton…
     cart/       CartDrawer
     anim/       Reveal, Tilt, Magnetic
   pages/        Accueil, Collection, Produit, Commande, Confirmation, Favoris, FAQ, Contact, pages légales

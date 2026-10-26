@@ -2,8 +2,9 @@
 
 Pour chaque paire, écrit dans public/products/ :
   <slug>.webp / <slug>-sm.webp              paire détourée (fond transparent), cadrage commun
-  <slug>-photo.webp / <slug>-photo-sm.webp  photo d'origine
-  <slug>-detail.webp                        gros plan (pont et verre gauche) recadré dans la photo d'origine
+  <slug>-detail.webp                        gros plan détouré (pont et verre gauche)
+
+Le fond des photos d'origine n'est jamais publié.
 
 Usage : python photos/process.py [slug ...]
 Nécessite : pip install "rembg[cpu]" pillow  (le modèle BiRefNet, ~1 Go, est téléchargé au premier lancement)
@@ -63,14 +64,9 @@ def main(slugs):
         sm = canvas.resize((640, round(640 * H / W)), Image.LANCZOS)
         sm.save(OUT / f'{slug}-sm.webp', quality=88, method=6)
 
-        photo = Image.open(SRC / f'{slug}.jpg').convert('RGB')
-        photo.save(OUT / f'{slug}-photo.webp', quality=86, method=6)
-        photo.resize((640, round(640 * photo.height / photo.width)), Image.LANCZOS).save(OUT / f'{slug}-photo-sm.webp', quality=84, method=6)
-
-        w, h = x1 - x0, y1 - y0
-        dx0, dx1 = max(0, x0 - 20), min(photo.width, x0 + int(w * 0.56))
-        dy0, dy1 = max(0, y0 - 30), min(photo.height, y1 + 30)
-        photo.crop((dx0, dy0, dx1, dy1)).save(OUT / f'{slug}-detail.webp', quality=88, method=6)
+        ox, oy = (W - piece.width) // 2, (H - piece.height) // 2
+        detail = canvas.crop((max(0, ox - 20), max(0, oy - 20), ox + int(piece.width * 0.56), min(H, oy + piece.height + 20)))
+        detail.save(OUT / f'{slug}-detail.webp', quality=90, method=6)
         print('écrit', slug, flush=True)
     print(f'canvas {W}x{H}')
 

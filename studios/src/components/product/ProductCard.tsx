@@ -1,22 +1,15 @@
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import type { Product } from '../../data/products.ts';
+import { productImage, type Product } from '../../data/products.ts';
 import { useCart } from '../../store/cart.tsx';
 import { useToast } from '../../store/toast.tsx';
-import { productImage } from '../../data/products.ts';
-import { Tilt } from '../anim/Tilt.tsx';
 import { FavoriteButton } from '../ui/FavoriteButton.tsx';
 import { Price } from '../ui/Price.tsx';
 import { ProductImage } from '../ui/ProductImage.tsx';
 
-type Props = { product: Product; index?: number; size?: 'normal' | 'large' | 'wide'; tone?: 'light' | 'dark' };
-
-/**
- * Carte produit : au survol, le fond prend la couleur du modèle et la paire pivote
- * vers sa vue trois-quarts. Au toucher, la carte reste lisible et cliquable.
- */
-export function ProductCard({ product, index = 0, size = 'normal', tone = 'light' }: Props) {
+/** Carte coloris : paire détourée sous un halo de lumière, qui se soulève au survol. */
+export function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
   const { add, setOpen } = useCart();
   const { notify } = useToast();
   const quickAdd = (e: React.MouseEvent) => {
@@ -24,70 +17,47 @@ export function ProductCard({ product, index = 0, size = 'normal', tone = 'light
     e.stopPropagation();
     add({ productId: product.id, qty: 1 });
     notify({
-      title: 'Dans ton panier',
+      title: 'Ajouté au panier',
       body: `${product.name} — 29,90 €`,
       image: productImage(product, 'studio', 'sm'),
       action: { label: 'Voir', onClick: () => setOpen(true) },
     });
   };
-  const base = tone === 'light' ? 'bg-[#f2f2ee] text-ink' : 'bg-white/[0.06] text-paper';
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '0px 0px -5% 0px' }}
-      transition={{ duration: 0.8, delay: (index % 4) * 0.06, ease: [0.16, 1, 0.3, 1] }}
-      className="group h-full"
+      transition={{ duration: 0.8, delay: (index % 3) * 0.06, ease: [0.16, 1, 0.3, 1] }}
+      className="group card relative flex h-full flex-col overflow-hidden transition-colors duration-500 hover:bg-smoke"
     >
-      <Tilt className="h-full rounded-[28px]" max={6}>
-        <div className={`relative flex h-full flex-col overflow-hidden rounded-[28px] ${base} has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-electric`}>
-          {/* Fond coloré révélé au survol */}
-          <span
-            aria-hidden
-            className="absolute inset-0 origin-bottom scale-y-0 transition-transform duration-500 ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-y-100"
-            style={{ background: product.accent }}
-          />
-          <span aria-hidden className="eyebrow absolute left-5 top-5 z-10 opacity-60 transition-colors group-hover:opacity-100" style={{ color: 'inherit' }}>
-            {String(product.drop).padStart(2, '0')}
-          </span>
-          <div
-            className={`relative ${size === 'large' ? 'aspect-[4/3] lg:aspect-auto lg:flex-1' : size === 'wide' ? 'aspect-[4/3] lg:aspect-[16/7]' : 'aspect-[4/3]'} [transform:translateZ(40px)]`}
-          >
-            {/* Paire détourée en studio, remplacée au survol par la photo en situation */}
-            <span aria-hidden className="absolute bottom-[22%] left-1/2 h-5 w-2/3 -translate-x-1/2 rounded-[50%] bg-black/30 blur-xl transition-opacity duration-500 group-hover:opacity-0" />
-            <span className="absolute inset-0 flex items-center transition-all duration-700 ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-110 group-hover:opacity-0">
-              <ProductImage product={product} view="studio" sizes={size === 'normal' ? undefined : '(min-width: 1024px) 50vw, 50vw'} className="w-full object-contain px-[7%]" />
-            </span>
-            <span className="absolute inset-3 scale-95 overflow-hidden rounded-[20px] opacity-0 transition-all duration-700 ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-100 group-hover:opacity-100">
-              <ProductImage product={product} view="photo" size="sm" className="h-full w-full object-cover" />
-            </span>
-          </div>
-          {/* Lien sur toute la carte ; les boutons restent au-dessus. */}
-          <Link to={`/produit/${product.slug}`} aria-label={`${product.name}, 29,90 €, voir le modèle`} className="absolute inset-0 z-[5] rounded-[28px] outline-none" />
-          <div className={`pointer-events-none relative z-10 flex items-end justify-between gap-3 p-5 pt-0 ${product.accent === '#080808' ? 'group-hover:text-paper' : ''}`}>
-            <div className="min-w-0">
-              <h3 className={`display truncate ${size === 'large' ? 'text-4xl sm:text-5xl' : 'text-[26px] sm:text-3xl'}`}>
-                {product.name}
-              </h3>
-              <p className="mt-1 font-mono text-[13px]">
-                <Price cents={product.priceCents} />
-              </p>
-            </div>
-            <span className="flex gap-2">
-              <button
-                type="button"
-                onClick={quickAdd}
-                aria-label={`Ajouter ${product.name} au panier`}
-                className="pointer-events-auto relative z-10 grid h-11 w-11 place-items-center rounded-full bg-ink text-paper transition hover:rotate-90 hover:bg-electric"
-              >
-                <Plus size={18} />
-              </button>
-            </span>
-          </div>
-          <FavoriteButton product={product} className="!absolute right-4 top-4 z-10" />
+      <Link to={`/produit/${product.slug}`} aria-label={`${product.name}, ${product.frameLabel}, 29,90 €`} className="absolute inset-0 z-[5] rounded-[22px]" />
+      <div className="relative aspect-[5/3]">
+        <span aria-hidden className="absolute inset-x-[15%] top-[8%] h-[70%] rounded-full bg-white/[0.06] opacity-0 blur-3xl transition-opacity duration-700 group-hover:opacity-100" />
+        <span aria-hidden className="absolute bottom-[16%] left-1/2 h-4 w-3/5 -translate-x-1/2 rounded-[50%] bg-black/70 blur-xl" />
+        <div className="absolute inset-0 flex items-center px-[8%] transition-transform duration-700 ease-[cubic-bezier(.16,1,.3,1)] group-hover:-translate-y-2 group-hover:scale-[1.04]">
+          <ProductImage product={product} className="w-full" />
         </div>
-      </Tilt>
+      </div>
+      <div className="relative z-10 mt-auto flex items-end justify-between gap-3 p-5 pt-0">
+        <div className="min-w-0">
+          <h3 className="truncate text-lg font-semibold tracking-tight">{product.name}</h3>
+          <p className="truncate text-sm text-mist">{product.frameLabel}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Price cents={product.priceCents} className="text-sm text-paper/80" />
+          <button
+            type="button"
+            onClick={quickAdd}
+            aria-label={`Ajouter ${product.name} au panier`}
+            className="grid h-10 w-10 place-items-center rounded-full bg-white/[0.08] text-paper transition hover:bg-paper hover:text-ink"
+          >
+            <Plus size={17} />
+          </button>
+        </div>
+      </div>
+      <FavoriteButton product={product} className="absolute right-3 top-3 z-10" />
     </motion.article>
   );
 }

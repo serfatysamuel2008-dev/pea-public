@@ -29,13 +29,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.96 }}
               transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-              className="pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-2xl bg-paper p-3 pr-4 text-ink shadow-[0_20px_60px_-20px_rgba(0,0,0,.5)] ring-1 ring-black/5"
+              className="pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-2xl bg-smoke p-3 pr-4 text-paper shadow-[0_20px_60px_-20px_rgba(0,0,0,.8)] ring-1 ring-white/10"
               role="status"
             >
-              {t.image && <img src={t.image} alt="" className="h-14 w-16 shrink-0 rounded-xl bg-volt object-contain p-1" />}
+              {t.image && <img src={t.image} alt="" className="h-14 w-16 shrink-0 rounded-xl bg-white/[0.05] object-contain p-1" />}
               <div className="min-w-0 flex-1">
-                <p className="font-display text-lg uppercase leading-none tracking-wide">{t.title}</p>
-                {t.body && <p className="mt-1 truncate text-sm text-black/60">{t.body}</p>}
+                <p className="font-semibold leading-tight">{t.title}</p>
+                {t.body && <p className="mt-1 truncate text-sm text-white/60">{t.body}</p>}
               </div>
               {t.action && (
                 <button
@@ -43,7 +43,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                     t.action!.onClick();
                     dismiss(t.id);
                   }}
-                  className="shrink-0 rounded-full bg-ink px-4 py-2 text-xs font-bold uppercase tracking-wider text-paper hover:bg-electric focus-visible:outline-2"
+                  className="shrink-0 rounded-full bg-paper px-4 py-2 text-xs font-semibold text-ink hover:bg-white"
                 >
                   {t.action.label}
                 </button>

@@ -11,9 +11,9 @@ export default function NotFound() {
       <div className="container-x grid min-h-[100svh] place-items-center pt-24 text-center">
         <div>
           <ProductImage product={getProduct('shadow')!} view="studio" size="sm" className="floaty mx-auto w-72" />
-          <h1 className="display mt-4 text-[28vw] leading-none sm:text-[16vw]">404</h1>
+          <h1 className="display mt-4 text-8xl">404</h1>
           <p className="mt-2 text-paper/70">Même avec des lunettes, on ne trouve pas cette page.</p>
-          <Link to="/" className="btn-volt mt-8">Retour à l’accueil</Link>
+          <Link to="/" className="btn-light mt-8">Retour à l’accueil</Link>
         </div>
       </div>
     </PageShell>

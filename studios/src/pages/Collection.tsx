@@ -31,7 +31,7 @@ function Filters({ query, update }: { query: CatalogQuery; update: (q: Partial<C
         const counts = facetCounts(PRODUCTS, f.field);
         return (
           <fieldset key={f.key}>
-            <legend className="eyebrow mb-3 text-black/50">{f.label}</legend>
+            <legend className="eyebrow mb-3 text-white/50">{f.label}</legend>
             <div className="flex flex-wrap gap-2">
               {[...counts.keys()].map((value) => {
                 const active = query[f.key].includes(value);
@@ -42,9 +42,9 @@ function Filters({ query, update }: { query: CatalogQuery; update: (q: Partial<C
                     type="button"
                     aria-pressed={active}
                     onClick={() => update({ [f.key]: active ? query[f.key].filter((v) => v !== value) : [...query[f.key], value] })}
-                    className={`flex items-center gap-2 rounded-full px-3.5 py-2 text-sm transition ${active ? 'bg-ink text-paper' : 'bg-black/5 hover:bg-black/10'}`}
+                    className={`flex items-center gap-2 rounded-full px-3.5 py-2 text-sm transition ${active ? 'bg-paper text-ink' : 'bg-white/5 hover:bg-white/10'}`}
                   >
-                    {swatch && <span className="h-3.5 w-3.5 rounded-full ring-1 ring-black/15" style={{ background: swatch }} />}
+                    {swatch && <span className="h-3.5 w-3.5 rounded-full ring-1 ring-white/15" style={{ background: swatch }} />}
                     {f.labels[value]}
                     <span className="font-mono text-[10px] opacity-50">{counts.get(value)}</span>
                   </button>
@@ -101,22 +101,22 @@ export default function Collection() {
   };
 
   return (
-    <PageShell tone="light">
+    <PageShell >
       <section className="container-x pb-24 pt-32 sm:pt-40">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <h1 className="display text-[19vw] sm:text-[11vw] lg:text-[8vw]">
-            Find your <span className="text-electric">frame.</span>
+          <h1 className="display text-5xl sm:text-6xl lg:text-7xl">
+            Find your <span className="text-mist">frame.</span>
           </h1>
-          <p className="max-w-sm text-black/60">
-            {SHAPE_LABEL}, en {PRODUCTS.length} coloris, tous à <strong className="text-ink">29,90 €</strong>. Filtre par monture, verres ou finition, ou cherche un nom.
+          <p className="max-w-sm text-white/60">
+            {SHAPE_LABEL}, en {PRODUCTS.length} coloris, tous à <strong className="text-paper">29,90 €</strong>. Filtre par monture, verres ou finition, ou cherche un nom.
           </p>
         </div>
 
         {/* Barre d'outils */}
-        <div className="sticky top-[76px] z-30 -mx-4 mt-10 flex flex-wrap items-center gap-2 bg-paper/85 px-4 py-3 backdrop-blur-xl sm:mx-0 sm:rounded-full sm:px-2">
+        <div className="sticky top-[76px] z-30 -mx-4 mt-10 flex flex-wrap items-center gap-2 bg-ink/85 px-4 py-3 backdrop-blur-xl sm:mx-0 sm:rounded-full sm:px-2">
           <label className="relative min-w-0 flex-1 basis-full sm:basis-64">
             <span className="sr-only">Rechercher un modèle</span>
-            <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-black/40" />
+            <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
             <input
               ref={searchRef}
               type="search"
@@ -126,11 +126,11 @@ export default function Collection() {
               className="field rounded-full py-3 pl-11"
             />
           </label>
-          <button type="button" onClick={() => setDrawer(true)} className="flex h-12 items-center gap-2 rounded-full bg-ink px-5 text-sm text-paper lg:hidden" aria-haspopup="dialog">
-            <SlidersHorizontal size={16} /> Filtres {activeCount > 0 && <span className="rounded-full bg-volt px-1.5 font-mono text-[10px] text-ink">{activeCount}</span>}
+          <button type="button" onClick={() => setDrawer(true)} className="flex h-12 items-center gap-2 rounded-full bg-white/10 px-5 text-sm text-paper lg:hidden" aria-haspopup="dialog">
+            <SlidersHorizontal size={16} /> Filtres {activeCount > 0 && <span className="rounded-full bg-paper px-1.5 font-mono text-[10px] text-ink">{activeCount}</span>}
           </button>
-          <label className="ml-auto flex h-12 items-center gap-2 rounded-full bg-black/5 pl-4 pr-2 text-sm">
-            <span className="text-black/50">Trier</span>
+          <label className="ml-auto flex h-12 items-center gap-2 rounded-full bg-white/5 pl-4 pr-2 text-sm">
+            <span className="text-white/50">Trier</span>
             <select value={query.sort} onChange={(e) => update({ sort: e.target.value as SortKey })} className="h-full cursor-pointer rounded-full bg-transparent pr-2 font-bold outline-none">
               {SORTS.map((s) => (
                 <option key={s.value} value={s.value}>
@@ -154,14 +154,14 @@ export default function Collection() {
           </aside>
 
           <div>
-            <p className="mb-4 font-mono text-xs text-black/50" aria-live="polite">
+            <p className="mb-4 font-mono text-xs text-white/50" aria-live="polite">
               {results.length} coloris
             </p>
             {results.length === 0 ? (
-              <div className="grid place-items-center rounded-[28px] bg-black/[0.04] px-6 py-24 text-center">
-                <p className="display text-5xl">Aucune paire trouvée.</p>
-                <p className="mt-3 text-black/60">Essaie un autre coloris ou un autre mot-clé.</p>
-                <button type="button" onClick={reset} className="btn-ink mt-8">Réinitialiser</button>
+              <div className="grid place-items-center rounded-[28px] bg-white/[0.04] px-6 py-24 text-center">
+                <p className="display text-3xl">Aucune paire trouvée.</p>
+                <p className="mt-3 text-white/60">Essaie un autre coloris ou un autre mot-clé.</p>
+                <button type="button" onClick={reset} className="btn-light mt-8">Réinitialiser</button>
               </div>
             ) : (
               <motion.div layout className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3">
@@ -184,22 +184,22 @@ export default function Collection() {
           <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true" aria-label="Filtres">
             <motion.div className="absolute inset-0 bg-ink/50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDrawer(false)} />
             <motion.div
-              className="absolute inset-x-0 bottom-0 max-h-[85svh] overflow-y-auto rounded-t-[28px] bg-paper p-6 pb-[max(env(safe-area-inset-bottom),24px)] text-ink"
+              className="absolute inset-x-0 bottom-0 max-h-[85svh] overflow-y-auto rounded-t-[28px] bg-coal p-6 pb-[max(env(safe-area-inset-bottom),24px)] text-paper"
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 340, damping: 36 }}
             >
               <div className="mb-6 flex items-center justify-between">
-                <p className="display text-4xl">Filtres</p>
-                <button type="button" onClick={() => setDrawer(false)} className="grid h-11 w-11 place-items-center rounded-full bg-black/5" aria-label="Fermer les filtres">
+                <p className="display text-3xl">Filtres</p>
+                <button type="button" onClick={() => setDrawer(false)} className="grid h-11 w-11 place-items-center rounded-full bg-white/5" aria-label="Fermer les filtres">
                   <X size={20} />
                 </button>
               </div>
               <Filters query={query} update={update} />
               <div className="mt-8 flex gap-3">
-                <button type="button" onClick={reset} className="btn flex-1 bg-black/5">Effacer</button>
-                <button type="button" onClick={() => setDrawer(false)} className="btn-ink flex-[2]">
+                <button type="button" onClick={reset} className="btn flex-1 bg-white/5">Effacer</button>
+                <button type="button" onClick={() => setDrawer(false)} className="btn-light flex-[2]">
                   Voir {results.length} coloris
                 </button>
               </div>

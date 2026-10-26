@@ -64,31 +64,31 @@ export function CartDrawer() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="cart-title"
-            className="on-light absolute inset-y-0 right-0 flex w-full max-w-[460px] flex-col bg-paper text-ink outline-none sm:inset-y-3 sm:right-3 sm:rounded-[28px]"
+            className="absolute inset-y-0 right-0 flex w-full max-w-[460px] flex-col bg-coal text-paper outline-none ring-1 ring-white/10 sm:inset-y-3 sm:right-3 sm:rounded-[24px]"
             initial={{ x: '105%' }}
             animate={{ x: 0 }}
             exit={{ x: '105%' }}
             transition={{ type: 'spring', stiffness: 320, damping: 36 }}
           >
             <header className="flex items-center justify-between px-6 pb-4 pt-[max(env(safe-area-inset-top),20px)]">
-              <h2 id="cart-title" className="display text-4xl">
+              <h2 id="cart-title" className="display text-3xl">
                 Panier <span className="align-top font-mono text-sm tracking-normal">({count})</span>
               </h2>
-              <button type="button" onClick={() => setOpen(false)} className="grid h-11 w-11 place-items-center rounded-full bg-black/5 transition hover:rotate-90 hover:bg-black/10" aria-label="Fermer le panier">
+              <button type="button" onClick={() => setOpen(false)} className="grid h-11 w-11 place-items-center rounded-full bg-white/5 transition hover:rotate-90 hover:bg-white/10" aria-label="Fermer le panier">
                 <X size={20} />
               </button>
             </header>
 
             {lines.length === 0 ? (
               <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
-                <motion.div initial={{ rotate: -10, scale: 0.8 }} animate={{ rotate: 0, scale: 1 }} className="grid h-20 w-20 place-items-center rounded-full bg-volt">
+                <motion.div initial={{ rotate: -10, scale: 0.8 }} animate={{ rotate: 0, scale: 1 }} className="grid h-20 w-20 place-items-center rounded-full bg-white/[0.06]">
                   <ShoppingBag size={30} />
                 </motion.div>
-                <p className="display mt-6 text-4xl">Ton panier est vide.</p>
-                <p className="mt-2 text-black/60">{PRODUCTS.length} coloris, un seul prix. Trouve ta paire.</p>
+                <p className="display mt-6 text-3xl">Ton panier est vide.</p>
+                <p className="mt-2 text-white/60">{PRODUCTS.length} coloris, un seul prix. Trouve ta paire.</p>
                 <button
                   type="button"
-                  className="btn-ink mt-8"
+                  className="btn-light mt-8"
                   onClick={() => {
                     setOpen(false);
                     navigate('/collection');
@@ -109,20 +109,20 @@ export function CartDrawer() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 60, height: 0, marginTop: 0 }}
                         transition={{ type: 'spring', stiffness: 380, damping: 34 }}
-                        className="flex gap-4 overflow-hidden rounded-3xl bg-[#f2f2ee] p-3"
+                        className="flex gap-4 overflow-hidden rounded-3xl bg-coal p-3"
                       >
-                        <Link to={`/produit/${l.product.slug}`} onClick={() => setOpen(false)} className="grid h-24 w-28 shrink-0 place-items-center rounded-2xl" style={{ background: l.product.accent }}>
+                        <Link to={`/produit/${l.product.slug}`} onClick={() => setOpen(false)} className="grid h-24 w-28 shrink-0 place-items-center rounded-2xl bg-white/[0.04]">
                           <ProductImage product={l.product} size="sm" className="h-full w-full object-contain p-1" />
                         </Link>
                         <div className="flex min-w-0 flex-1 flex-col justify-between py-1">
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
-                              <p className="display truncate text-2xl">{l.product.name}</p>
-                              <p className="truncate text-xs text-black/55">
+                              <p className="truncate text-lg font-semibold tracking-tight">{l.product.name}</p>
+                              <p className="truncate text-xs text-white/55">
                                 {l.product.frameLabel} · {l.product.lensLabel}
                               </p>
                             </div>
-                            <button type="button" onClick={() => remove(lineKey(l))} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-black/50 transition hover:bg-flash/15 hover:text-flash" aria-label={`Supprimer ${l.product.name} du panier`}>
+                            <button type="button" onClick={() => remove(lineKey(l))} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-white/50 transition hover:bg-white/10 hover:text-paper" aria-label={`Supprimer ${l.product.name} du panier`}>
                               <Trash2 size={16} />
                             </button>
                           </div>
@@ -135,7 +135,7 @@ export function CartDrawer() {
                     ))}
                   </AnimatePresence>
                 </ul>
-                <footer className="space-y-3 border-t border-black/10 px-6 pb-[max(env(safe-area-inset-bottom),20px)] pt-5">
+                <footer className="space-y-3 border-t border-white/10 px-6 pb-[max(env(safe-area-inset-bottom),20px)] pt-5">
                   <dl className="space-y-1.5 text-sm">
                     <div className="flex justify-between">
                       <dt>Sous-total</dt>
@@ -143,14 +143,14 @@ export function CartDrawer() {
                         <Price cents={subtotalCents} />
                       </dd>
                     </div>
-                    <div className="flex justify-between text-black/60">
+                    <div className="flex justify-between text-white/60">
                       <dt>Livraison</dt>
                       <dd>dès {formatPrice(cheapestShipping)}, choisie à l’étape suivante</dd>
                     </div>
                   </dl>
                   <button
                     type="button"
-                    className="btn-ink w-full"
+                    className="btn-light w-full"
                     onClick={() => {
                       setOpen(false);
                       navigate('/commande');
@@ -158,7 +158,7 @@ export function CartDrawer() {
                   >
                     Passer commande <ArrowRight size={16} />
                   </button>
-                  <button type="button" onClick={() => setOpen(false)} className="w-full py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-black/60 hover:text-ink">
+                  <button type="button" onClick={() => setOpen(false)} className="w-full py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-white/60 hover:text-paper">
                     Continuer mes achats
                   </button>
                 </footer>

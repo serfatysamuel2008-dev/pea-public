@@ -41,7 +41,7 @@ export default function Confirmation() {
   }, [sessionId, clear]);
 
   return (
-    <PageShell tone="light">
+    <PageShell >
       <div className="container-x grid min-h-[90svh] place-items-center pb-20 pt-32">
         <div className="w-full max-w-xl text-center">
           {state.kind === 'loading' && (
@@ -51,21 +51,21 @@ export default function Confirmation() {
           )}
           {state.kind === 'error' && (
             <>
-              <XCircle className="mx-auto text-flash" size={48} />
+              <XCircle className="mx-auto text-signal" size={48} />
               <h1 className="display mt-6 text-6xl">Rien à confirmer</h1>
-              <p className="mt-4 text-black/60">{state.message}</p>
-              <Link to="/" className="btn-ink mt-8">Retour à l’accueil</Link>
+              <p className="mt-4 text-white/60">{state.message}</p>
+              <Link to="/" className="btn-light mt-8">Retour à l’accueil</Link>
             </>
           )}
           {state.kind === 'done' && state.order.paid && (
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
-              <CheckCircle2 className="mx-auto text-electric" size={56} />
+              <CheckCircle2 className="mx-auto text-mist" size={56} />
               <h1 className="display mt-6 text-[16vw] sm:text-8xl">Merci !</h1>
               <p className="mt-4 text-lg">
                 Ta commande <strong className="font-mono">{state.order.reference}</strong> est confirmée
                 {state.order.totalCents !== null && <> pour un total de <strong>{formatPrice(state.order.totalCents)}</strong></>}.
               </p>
-              {state.order.email && <p className="mt-2 text-black/60">Un récapitulatif est envoyé à {state.order.email}.</p>}
+              {state.order.email && <p className="mt-2 text-white/60">Un récapitulatif est envoyé à {state.order.email}.</p>}
               <ul className="mt-6 space-y-1 font-mono text-sm">
                 {state.order.items.map((it) => (
                   <li key={it.name}>
@@ -73,17 +73,17 @@ export default function Confirmation() {
                   </li>
                 ))}
               </ul>
-              <Link to="/collection" className="btn-ink mt-10">Continuer</Link>
+              <Link to="/collection" className="btn-light mt-10">Continuer</Link>
             </motion.div>
           )}
           {state.kind === 'done' && !state.order.paid && (
             <>
-              <XCircle className="mx-auto text-flash" size={48} />
+              <XCircle className="mx-auto text-signal" size={48} />
               <h1 className="display mt-6 text-6xl">Paiement non confirmé</h1>
-              <p className="mt-4 text-black/60">
+              <p className="mt-4 text-white/60">
                 Le paiement n’a pas été validé (statut : {state.order.status}). Ton panier est conservé : tu peux réessayer.
               </p>
-              <Link to="/commande" className="btn-ink mt-8">Revenir à la commande</Link>
+              <Link to="/commande" className="btn-light mt-8">Revenir à la commande</Link>
             </>
           )}
         </div>

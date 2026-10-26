@@ -22,11 +22,11 @@ function Field({
   return (
     <div>
       <label htmlFor={id} className="mb-1.5 block text-sm font-medium">
-        {label} {optional && <span className="font-normal text-black/40">(facultatif)</span>}
+        {label} {optional && <span className="font-normal text-white/40">(facultatif)</span>}
       </label>
       <input id={id} name={id} aria-invalid={!!error} aria-describedby={error ? `${id}-err` : undefined} className={`field ${error ? 'field-error' : ''}`} {...rest} />
       {error && (
-        <p id={`${id}-err`} className="mt-1.5 text-sm text-[#d4006e]">
+        <p id={`${id}-err`} className="mt-1.5 text-sm text-signal">
           {error}
         </p>
       )}
@@ -36,11 +36,11 @@ function Field({
 
 function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
-    <fieldset className="rounded-[28px] bg-white p-5 ring-1 ring-black/5 sm:p-7">
+    <fieldset className="card p-5 sm:p-7">
       <legend className="sr-only">{title}</legend>
       <div aria-hidden className="mb-5 flex items-center gap-3">
-        <span className="grid h-8 w-8 place-items-center rounded-full bg-ink font-mono text-xs text-paper">{n}</span>
-        <span className="display text-3xl">{title}</span>
+        <span className="grid h-8 w-8 place-items-center rounded-full bg-white/10 font-mono text-xs text-paper">{n}</span>
+        <span className="text-xl font-semibold tracking-tight">{title}</span>
       </div>
       {children}
     </fieldset>
@@ -93,12 +93,12 @@ export default function Checkout() {
 
   if (items.length === 0) {
     return (
-      <PageShell tone="light">
+      <PageShell >
         <div className="container-x grid min-h-[80svh] place-items-center pt-28 text-center">
           <div>
-            <h1 className="display text-6xl sm:text-8xl">Panier vide.</h1>
-            <p className="mt-4 text-black/60">Ajoute une paire avant de passer commande.</p>
-            <Link to="/collection" className="btn-ink mt-8">Voir la collection</Link>
+            <h1 className="display text-5xl sm:text-6xl">Panier vide.</h1>
+            <p className="mt-4 text-white/60">Ajoute une paire avant de passer commande.</p>
+            <Link to="/collection" className="btn-light mt-8">Voir la collection</Link>
           </div>
         </div>
       </PageShell>
@@ -106,16 +106,16 @@ export default function Checkout() {
   }
 
   return (
-    <PageShell tone="light">
-      <div className="min-h-screen bg-[#f2f2ee]">
+    <PageShell >
+      <div className="min-h-screen bg-coal">
         <div className="container-x pb-24 pt-28 sm:pt-32">
-          <Link to="/collection" className="mb-6 inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.18em] text-black/50 hover:text-ink">
+          <Link to="/collection" className="mb-6 inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.18em] text-white/50 hover:text-paper">
             <ArrowLeft size={14} /> Continuer mes achats
           </Link>
-          <h1 className="display text-[16vw] sm:text-[8vw] lg:text-[6vw]">Commande</h1>
+          <h1 className="display text-5xl sm:text-6xl lg:text-7xl">Commande</h1>
 
           {demo && payment !== undefined && (
-            <div role="note" className="mt-6 flex gap-4 rounded-[24px] bg-volt p-5 text-ink">
+            <div role="note" className="mt-6 flex gap-4 rounded-[20px] bg-white/[0.05] p-5 text-paper ring-1 ring-white/10">
               <AlertTriangle className="mt-0.5 shrink-0" size={20} />
               <div className="text-[15px]">
                 <p className="font-bold">Mode démonstration : le paiement n’est pas encore connecté.</p>
@@ -170,9 +170,9 @@ export default function Checkout() {
                   {SHIPPING_METHODS.map((m) => {
                     const active = form.shippingMethod === m.id;
                     return (
-                      <label key={m.id} className={`flex cursor-pointer items-center justify-between gap-3 rounded-2xl p-4 ring-2 transition ${active ? 'bg-ink text-paper ring-ink' : 'bg-white ring-black/10 hover:ring-black/30'}`}>
+                      <label key={m.id} className={`flex cursor-pointer items-center justify-between gap-3 rounded-2xl p-4 ring-2 transition ${active ? 'bg-white/[0.08] ring-paper' : 'bg-white/[0.02] ring-white/10 hover:ring-white/30'}`}>
                         <span className="flex items-center gap-3">
-                          <input type="radio" name="shippingMethod" value={m.id} checked={active} onChange={set('shippingMethod')} className="h-4 w-4 accent-[#C6FF00]" />
+                          <input type="radio" name="shippingMethod" value={m.id} checked={active} onChange={set('shippingMethod')} className="h-4 w-4 accent-[#ECEBE7]" />
                           <span>
                             <span className="block font-bold">{m.label}</span>
                             {m.delay && <span className="text-sm opacity-70">{m.delay}</span>}
@@ -183,22 +183,22 @@ export default function Checkout() {
                     );
                   })}
                 </div>
-                {errors.shippingMethod && <p className="mt-2 text-sm text-[#d4006e]">{errors.shippingMethod}</p>}
-                {!SHIPPING_RATES_CONFIRMED && <p className="mt-3 text-sm text-black/50">Tarifs de livraison en cours de validation avec le transporteur.</p>}
+                {errors.shippingMethod && <p className="mt-2 text-sm text-signal">{errors.shippingMethod}</p>}
+                {!SHIPPING_RATES_CONFIRMED && <p className="mt-3 text-sm text-white/50">Tarifs de livraison en cours de validation avec le transporteur.</p>}
               </Step>
             </div>
 
             {/* Récapitulatif */}
-            <aside aria-labelledby="summary-title" className="rounded-[28px] bg-ink p-5 text-paper sm:p-7 lg:sticky lg:top-28">
+            <aside aria-labelledby="summary-title" className="rounded-[24px] bg-coal p-5 text-paper ring-1 ring-white/[0.06] sm:p-7 lg:sticky lg:top-28">
               <h2 id="summary-title" className="display text-3xl">Récapitulatif</h2>
               <ul className="mt-5 space-y-3">
                 {totals.lines.map((l) => (
                   <li key={lineKey(l)} className="flex items-center gap-3">
-                    <span className="grid h-16 w-20 shrink-0 place-items-center rounded-xl" style={{ background: l.product.accent }}>
+                    <span className="grid h-16 w-20 shrink-0 place-items-center rounded-xl bg-white/[0.05]">
                       <ProductImage product={l.product} size="sm" className="h-full w-full object-contain p-1" />
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="display block truncate text-xl">{l.product.name}</span>
+                      <span className="block truncate font-semibold">{l.product.name}</span>
                       <span className="font-mono text-xs text-paper/60">
                         {l.qty} × {formatPrice(l.unitCents)}
                       </span>
@@ -218,17 +218,17 @@ export default function Checkout() {
                 </div>
                 <div className="flex items-baseline justify-between border-t border-white/15 pt-3">
                   <dt className="font-bold">Total TTC</dt>
-                  <dd className="display text-4xl text-volt">{formatPrice(totals.totalCents)}</dd>
+                  <dd className="text-3xl font-semibold tracking-tight text-paper">{formatPrice(totals.totalCents)}</dd>
                 </div>
               </dl>
 
               {serverError && (
-                <p role="alert" className="mt-4 rounded-2xl bg-flash/20 p-3 text-sm text-paper">
+                <p role="alert" className="mt-4 rounded-2xl bg-signal/20 p-3 text-sm text-paper">
                   {serverError}
                 </p>
               )}
 
-              <motion.button whileTap={{ scale: 0.97 }} type="submit" disabled={submitting || payment === undefined} className="btn-volt mt-6 w-full">
+              <motion.button whileTap={{ scale: 0.97 }} type="submit" disabled={submitting || payment === undefined} className="btn-light mt-6 w-full">
                 {submitting ? (
                   <>
                     <Loader2 size={16} className="animate-spin" /> Redirection vers le paiement…
@@ -262,7 +262,7 @@ export default function Checkout() {
 function DemoNotice({ show }: { show: boolean }) {
   if (!show) return null;
   return (
-    <p role="status" className="mt-6 rounded-[24px] bg-white p-5 text-[15px] ring-1 ring-black/5">
+    <p role="status" className="card mt-6 p-5 text-[15px]">
       Formulaire complet. En mode démonstration, le parcours s’arrête ici : <strong>aucune commande n’a été créée et rien n’a été débité.</strong>
     </p>
   );

@@ -2,7 +2,6 @@ import { AnimatePresence } from 'framer-motion';
 import { lazy, Suspense, useEffect, type ReactNode } from 'react';
 import { BrowserRouter, HashRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { CartDrawer } from './components/cart/CartDrawer.tsx';
-import { Intro } from './components/home/Intro.tsx';
 import { Footer } from './components/layout/Footer.tsx';
 import { Header } from './components/layout/Header.tsx';
 import Home from './pages/Home.tsx';
@@ -74,7 +73,6 @@ export default function App() {
         <FavoritesProvider>
           <CartProvider>
             <div className="grain">
-              <Intro />
               <ScrollToTop />
               <Header />
               <AnimatedRoutes />
