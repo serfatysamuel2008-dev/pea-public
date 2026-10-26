@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --ink: #080808;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-ink font-sans text-paper antialiased;
+    overflow-x: clip;
+  }
+  ::selection {
+    background: #c6ff00;
+    color: #080808;
+  }
+  :focus-visible {
+    outline: 2px solid #c6ff00;
+    outline-offset: 3px;
+  }
+  .on-light :focus-visible {
+    outline-color: #315bff;
+  }
+  button,
+  [role='button'] {
+    cursor: pointer;
+  }
+  img {
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-10;
+  }
+  .eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-[0.22em];
+  }
+  .display {
+    @apply font-display uppercase leading-[0.86] tracking-[-0.01em];
+  }
+  .text-outline {
+    -webkit-text-stroke: 1.5px currentColor;
+    color: transparent;
+  }
+  .btn {
+    @apply relative inline-flex min-h-[52px] items-center justify-center gap-3 overflow-hidden rounded-full px-7 font-mono text-[12px] font-bold uppercase tracking-[0.18em] transition-[transform,background-color,color] duration-300 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-volt {
+    @apply btn bg-volt text-ink hover:bg-paper;
+  }
+  .btn-ink {
+    @apply btn bg-ink text-paper hover:bg-electric;
+  }
+  .btn-ghost {
+    @apply btn text-current ring-1 ring-current hover:bg-paper hover:text-ink;
+  }
+  .field {
+    @apply w-full rounded-2xl border border-black/15 bg-white px-4 py-3.5 text-[16px] text-ink outline-none transition placeholder:text-black/35 focus:border-electric focus:ring-4 focus:ring-electric/15;
+  }
+  .field-error {
+    @apply border-flash focus:border-flash focus:ring-flash/15;
+  }
+}
+
+/* Grain photo discret sur toute la page. */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 1.2s steps(6) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -4%); }
+  60% { transform: translate(-4%, -1%); }
+  80% { transform: translate(3%, 3%); }
+  100% { transform: translate(0, 0); }
+}
+
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee var(--marquee-duration, 32s) linear infinite;
+}
+.marquee[data-reverse='true'] {
+  animation-direction: reverse;
+}
+@keyframes marquee {
+  to { transform: translateX(-50%); }
+}
+
+@keyframes floaty {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-14px) rotate(2deg); }
+}
+.floaty {
+  animation: floaty 6s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, rgba(0,0,0,.04) 25%, rgba(0,0,0,.09) 37%, rgba(0,0,0,.04) 63%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .marquee { animation: none; }
+}
+
+.prose-studios {
+  font-size: 17px;
+  line-height: 1.7;
+  color: rgb(0 0 0 / 0.75);
+}
+.prose-studios h2 {
+  margin: 2.5rem 0 0.75rem;
+  font-family: Anton, Impact, sans-serif;
+  font-size: 2rem;
+  line-height: 1;
+  text-transform: uppercase;
+  color: #080808;
+}
+.prose-studios p,
+.prose-studios ul {
+  margin: 0.75rem 0;
+}
+.prose-studios ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+.prose-studios a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: #080808;
+}

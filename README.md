@@ -80,3 +80,7 @@ const BRAND = {name:'Mon épargne', sub:'Investissement', logo:null};
 | `POST` | `/api/logout` | ferme la session |
 | `GET` | `/api/me` | utilisateur et état de ses comptes |
 | `POST` | `/api/op` | applique une opération, par exemple `{type:"order", account:"pea", mode:"buy", asset:"MO", amount:965}` |
+
+## STUDIOS (boutique de lunettes)
+
+Le dossier [`studios/`](studios/) contient un projet indépendant : la boutique en ligne STUDIOS. Voir [`studios/README.md`](studios/README.md).
