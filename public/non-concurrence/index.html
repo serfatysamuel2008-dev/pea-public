@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Tout comprendre sur la clause de non-concurrence : justification, conditions de validité, arrêt du 27 février 2007, clause rédigée et quiz.">
+<title>Clause de non-concurrence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Instrument+Sans:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout : une seule colonne qui flotte sur un champ d'ondes lumineuses piloté par la souris ; look sombre assumé */
+:root{
+  --bg:#07040f; --ink:#f3eefe; --dim:#b3a9cc; --glass:rgba(20,12,40,.55); --line:rgba(255,255,255,.12);
+  --c1:#ff2bd6; --c2:#22e6ff; --c3:#ffd23f; --c4:#7a5cff; --c5:#3dff9a;
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:16px/1.65 var(--body);overflow-x:hidden}
+#waves{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+.cursor{position:fixed;left:0;top:0;width:340px;height:340px;margin:-170px 0 0 -170px;border-radius:50%;pointer-events:none;z-index:1;
+  background:radial-gradient(circle,rgba(255,43,214,.28),rgba(34,230,255,.12) 40%,transparent 70%);mix-blend-mode:screen;transition:background .4s}
+main{position:relative;z-index:2;max-width:1060px;margin:0 auto;padding-block:48px 120px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:40px}
+nav.top a{font:600 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink);text-decoration:none;padding:10px 14px;border-radius:999px;
+  background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:transform .2s,border-color .2s}
+nav.top a:hover,nav.top a:focus-visible{transform:translateY(-2px);border-color:var(--c2);outline:none}
+
+.hero{text-align:left;padding-block:40px 70px}
+.eyebrow{font:600 12px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--c2)}
+h1{font:900 clamp(34px,7vw,92px)/.95 var(--display);overflow-wrap:anywhere;letter-spacing:-.02em;margin:18px 0 22px;text-wrap:balance;
+  background:linear-gradient(100deg,var(--c1),var(--c3),var(--c5),var(--c2),var(--c4),var(--c1));background-size:300% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 9s linear infinite;
+  filter:drop-shadow(0 0 30px rgba(255,43,214,.35))}
+@keyframes flow{to{background-position:300% 0}}
+.lede{text-shadow:0 2px 12px var(--bg),0 0 2px var(--bg);font-size:clamp(17px,2.2vw,21px);max-width:62ch;color:var(--ink)}
+.lede b{color:var(--c3)}
+.stamp{display:inline-flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+.stamp span{font:600 12px/1 var(--mono);padding:9px 12px;border-radius:8px;border:1px dashed rgba(255,255,255,.3);color:var(--dim)}
+
+section{margin-top:90px;scroll-margin-top:80px}
+h2{font:700 clamp(26px,4.6vw,48px)/1.05 var(--display);margin:10px 0 20px;text-wrap:balance}
+h2 .q{color:var(--c1)}
+h3{font:700 18px/1.25 var(--display);margin:0 0 8px}
+p{margin:0 0 14px;max-width:68ch}
+.panel{background:var(--glass);border:1px solid var(--line);border-radius:22px;padding:28px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}
+.duo>*{min-width:0}
+.tension{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:6px}
+.pole{flex:1 1 220px;min-width:0;padding:22px;border-radius:18px;border:1px solid var(--line)}
+.pole.emp{background:linear-gradient(135deg,rgba(34,230,255,.18),transparent)}
+.pole.sal{background:linear-gradient(135deg,rgba(255,43,214,.2),transparent)}
+.pole small{font:600 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.vs{font:900 28px var(--display);color:var(--c3);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.25) rotate(8deg);text-shadow:0 0 24px var(--c3)}}
+.law{font-family:var(--mono);font-size:14px;border-left:3px solid var(--c2);padding:10px 16px;margin:18px 0;background:rgba(34,230,255,.07);border-radius:0 12px 12px 0;max-width:68ch}
+
+/* Conditions : cartes inclinées par la souris */
+.conds{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:16px;perspective:900px}
+.cond{position:relative;min-width:0;border-radius:20px;padding:24px 20px 22px;background:var(--glass);border:1px solid var(--line);
+  transform-style:preserve-3d;transition:transform .15s ease-out,box-shadow .3s;cursor:pointer;overflow:hidden;outline:none}
+.cond::before{content:"";position:absolute;inset:-2px;border-radius:inherit;padding:2px;background:conic-gradient(from var(--a,0deg),var(--c1),var(--c3),var(--c5),var(--c2),var(--c4),var(--c1));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.55;animation:spin 6s linear infinite}
+@property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
+@keyframes spin{to{--a:360deg}}
+.cond .shine{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.22),transparent 55%);opacity:0;transition:opacity .3s}
+.cond:hover .shine{opacity:1}
+.cond:focus-visible{box-shadow:0 0 0 3px var(--c3)}
+.cond .n{font:900 44px/1 var(--display);background:linear-gradient(var(--c3),var(--c1));-webkit-background-clip:text;background-clip:text;color:transparent}
+.cond .tag{font:600 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--c2);display:block;margin:14px 0 8px}
+.cond p{font-size:14.5px;color:var(--dim);margin:0}
+.cond .more{max-height:0;overflow:hidden;transition:max-height .5s ease}
+.cond.open .more{max-height:400px}
+.cond .more p{color:var(--ink);margin-top:12px;font-size:14px}
+.hint{font:12px var(--mono);color:var(--dim);margin-top:14px}
+.verdict{margin-top:20px;font-size:15px}
+.verdict b{color:var(--c5)}
+
+/* Simulateur */
+.sim{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px;align-items:start}
+.sim>*{min-width:0}
+.ctrl{display:grid;gap:16px}
+.ctrl label{display:grid;gap:6px;font:600 13px var(--mono);color:var(--dim)}
+.ctrl output{color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--c1)}
+.check{display:flex;gap:10px;align-items:center;font:500 14px var(--body)!important;color:var(--ink)!important}
+.check input{width:18px;height:18px;accent-color:var(--c5)}
+.meter{height:16px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin:14px 0}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--c1),var(--c3),var(--c5));transition:width .5s cubic-bezier(.2,.9,.2,1.2)}
+.score{font:900 clamp(34px,6vw,56px)/1 var(--display)}
+.issues{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:8px;font-size:14px}
+.issues li{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.05);border-left:3px solid var(--c5)}
+.issues li.bad{border-color:var(--c1);color:var(--ink)}
+
+/* Arrêt */
+.timeline{display:grid;gap:0;position:relative;margin:10px 0 24px}
+.ev{display:grid;grid-template-columns:110px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
+.ev time{font:600 13px var(--mono);color:var(--c3);font-variant-numeric:tabular-nums}
+.ev div{min-width:0}
+.qa{display:grid;gap:14px}
+details{border-radius:18px;background:var(--glass);border:1px solid var(--line);padding:4px 22px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:border-color .3s}
+details[open]{border-color:var(--c4)}
+summary{cursor:pointer;list-style:none;padding:16px 0;font:700 16px/1.3 var(--display);display:flex;gap:14px;align-items:baseline}
+summary::-webkit-details-marker{display:none}
+summary .k{font:600 12px var(--mono);color:var(--c2);flex:none}
+summary::after{content:"+";margin-left:auto;font:400 24px var(--mono);color:var(--c1);transition:transform .3s}
+details[open] summary::after{transform:rotate(45deg)}
+summary:focus-visible{outline:2px solid var(--c3);outline-offset:4px;border-radius:6px}
+details .body{padding-bottom:18px}
+blockquote{margin:14px 0;padding:14px 18px;border-radius:12px;background:rgba(255,210,63,.08);border-left:3px solid var(--c3);font-style:italic;max-width:68ch}
+
+/* Clause */
+.contract{font-family:var(--mono);font-size:14px;line-height:1.75;background:rgba(5,3,12,.75);border:1px solid var(--line);border-radius:18px;padding:28px;position:relative;overflow:hidden}
+.contract h3{font-family:var(--mono);font-size:15px;color:var(--c3);letter-spacing:.06em;text-transform:uppercase}
+.contract p{max-width:none}
+.contract mark{background:none;color:var(--c2);border-bottom:1px dashed var(--c2);cursor:help}
+.contract .scan{position:absolute;left:0;right:0;height:80px;top:-80px;background:linear-gradient(transparent,rgba(34,230,255,.12),transparent);animation:scan 5s linear infinite;pointer-events:none}
+@keyframes scan{to{top:100%}}
+.copy{margin-top:16px;font:600 13px var(--mono);color:var(--bg);background:linear-gradient(90deg,var(--c2),var(--c5));border:0;padding:12px 18px;border-radius:999px;cursor:pointer}
+.copy:focus-visible{outline:3px solid var(--c3);outline-offset:3px}
+.tip{position:fixed;z-index:20;max-width:280px;padding:10px 12px;border-radius:10px;background:#1a1030;border:1px solid var(--c2);font:13px/1.45 var(--body);color:var(--ink);pointer-events:none}
+
+/* Quiz */
+.quiz{display:grid;gap:14px}
+.qq{padding:20px}
+.qq .opts{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.qq button{font:600 13px var(--mono);padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);cursor:pointer;transition:transform .15s}
+.qq button:hover{transform:scale(1.05)}
+.qq button:focus-visible{outline:2px solid var(--c3)}
+.qq button.ok{background:var(--c5);color:var(--bg);border-color:var(--c5)}
+.qq button.ko{background:var(--c1);color:var(--bg);border-color:var(--c1)}
+.qq .fb{font-size:14px;color:var(--dim);margin-top:10px}
+
+footer{margin-top:90px;font:12px var(--mono);color:var(--dim);text-align:center}
+.reveal{transition:transform .9s cubic-bezier(.2,.8,.2,1),filter .9s}
+.reveal.pre{transform:translateY(30px);filter:hue-rotate(90deg)}
+@media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}.cursor{display:none}}
+@media (max-width:560px){.ev{grid-template-columns:1fr;gap:4px}.panel,.contract{padding:20px}}
+</style>
+</head>
+<body>
+
+<canvas id="waves" aria-hidden="true"></canvas>
+<div class="cursor" id="cur" aria-hidden="true"></div>
+
+<main>
+<nav class="top" aria-label="Sections">
+  <a href="#pourquoi">Justification</a><a href="#conditions">Conditions</a><a href="#simulateur">Testeur</a><a href="#arret">Arrêt 2007</a><a href="#clause">La clause</a><a href="#quiz">Quiz</a>
+</nav>
+
+<header class="hero">
+  <div class="eyebrow">Droit du travail · Cas Arnaud Delval / Société ZK</div>
+  <h1>Clause de non-concurrence</h1>
+  <p class="lede">Une ligne dans un contrat qui interdit à un salarié, <b>après son départ</b>, de travailler pour un concurrent ou de créer une activité concurrente. Elle protège l'entreprise, mais elle limite une liberté fondamentale. Toute la matière tient dans cet équilibre.</p>
+  <div class="stamp"><span>C. trav. art. L. 1121-1</span><span>Cass. soc. 10 juillet 2002</span><span>Cass. soc. 27 février 2007</span></div>
+</header>
+
+<section id="pourquoi" class="reveal">
+  <div class="eyebrow">Question 1 · Cas pratique</div>
+  <h2>Comment le droit justifie-t-il la clause <span class="q">?</span></h2>
+  <div class="tension">
+    <div class="pole emp"><small>L'employeur</small><h3>Protéger ses intérêts légitimes</h3><p>Son fichier clients, son savoir-faire, ses tarifs, ses contacts. Un commercial qui part chez le concurrent avec tout ça peut vider le portefeuille de l'entreprise.</p></div>
+    <div class="vs" aria-hidden="true">⇄</div>
+    <div class="pole sal"><small>Le salarié</small><h3>Liberté du travail</h3><p>Principe fondamental : chacun est libre d'exercer l'activité professionnelle de son choix (Préambule de 1946, liberté d'entreprendre, art. L. 1121-1).</p></div>
+  </div>
+  <div class="law">« Nul ne peut apporter aux droits des personnes et aux libertés individuelles et collectives de restrictions qui ne seraient pas justifiées par la nature de la tâche à accomplir ni proportionnées au but recherché. » Art. L. 1121-1 C. trav.</div>
+  <div class="panel">
+    <p><b>La réponse :</b> le droit admet la clause parce qu'elle sert un <b>intérêt légitime</b> de l'entreprise : éviter qu'un ancien salarié détourne la clientèle ou exploite les informations obtenues pendant son contrat. Pendant le contrat, le salarié est déjà tenu par l'<b>obligation de loyauté</b> (art. L. 1222-1, exécution de bonne foi). La clause prolonge cette protection <b>après</b> la rupture.</p>
+    <p style="margin:0">Comme elle restreint une liberté, aucun texte ne l'organise en détail : c'est la <b>jurisprudence</b> qui en a fixé les conditions, sur la base de l'article L. 1121-1 (restriction justifiée et proportionnée). Pour Arnaud Delval, qui va construire et enrichir le fichier des professionnels du bâtiment, l'intérêt de ZK est évident : ce fichier est un actif de l'entreprise.</p>
+  </div>
+</section>
+
+<section id="conditions" class="reveal">
+  <div class="eyebrow">Question 2 · Cas pratique</div>
+  <h2>Cinq conditions, <span class="q">toutes cumulatives</span></h2>
+  <p>Depuis les arrêts de la chambre sociale du 10 juillet 2002, une clause est valable seulement si elle remplit <b>les cinq</b> conditions. Il en manque une : la clause est nulle. Cliquez sur une carte.</p>
+  <div class="conds" id="conds">
+    <div class="cond" tabindex="0" role="button" aria-expanded="false"><div class="shine"></div><div class="n">1</div><span class="tag">Intérêt légitime</span><p>Indispensable à la protection des intérêts légitimes de l'entreprise.</p>
+      <div class="more"><p>Le salarié doit pouvoir réellement nuire : contact clientèle, savoir-faire, informations sensibles. Une clause imposée à un agent d'entretien sans lien avec la clientèle serait nulle.</p></div></div>
+    <div class="cond" tabindex="0" role="button" aria-expanded="false"><div class="shine"></div><div class="n">2</div><span class="tag">Limitée dans le temps</span><p>Une durée précise et raisonnable.</p>
+      <div class="more"><p>En pratique de 6 mois à 2 ans selon le poste et le secteur. Une durée illimitée ou floue rend la clause nulle.</p></div></div>
+    <div class="cond" tabindex="0" role="button" aria-expanded="false"><div class="shine"></div><div class="n">3</div><span class="tag">Limitée dans l'espace</span><p>Une zone géographique définie.</p>
+      <div class="more"><p>Départements, région, rayon en km. Elle doit correspondre au secteur où le salarié pouvait réellement concurrencer l'entreprise.</p></div></div>
+    <div class="cond" tabindex="0" role="button" aria-expanded="false"><div class="shine"></div><div class="n">4</div><span class="tag">Spécificités de l'emploi</span><p>Elle tient compte de l'emploi et de la qualification.</p>
+      <div class="more"><p>Elle ne doit pas empêcher le salarié de travailler selon sa formation et son expérience. Elle vise une activité précise, pas tout un métier.</p></div></div>
+    <div class="cond" tabindex="0" role="button" aria-expanded="false"><div class="shine"></div><div class="n">5</div><span class="tag">Contrepartie financière</span><p>Une indemnité versée au salarié après la rupture.</p>
+      <div class="more"><p>Obligatoire depuis 2002. Elle ne doit pas être dérisoire, elle est due quel que soit le mode de rupture (démission, licenciement, même pour faute grave) et ne se verse pas pendant le contrat.</p></div></div>
+  </div>
+  <p class="hint">Survolez une carte : elle suit votre souris.</p>
+  <div class="panel verdict">
+    <p><b>Autres règles à connaître</b></p>
+    <p>• La clause doit être <b>écrite</b> dans le contrat ou un avenant, ou prévue par la convention collective (le salarié doit en avoir été informé).</p>
+    <p>• L'employeur peut y <b>renoncer</b> seulement si le contrat ou la convention le prévoit, dans le délai fixé. S'il dispense le salarié de préavis, il doit renoncer au plus tard le jour du départ effectif.</p>
+    <p>• La contrepartie a la nature d'un <b>salaire</b> : elle ouvre droit à congés payés et supporte les cotisations.</p>
+    <p style="margin:0">• Si le salarié viole la clause, il perd le droit à la contrepartie et peut devoir des dommages-intérêts. Si la clause est nulle et que le salarié l'a respectée, il peut demander réparation du préjudice qu'il prouve.</p>
+  </div>
+</section>
+
+<section id="simulateur" class="reveal">
+  <div class="eyebrow">Outil</div>
+  <h2>Testez une clause <span class="q">en direct</span></h2>
+  <div class="sim panel">
+    <div class="ctrl">
+      <label for="dur">Durée de l'interdiction : <output id="durO">12 mois</output><input type="range" id="dur" min="0" max="60" value="12"></label>
+      <label for="zone">Zone géographique : <output id="zoneO">Région</output><input type="range" id="zone" min="0" max="4" value="2"></label>
+      <label for="cp">Contrepartie (% du salaire mensuel) : <output id="cpO">30 %</output><input type="range" id="cp" min="0" max="100" value="30"></label>
+      <label class="check" for="int"><input type="checkbox" id="int" checked> Le salarié est en contact avec la clientèle</label>
+      <label class="check" for="spec"><input type="checkbox" id="spec" checked> Vise une activité précise (pas tout le métier)</label>
+      <label class="check" for="all"><input type="checkbox" id="all"> Contrepartie seulement si le salarié démissionne</label>
+    </div>
+    <div>
+      <div class="eyebrow">Verdict</div>
+      <div class="score" id="score">Valable</div>
+      <div class="meter"><i id="bar"></i></div>
+      <ul class="issues" id="issues"></ul>
+    </div>
+  </div>
+</section>
+
+<section id="arret" class="reveal">
+  <div class="eyebrow">Analyse d'une décision de justice</div>
+  <h2>Cass. soc., 27 février 2007 <span class="q">· Unilog</span></h2>
+  <div class="timeline">
+    <div class="ev"><time>10/08/1998</time><div>Mme X est engagée par Unilog IT Services comme chef de projet.</div></div>
+    <div class="ev"><time>19/01/2001</time><div>Avenant : clause de non-concurrence. La contrepartie n'est prévue qu'en cas de rupture <b>à l'initiative de la salariée</b>.</div></div>
+    <div class="ev"><time>22/01/2003</time><div>Licenciement pour insuffisance professionnelle. Elle saisit le conseil de prud'hommes.</div></div>
+    <div class="ev"><time>07/09/2005</time><div>La cour d'appel de Paris rejette sa demande de contrepartie : la rupture vient de l'employeur.</div></div>
+    <div class="ev"><time>27/02/2007</time><div>La Cour de cassation casse et annule sur ce point. Renvoi devant la cour d'appel de Paris autrement composée. 2 500 € au titre de l'art. 700 NCPC.</div></div>
+  </div>
+  <div class="qa">
+    <details><summary><span class="k">Q1</span>La situation soumise à la Cour</summary><div class="body">
+      <p>Une salariée, chef de projet, est liée par une clause de non-concurrence ajoutée par avenant. Cette clause ne prévoit une contrepartie financière que si la salariée rompt elle-même le contrat. Elle est licenciée pour insuffisance professionnelle et réclame la contrepartie. La cour d'appel la déboute parce que c'est l'employeur qui a rompu. La salariée forme un pourvoi en cassation.</p></div></details>
+    <details><summary><span class="k">Q2</span>Le problème de droit</summary><div class="body">
+      <p>Une clause de non-concurrence qui réserve la contrepartie financière au seul cas où le salarié est à l'origine de la rupture est-elle valable ? Le salarié licencié peut-il y prétendre ?</p></div></details>
+    <details><summary><span class="k">Q3</span>La solution de la Cour de cassation</summary><div class="body">
+      <blockquote>« Est nulle la clause de non-concurrence qui ne prévoit le versement d'une contrepartie pécuniaire qu'en cas de rupture du contrat de travail à l'initiative du salarié. »</blockquote>
+      <p>La Cour casse l'arrêt au visa du principe de libre exercice d'une activité professionnelle et de l'article L. 120-2 (aujourd'hui L. 1121-1). La contrepartie doit être due <b>quel que soit le mode de rupture</b>. Une clause qui l'exclut selon l'auteur de la rupture est nulle. L'affaire est renvoyée pour statuer sur les conséquences.</p></div></details>
+    <details><summary><span class="k">Q4</span>Le lien avec le principe fondamental</summary><div class="body">
+      <p>Le principe en cause est la <b>liberté fondamentale d'exercer une activité professionnelle</b> (liberté du travail). La clause de non-concurrence y porte atteinte : le salarié ne peut plus travailler librement dans son secteur. Le droit ne l'accepte qu'en échange d'une compensation. Cette contrepartie indemnise le salarié de la restriction qu'il subit.</p>
+      <p style="margin:0">Or la restriction est la même que le salarié démissionne ou qu'il soit licencié. Priver de contrepartie le salarié licencié reviendrait à lui imposer l'atteinte sans la compenser. C'est pour cela que la Cour vise directement le principe fondamental : sans contrepartie générale, l'atteinte à la liberté n'est plus proportionnée, la clause est nulle.</p></div></details>
+  </div>
+</section>
+
+<section id="clause" class="reveal">
+  <div class="eyebrow">Question 3 · Cas pratique</div>
+  <h2>Proposition de rédaction <span class="q">pour Arnaud Delval</span></h2>
+  <p>Survolez les passages soulignés pour voir quelle condition de validité chacun remplit.</p>
+  <div class="contract" id="contract"><div class="scan" aria-hidden="true"></div>
+    <h3>Article X · Clause de non-concurrence</h3>
+    <p>Compte tenu de la nature de ses fonctions de négociateur chargé de la prospection des professionnels du bâtiment, et de l'accès qu'il aura au fichier clients de la société ZK, <mark data-t="Condition 1 : intérêt légitime. On explique pourquoi l'entreprise a besoin de se protéger.">M. Arnaud Delval s'interdit, en cas de rupture de son contrat de travail pour quelque cause que ce soit</mark>, d'entrer au service d'une entreprise concurrente, de créer ou de participer directement ou indirectement à une entreprise concurrente.</p>
+    <p>Cette interdiction porte uniquement sur <mark data-t="Condition 4 : spécificités de l'emploi. Il garde le droit de vendre dans d'autres secteurs.">la commercialisation de produits ou services identiques ou similaires à ceux de la société ZK auprès des professionnels du bâtiment</mark>.</p>
+    <p>Elle est limitée à une durée de <mark data-t="Condition 2 : limite dans le temps, courte et adaptée à un commercial.">douze (12) mois</mark> à compter de la date de cessation effective du contrat, et s'applique sur <mark data-t="Condition 3 : limite dans l'espace, le secteur réellement prospecté.">le territoire des départements composant le secteur de prospection confié au salarié au cours des douze derniers mois</mark>.</p>
+    <p>En contrepartie, et <mark data-t="Leçon de l'arrêt du 27 février 2007 : contrepartie due quel que soit l'auteur de la rupture.">quel que soit le mode ou l'auteur de la rupture</mark>, M. Delval percevra, pendant toute la durée de l'interdiction, <mark data-t="Condition 5 : contrepartie financière réelle, versée après la rupture.">une indemnité mensuelle égale à 30 % de la moyenne de sa rémunération brute mensuelle des douze derniers mois</mark>.</p>
+    <p>La société ZK pourra <mark data-t="Renonciation encadrée, à la date du départ effectif au plus tard en cas de dispense de préavis.">libérer le salarié de cette obligation par lettre recommandée avec accusé de réception, dans les quinze jours suivant la notification de la rupture, et au plus tard à la date de son départ effectif</mark>. Elle sera alors dispensée de verser la contrepartie.</p>
+    <p style="margin:0">Toute violation de la présente clause libérera la société ZK du versement de la contrepartie et rendra M. Delval redevable d'une somme forfaitaire égale à six mois de contrepartie, sans préjudice de dommages-intérêts complémentaires et de toute action visant à faire cesser l'activité concurrente.</p>
+  </div>
+  <button class="copy" id="copy" type="button">Copier la clause</button>
+</section>
+
+<section id="quiz" class="reveal">
+  <div class="eyebrow">Vérifiez vos acquis</div>
+  <h2>Vrai ou faux <span class="q">?</span></h2>
+  <div class="quiz" id="qz"></div>
+</section>
+
+<footer>Fiche de révision · droit du travail · BTS · contenu pédagogique, ne remplace pas un conseil juridique</footer>
+</main>
+
+<script>
+(()=>{
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cv=document.getElementById('waves'),ctx=cv.getContext('2d');
+let W,H,dpr=Math.min(devicePixelRatio||1,2);
+const m={x:innerWidth/2,y:innerHeight/2,tx:innerWidth/2,ty:innerHeight/2};
+function size(){W=cv.width=innerWidth*dpr;H=cv.height=innerHeight*dpr;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px'}
+size();addEventListener('resize',size);
+const cur=document.getElementById('cur');
+addEventListener('pointermove',e=>{m.tx=e.clientX;m.ty=e.clientY});
+let t=0,scroll=0;addEventListener('scroll',()=>scroll=scrollY,{passive:true});
+function frame(){
+  m.x+=(m.tx-m.x)*.08;m.y+=(m.ty-m.y)*.08;
+  cur.style.transform=`translate(${m.x}px,${m.y}px)`;
+  const hueBase=(t*20+m.x/innerWidth*180+scroll*.05)%360;
+  cur.style.background=`radial-gradient(circle,hsla(${hueBase},100%,60%,.32),hsla(${(hueBase+120)%360},100%,60%,.12) 40%,transparent 70%)`;
+  ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle='rgba(7,4,15,.22)';ctx.fillRect(0,0,W,H);
+  ctx.globalCompositeOperation='lighter';
+  const mx=m.x*dpr,my=m.y*dpr,lines=34;
+  for(let i=0;i<lines;i++){
+    const p=i/lines,base=H*(.1+p*.85);
+    const hue=(hueBase+p*260)%360;
+    ctx.strokeStyle=`hsla(${hue},100%,${55+15*Math.sin(t+i)}%,.35)`;
+    ctx.lineWidth=(1+1.6*Math.sin(t*1.3+i*.4)**2)*dpr;
+    ctx.beginPath();
+    for(let x=0;x<=W;x+=14*dpr){
+      const dx=x-mx,dy=base-my,d=Math.sqrt(dx*dx+dy*dy);
+      const pull=Math.exp(-d*d/(2*(220*dpr)**2));
+      const y=base+Math.sin(x*.0025/dpr+t*1.4+i*.35)*40*dpr*(1+p)
+        +Math.sin(x*.006/dpr-t*2+i)*14*dpr
+        -dy*pull*.65+Math.sin(t*6+x*.02/dpr)*pull*30*dpr;
+      x?ctx.lineTo(x,y):ctx.moveTo(x,y);
+    }
+    ctx.stroke();
+  }
+  // orbes
+  for(let k=0;k<3;k++){
+    const ox=W*(.5+.4*Math.sin(t*.3+k*2.1)),oy=H*(.5+.35*Math.cos(t*.25+k*1.7));
+    const g=ctx.createRadialGradient(ox,oy,0,ox,oy,300*dpr);
+    g.addColorStop(0,`hsla(${(hueBase+k*120)%360},100%,55%,.10)`);g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  }
+  t+=.008;
+  if(!reduce)requestAnimationFrame(frame);
+}
+frame();
+
+// cartes 3D
+document.querySelectorAll('.cond').forEach(c=>{
+  c.addEventListener('pointermove',e=>{
+    const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+    c.style.transform=`rotateY(${(x-.5)*22}deg) rotateX(${(.5-y)*22}deg) translateZ(10px)`;
+    c.style.setProperty('--mx',x*100+'%');c.style.setProperty('--my',y*100+'%');
+  });
+  c.addEventListener('pointerleave',()=>c.style.transform='');
+  const tog=()=>{c.classList.toggle('open');c.setAttribute('aria-expanded',c.classList.contains('open'))};
+  c.addEventListener('click',tog);
+  c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tog()}});
+});
+
+// apparitions
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting&&e.boundingClientRect.top>0)e.target.classList.add('pre');else e.target.classList.remove('pre')}),{threshold:.08});
+document.querySelectorAll('.reveal').forEach(s=>io.observe(s));
+
+// simulateur
+const $=id=>document.getElementById(id);
+const zones=['Aucune zone','Ville','Région','France entière','Monde entier'];
+function sim(){
+  const d=+$('dur').value,z=+$('zone').value,cp=+$('cp').value;
+  $('durO').textContent=d?d+' mois':'Non précisée';$('zoneO').textContent=zones[z];$('cpO').textContent=cp+' %';
+  const out=[];let ok=0;
+  if($('int').checked){ok++;out.push(['Intérêt légitime : oui, accès à la clientèle.',1])}else out.push(['Pas d\'intérêt légitime : le salarié ne peut pas nuire à l\'entreprise.',0]);
+  if(d===0)out.push(['Aucune durée : clause nulle.',0]);else if(d>24)out.push([`${d} mois : durée excessive, risque fort de nullité.`,0]);else{ok++;out.push([`Durée de ${d} mois : raisonnable.`,1])}
+  if(z===0)out.push(['Aucune zone définie : clause nulle.',0]);else if(z>=3)out.push([zones[z]+' : zone disproportionnée pour un commercial terrain.',0]);else{ok++;out.push(['Zone limitée : '+zones[z].toLowerCase()+'.',1])}
+  if($('spec').checked){ok++;out.push(['Activité ciblée : le salarié peut retrouver un emploi.',1])}else out.push(['Interdit tout le métier : l\'empêche de travailler.',0]);
+  if(cp===0)out.push(['Pas de contrepartie : clause nulle (Cass. soc. 10 juillet 2002).',0]);
+  else if(cp<10)out.push([cp+' % : contrepartie dérisoire, assimilée à une absence.',0]);
+  else if($('all').checked)out.push(['Contrepartie réservée à la démission : nulle (Cass. soc. 27 février 2007).',0]);
+  else{ok++;out.push([`Contrepartie de ${cp} % due quel que soit le mode de rupture.`,1])}
+  $('bar').style.width=ok/5*100+'%';
+  $('score').textContent=ok===5?'Valable':'Nulle';
+  $('score').style.color=ok===5?'var(--c5)':'var(--c1)';
+  $('issues').innerHTML=out.map(([s,g])=>`<li class="${g?'':'bad'}">${g?'✓':'✕'} ${s}</li>`).join('');
+}
+['dur','zone','cp','int','spec','all'].forEach(i=>$(i).addEventListener('input',sim));sim();
+
+// infobulles
+const tip=document.createElement('div');tip.className='tip';tip.hidden=true;document.body.appendChild(tip);
+document.querySelectorAll('mark[data-t]').forEach(mk=>{
+  mk.tabIndex=0;
+  const show=e=>{tip.textContent=mk.dataset.t;tip.hidden=false;const r=mk.getBoundingClientRect();
+    tip.style.left=Math.min(innerWidth-296,Math.max(8,(e&&e.clientX||r.left)+12))+'px';tip.style.top=(r.bottom+8)+'px'};
+  mk.addEventListener('pointerenter',show);mk.addEventListener('pointermove',show);mk.addEventListener('focus',()=>show());
+  mk.addEventListener('pointerleave',()=>tip.hidden=true);mk.addEventListener('blur',()=>tip.hidden=true);
+});
+addEventListener('scroll',()=>tip.hidden=true,{passive:true});
+
+// copier
+$('copy').addEventListener('click',()=>{
+  const txt=[...$('contract').querySelectorAll('h3,p')].map(n=>n.textContent).join('\n\n');
+  const done=()=>{$('copy').textContent='Clause copiée';setTimeout(()=>$('copy').textContent='Copier la clause',1800)};
+  navigator.clipboard?.writeText(txt).then(done).catch(()=>{const s=getSelection(),r=document.createRange();r.selectNodeContents($('contract'));s.removeAllRanges();s.addRange(r);$('copy').textContent='Texte sélectionné, faites Ctrl+C'});
+});
+
+// quiz
+const Q=[
+ ['Une clause sans contrepartie financière est valable si le salarié l\'a signée.',false,'Faux. Depuis 2002, la contrepartie est une condition de validité. Sans elle, la clause est nulle même signée.'],
+ ['Un salarié licencié pour faute grave a droit à la contrepartie s\'il respecte la clause.',true,'Vrai. La contrepartie est due quel que soit le mode de rupture, y compris la faute grave.'],
+ ['L\'employeur peut renoncer à la clause quand il veut, même un an après le départ.',false,'Faux. Il doit renoncer dans le délai prévu au contrat ou à la convention, au plus tard au départ effectif en cas de dispense de préavis.'],
+ ['L\'arrêt du 27 février 2007 s\'appuie sur la liberté d\'exercer une activité professionnelle.',true,'Vrai. La Cour vise ce principe fondamental avec l\'ancien article L. 120-2, devenu L. 1121-1.'],
+ ['Une clause valable dans toute la France pendant 5 ans est toujours acceptable pour un commercial.',false,'Faux. Durée et zone doivent être proportionnées. Cinq ans sur toute la France empêcherait presque sûrement le salarié de travailler.']
+];
+let score=0;
+$('qz').innerHTML=Q.map((q,i)=>`<div class="qq panel" data-i="${i}"><b>${i+1}. ${q[0]}</b><div class="opts"><button type="button" data-v="1">Vrai</button><button type="button" data-v="0">Faux</button></div><div class="fb" hidden></div></div>`).join('');
+$('qz').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;const box=b.closest('.qq');if(box.dataset.done)return;
+  const q=Q[box.dataset.i],good=(b.dataset.v==='1')===q[1];box.dataset.done=1;
+  b.classList.add(good?'ok':'ko');const fb=box.querySelector('.fb');fb.textContent=q[2];fb.hidden=false;
+  if(good){score++;burst(b)}
+});
+function burst(el){
+  const r=el.getBoundingClientRect();
+  for(let i=0;i<24;i++){
+    const s=document.createElement('i');const a=Math.random()*Math.PI*2,v=60+Math.random()*90;
+    Object.assign(s.style,{position:'fixed',left:r.left+r.width/2+'px',top:r.top+r.height/2+'px',width:'8px',height:'8px',borderRadius:'50%',zIndex:30,pointerEvents:'none',
+      background:`hsl(${Math.random()*360},100%,60%)`,transition:'transform .8s cubic-bezier(.1,.8,.3,1),opacity .8s'});
+    document.body.appendChild(s);
+    requestAnimationFrame(()=>{s.style.transform=`translate(${Math.cos(a)*v}px,${Math.sin(a)*v}px) scale(.3)`;s.style.opacity=0});
+    setTimeout(()=>s.remove(),900);
+  }
+}
+})();
+</script>
+</body>
+</html>
