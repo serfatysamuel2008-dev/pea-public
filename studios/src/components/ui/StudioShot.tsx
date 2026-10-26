@@ -6,6 +6,8 @@ type Props = {
   size?: 'sm' | 'lg';
   /** Position du reflet de projecteur (0 → 100 %), pilotée par le curseur ou une animation. */
   glint?: MotionValue<number>;
+  /** Intensité de l'éclat (0 → 1), pour l'éteindre sur les paires dans l'ombre. */
+  glintOpacity?: MotionValue<number> | number;
   reflection?: boolean;
   shadow?: boolean;
   priority?: boolean;
@@ -16,7 +18,7 @@ type Props = {
  * Paire détourée mise en scène comme en studio : ombre portée au sol, reflet sur un sol brillant
  * et éclat de lumière qui glisse uniquement sur la monture (masque = la photo elle-même).
  */
-export function StudioShot({ product, size = 'lg', glint, reflection = true, shadow = true, priority, className = '' }: Props) {
+export function StudioShot({ product, size = 'lg', glint, glintOpacity = 1, reflection = true, shadow = true, priority, className = '' }: Props) {
   const src = productImage(product, 'studio', size);
   const pos = useMotionTemplate`${glint ?? 50}% 0`;
   const alt = `Lunettes de soleil STUDIOS ${product.name} ${VIEW_LABELS.studio}, monture ${product.frameLabel.toLowerCase()}, verres ${product.lensLabel.toLowerCase()}`;
@@ -32,9 +34,10 @@ export function StudioShot({ product, size = 'lg', glint, reflection = true, sha
             className="pointer-events-none absolute inset-0 mix-blend-screen"
             style={{
               ...mask,
-              backgroundImage: 'linear-gradient(105deg, transparent 38%, rgba(255,255,255,.55) 48%, rgba(255,255,255,.9) 50%, rgba(255,255,255,.55) 52%, transparent 62%)',
+              backgroundImage: 'linear-gradient(105deg, transparent 44%, rgba(255,255,255,.16) 48.5%, rgba(255,255,255,.38) 50%, rgba(255,255,255,.16) 51.5%, transparent 56%)',
               backgroundSize: '300% 100%',
               backgroundPosition: pos,
+              opacity: glintOpacity,
             }}
           />
         )}

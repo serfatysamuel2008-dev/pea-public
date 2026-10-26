@@ -26,10 +26,11 @@ function Pair({ product, index, pos, spacing, tiltX, tiltY, glint }: {
   const opacity = useTransform(d, (v) => (Math.abs(v) > 2.6 ? 0 : 1 - Math.max(0, Math.abs(v) - 1.6)));
   const brightness = useTransform(d, (v) => `brightness(${Math.max(0.28, 1 - Math.abs(v) * 0.42)})`);
   const zIndex = useTransform(d, (v) => 100 - Math.round(Math.abs(v) * 10));
+  const glintOpacity = useTransform(d, (v) => Math.max(0, 1 - Math.abs(v) * 1.5));
   return (
     <motion.div className="absolute left-1/2 top-1/2 w-0" style={{ x, y, scale, rotateY, rotateX, opacity, zIndex, filter: brightness }}>
       <div className="w-[var(--pair-w)] -translate-x-1/2 -translate-y-1/2">
-        <StudioShot product={product} glint={glint} priority={index < 3} size="lg" />
+        <StudioShot product={product} glint={glint} glintOpacity={glintOpacity} priority={index < 3} size="lg" />
       </div>
     </motion.div>
   );
@@ -150,7 +151,7 @@ export function Stage() {
     const dx = e.clientX - s.lastX;
     s.lastX = e.clientX;
     // Souris : la collection suit le mouvement de la main, sans clic. Doigt : glisser.
-    const gain = s.dragging ? 1 : e.pointerType === 'mouse' ? 0.55 : 0;
+    const gain = s.dragging ? 1 : e.pointerType === 'mouse' ? 1 : 0;
     if (!gain || Math.abs(dx) > 200) {
       s.lastT = now;
       return;
